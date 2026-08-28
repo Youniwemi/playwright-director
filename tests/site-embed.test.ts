@@ -88,7 +88,7 @@ describe('buildEmbedFiles', () => {
 });
 
 describe('scaffold widget output', () => {
-	const tempDir = join(tmpdir(), `pw-tutorial-embed-test-${process.pid}`);
+	const tempDir = join(tmpdir(), `playwright-director-embed-test-${process.pid}`);
 
 	afterEach(() => rmSync(tempDir, { recursive: true, force: true }));
 

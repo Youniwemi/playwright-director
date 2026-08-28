@@ -1,12 +1,12 @@
 {
-  "name": "pw-tutorial-video",
+  "name": "playwright-director",
   "version": "0.2.0",
-  "description": "Turn Playwright end-to-end tests into professional narrated tutorial videos with TTS voice, animated cursor, step overlays, and ffmpeg post-processing.",
+  "description": "AI-assisted Playwright tool that turns executable tests into directed video guides — demos, tutorials, and documentation that never lag behind the product.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Youniwemi/pw-tutorial-video.git"
+    "url": "git+https://github.com/Youniwemi/playwright-director.git"
   },
-  "homepage": "https://github.com/Youniwemi/pw-tutorial-video#readme",
+  "homepage": "https://github.com/Youniwemi/playwright-director#readme",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,7 @@
     "./styles.css": "./src/styles.css"
   },
   "bin": {
-    "pw-tutorial-video": "./dist/init.js",
+    "playwright-director": "./dist/init.js",
     "tutorial-transcript": "./dist/bin/export-transcript.js"
   },
   "files": [
@@ -64,7 +64,7 @@
     "demo",
     "walkthrough"
   ],
-  "author": "",
+  "author": "Youniwemi",
   "license": "MIT",
   "dependencies": {
     "astro": "^5.0.0"

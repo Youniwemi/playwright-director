@@ -32,7 +32,7 @@ function yes(answer: string): boolean {
 
 function usage() {
 	console.log(`
-Usage: pw-tutorial-video <command> [options]
+Usage: playwright-director <command> [options]
 
 Commands:
   init          Install /tutorialize skill and tutorial-crafter agent into .claude/
@@ -66,7 +66,7 @@ function transition(from: string | undefined, to: string): string {
 
 async function init() {
 	const version = packageVersion(packageRoot);
-	console.log(`\n  pw-tutorial-video ${version} — Claude Code Setup\n`);
+	console.log(`\n  playwright-director ${version} — Claude Code Setup\n`);
 
 	if (!existsSync(skillsSrc)) {
 		console.error('Could not find skills/ directory in the package. Ensure the package is installed correctly.');
@@ -141,7 +141,7 @@ function copyAgent() {
 	console.log('  + Agent copied to .claude/agents/tutorial-crafter.md');
 }
 
-// Flags may appear before the command: `pw-tutorial-video --yes` means init.
+// Flags may appear before the command: `playwright-director --yes` means init.
 const command = process.argv.slice(2).find((arg) => !arg.startsWith('-'));
 
 if (!command || command === 'init') {

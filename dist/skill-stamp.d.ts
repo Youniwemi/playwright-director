@@ -8,7 +8,7 @@ export interface SkillStamp {
     skill?: string;
     agent?: string;
 }
-export declare const STAMP_FILE = ".pw-tutorial-video.json";
+export declare const STAMP_FILE = ".playwright-director.json";
 export declare function stampPath(claudeDir: string): string;
 export declare function readStamp(claudeDir: string): SkillStamp;
 export declare function writeStamp(claudeDir: string, stamp: SkillStamp): void;

@@ -32,8 +32,8 @@ try {
 			const what = stale.join(' and ');
 			const verb = stale.length > 1 ? 'are' : 'is';
 			console.log(
-				`\npw-tutorial-video ${version}: your ${what} in .claude/ ${verb} out of date.` +
-					`\n  Run: npx pw-tutorial-video init\n`
+				`\nplaywright-director ${version}: your ${what} in .claude/ ${verb} out of date.` +
+					`\n  Run: npx playwright-director init\n`
 			);
 		}
 	}

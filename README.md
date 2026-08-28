@@ -1,16 +1,19 @@
-# pw-tutorial-video
+# playwright-director
 
-**Turn your Playwright end-to-end tests into professional narrated tutorial videos — automatically.**
+**Turn your Playwright end-to-end tests into directed video guides — automatically.**
 
 Write your tests once, get polished how-to videos with voice narration, animated cursor, step overlays, background music, and ffmpeg post-processing. Publish them as a static gallery site, and embed any tutorial back into your app as contextual help with a single `data-tutorial` attribute. No screen-recording software, no video editors, no docs that lag behind the product.
 
-🌐 **[Project site](https://youniwemi.github.io/pw-tutorial-video/)** · 🎬 **[Live demo gallery](https://youniwemi.github.io/pw-tutorial-video/gallery/)** — every gallery video is recorded by this repo's own CI from its e2e tests on each push to `main`.
+An AI agent can also write or adapt the test for a specific communication goal — a product demo, a feature explanation, an onboarding walkthrough — and the direction is yours to apply: what to emphasize, how fast to move, where to pause. Every demonstration stays reproducible, because it originates from an automated test.
+
+🌐 **[Project site](https://youniwemi.github.io/playwright-director/)** · 🎬 **[Live demo gallery](https://youniwemi.github.io/playwright-director/gallery/)** — every gallery video is recorded by this repo's own CI from its e2e tests on each push to `main`.
 
 ---
 
 ## Table of Contents
 
-- [Why pw-tutorial-video?](#why-pw-tutorial-video)
+- [Why playwright-director?](#why-playwright-director)
+- [The name](#the-name)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
@@ -30,11 +33,11 @@ Write your tests once, get polished how-to videos with voice narration, animated
 
 ---
 
-## Why pw-tutorial-video?
+## Why playwright-director?
 
 Most software teams maintain **tests** and **documentation** separately. Tests verify features work; docs explain how to use them. When a feature changes, the docs lag behind — or never get updated.
 
-`pw-tutorial-video` bridges this gap: your Playwright tests **are** your tutorial source. Run them normally for CI; flip a flag and they produce broadcast-ready video tutorials.
+`playwright-director` bridges this gap: your Playwright tests **are** your tutorial source. Run them normally for CI; flip a flag and they produce broadcast-ready **directed video guides**.
 
 ### Key Features
 
@@ -55,10 +58,18 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **In-app help widget** — the published gallery serves a `widget.js`: one `data-tutorial` attribute opens any tutorial as an overlay inside your own app
 - **Zero runtime overhead** — All tutorial logic is no-op when `TUTORIAL_MODE` is not set
 
+## The name
+
+This package went through more names than it went through versions. It started as `pw-tutorial-video` — literal, honest, and about as charming as a filename. It worked until the tool outgrew it: this package no longer just records videos, it stages them — deciding what to emphasize, how fast to move, where to pause, what deserves the viewer's attention.
+
+Then came the search, and the search was humbling. `tutorialize` — the most natural verb in the space — was taken. `testory` (test + story) was brandable but told you nothing. `test2video` described the mechanics, not the craft. `playwright-tutorial` was accurate and instantly forgettable. Every candidate either over-explained or under-sold.
+
+The way out was to flip the question: stop naming the output, name the role. Playwright is the actor — it performs every click, scroll, and keystroke on stage. This package is everything around the performance: the staging, the pacing, the narration, the final cut. That job already has a name — **director**. `playwright-director` was free, and it was the only candidate that described the job instead of the file format.
+
 ## Installation
 
 ```bash
-npm install --save-dev pw-tutorial-video
+npm install --save-dev playwright-director
 ```
 
 ### Peer Dependencies
@@ -76,7 +87,7 @@ npm install --save-dev pw-tutorial-video
 
 ```typescript
 import { test, expect } from '@playwright/test';
-import { Tutorial } from 'pw-tutorial-video';
+import { Tutorial } from 'playwright-director';
 
 test('Create your first invoice', { tag: ['@tutorial'] }, async ({ page }, testInfo) => {
   const tutorial = new Tutorial(page, {
@@ -145,7 +156,7 @@ Videos are saved to `tutorials/videos/`, timelines to `tutorials/output/`.
 Tutorial runs create files in your project. Add these to `.gitignore`:
 
 ```gitignore
-# pw-tutorial-video generated files
+# playwright-director generated files
 tutorials/
 static/audio/tutorial-voice/
 ```
@@ -170,7 +181,7 @@ Keep the `expect()` assertions — they still run in both modes, ensuring your t
 ### `Tutorial` class
 
 ```typescript
-import { Tutorial } from 'pw-tutorial-video';
+import { Tutorial } from 'playwright-director';
 
 const tutorial = new Tutorial(page, options);
 ```
@@ -314,7 +325,7 @@ Set `TUTORIAL_VARIANT=mobile` (or pass `variant: 'mobile'`) to record a second,
 phone-sized version of a tutorial without touching the spec:
 
 ```typescript
-import { Tutorial, mobileStage } from 'pw-tutorial-video';
+import { Tutorial, mobileStage } from 'playwright-director';
 
 // Widens the viewport (and video) to N phones side by side.
 // Inert unless TUTORIAL_VARIANT=mobile — the same spec records both versions.
@@ -389,7 +400,7 @@ Auto-merge audio into video after each tutorial test:
 // playwright.config.ts
 export default defineConfig({
   reporter: [
-    ['pw-tutorial-video/reporter', {
+    ['playwright-director/reporter', {
       mappingFile: 'path/to/tutorial-mapping.txt',  // optional
       tutorialsJson: 'path/to/tutorials.json',      // optional
     }],
@@ -400,9 +411,9 @@ export default defineConfig({
 ### Utilities
 
 ```typescript
-import { slugify } from 'pw-tutorial-video/slugify';
-import { createTTSProvider } from 'pw-tutorial-video';
-import { buildMergeCommand } from 'pw-tutorial-video';
+import { slugify } from 'playwright-director/slugify';
+import { createTTSProvider } from 'playwright-director';
+import { buildMergeCommand } from 'playwright-director';
 ```
 
 ## TTS Configuration
@@ -435,11 +446,11 @@ TTS synthesis is the slow part of a tutorial run, and clips are cached by
 the clips outside of any test run:
 
 ```bash
-npx pw-tutorial-video regen-voices                    # synthesize the missing clips
-npx pw-tutorial-video regen-voices --workers=4        # parallel TTS (default 2)
-npx pw-tutorial-video regen-voices --force            # after a voice change: redo everything
-npx pw-tutorial-video regen-voices --lang=fr          # one language only
-rm -rf static/audio/tutorial-voice && npx pw-tutorial-video regen-voices   # full rebuild
+npx playwright-director regen-voices                    # synthesize the missing clips
+npx playwright-director regen-voices --workers=4        # parallel TTS (default 2)
+npx playwright-director regen-voices --force            # after a voice change: redo everything
+npx playwright-director regen-voices --lang=fr          # one language only
+rm -rf static/audio/tutorial-voice && npx playwright-director regen-voices   # full rebuild
 ```
 
 Narration texts are collected from the artifacts that record them verbatim:
@@ -572,7 +583,7 @@ This package ships **two assets for Claude Code** that teach AI agents how to co
 
 | Asset | Installed to | Purpose |
 |---|---|---|
-| `/tutorialize` skill | `.claude/skills/tutorialize/` | Slash command that loads tutorial design methodology — persona analysis, storytelling arc, choreography rules, and the full `pw-tutorial-video` API. Invoke with `/tutorialize` in Claude Code. |
+| `/tutorialize` skill | `.claude/skills/tutorialize/` | Slash command that loads tutorial design methodology — persona analysis, storytelling arc, choreography rules, and the full `playwright-director` API. Invoke with `/tutorialize` in Claude Code. |
 | `tutorial-crafter` agent | `.claude/agents/tutorial-crafter.md` | Specialized agent (Sonnet) that reads your test, designs the tutorial arc, and writes the tutorial code. Dispatched automatically or manually. |
 
 ### Skill reference files
@@ -581,20 +592,20 @@ The skill bundles two reference documents that Claude reads before tutorializing
 
 | File | Content |
 |---|---|
-| `SKILL.md` | 4-phase process: understand the viewer → design the arc → implement with `pw-tutorial-video` → verify |
+| `SKILL.md` | 4-phase process: understand the viewer → design the arc → implement with `playwright-director` → verify |
 | `references/storytelling.md` | Who is watching (role, expertise, emotional state), narration voice rules, pacing decisions, when to use context screens vs steps, multi-profile scene heuristics |
 | `references/api.md` | Complete `Tutorial` class API with timing model, critical rules (e.g., navigate before any tutorial call, never override `--reporter`), and a pre-commit checklist |
 
 ### Setup
 
 ```bash
-npx pw-tutorial-video init
+npx playwright-director init
 ```
 
 This interactively copies the skill and agent into your `.claude/` directory. Example session:
 
 ```
-  pw-tutorial-video 0.2.0 — Claude Code Setup
+  playwright-director 0.2.0 — Claude Code Setup
 
   Install /tutorialize skill into .claude/skills/? [Y/n] y
   + Skill copied to .claude/skills/tutorialize/
@@ -623,14 +634,14 @@ Claude will:
 ### Keeping them up to date
 
 The skill and agent are **copies**, so upgrading the package does not auto-update them.
-`init` stamps the version it installed in `.claude/.pw-tutorial-video.json`, and:
+`init` stamps the version it installed in `.claude/.playwright-director.json`, and:
 
 - after an upgrade, a post-install message names what went stale and tells you to
   re-run `init` — it only speaks when there is something to say, and never writes
   to `.claude/` on its own;
 - re-running `init` shows the transition (`0.1.0 → 0.2.0`) and skips anything
   already current;
-- `npx pw-tutorial-video init --yes` answers yes to everything, for scripted
+- `npx playwright-director init --yes` answers yes to everything, for scripted
   updates.
 
 If you customize the copied skill, keep your additions in a separate file next to
@@ -643,7 +654,7 @@ Generate a static video gallery website from your tutorials — one command, zer
 ### Quick start
 
 ```bash
-npx pw-tutorial-video build-site
+npx playwright-director build-site
 ```
 
 On the first run, a `tutorial-site.config.js` file is created with sensible defaults. Edit it to customize branding, then re-run `build-site` — the config is reused automatically.
@@ -724,11 +735,11 @@ Notes:
 - **Slugs** are the video ids — the file names in the gallery's `videos/`
   directory (a tutorial's `name`, plus `-<variant>` for variant recordings).
   `GET <site>/embed/index.json` lists them all.
-- **Programmatic API**: `window.PwTutorial.open('create-account')` and
-  `window.PwTutorial.close()` — e.g. to launch a tutorial from an onboarding
+- **Programmatic API**: `window.PlaywrightDirector.open('create-account')` and
+  `window.PlaywrightDirector.close()` — e.g. to launch a tutorial from an onboarding
   checklist instead of a button.
 - **Theming**: the gallery's `primaryColor` is the default accent; override it
-  from the host page with `.pw-tutorial-widget { --pw-tutorial-accent: #16a34a; }`.
+  from the host page with `.playwright-director-widget { --playwright-director-accent: #16a34a; }`.
 - **Cross-origin**: the widget fetches `embed/<slug>.json` from the gallery
   host, so the gallery must send `Access-Control-Allow-Origin` for your app's
   origin. GitHub Pages sends `*` out of the box; on Netlify or Cloudflare
@@ -793,8 +804,8 @@ npx serve tutorial-site-dist
 ### CLI options
 
 ```bash
-pw-tutorial-video build-site                      # Uses ./tutorial-site.config.js
-pw-tutorial-video build-site --config=path/to.js   # Custom config path
+playwright-director build-site                      # Uses ./tutorial-site.config.js
+playwright-director build-site --config=path/to.js   # Custom config path
 ```
 
 ### Deploying to GitHub Pages from CI
@@ -819,7 +830,7 @@ steps:
   - run: pipx install edge-tts                     # real narration on Linux
   - run: npx playwright install --with-deps chromium
   - run: npm run test:e2e:video                    # TUTORIAL_MODE=true playwright test
-  - run: npx pw-tutorial-video build-site -y
+  - run: npx playwright-director build-site -y
   - run: |                                         # landing page + gallery
       mkdir -p _site/gallery
       cp -r landing/. _site/
@@ -833,7 +844,7 @@ steps:
 Things to know when adapting it:
 
 - **TTS on Linux** — there is no macOS `say` on CI runners. With [`edge-tts`](https://pypi.org/project/edge-tts/) on the PATH the voice system falls back to it automatically, so the published videos have real narration. Alternatively set `TUTORIAL_TTS_CMD` to any command you prefer.
-- **Sub-path hosting** — GitHub Pages serves project sites under `/<repo>/`. Set `baseUrl` in `tutorial-site.config.js` to the full public URL **including the path** (this repo uses `https://youniwemi.github.io/pw-tutorial-video/gallery/`); the site build derives the Astro `site` + `base` from it so all links and assets resolve.
+- **Sub-path hosting** — GitHub Pages serves project sites under `/<repo>/`. Set `baseUrl` in `tutorial-site.config.js` to the full public URL **including the path** (this repo uses `https://youniwemi.github.io/playwright-director/gallery/`); the site build derives the Astro `site` + `base` from it so all links and assets resolve.
 - **Pages source** — the workflow publishes to the `gh-pages` branch; configure Pages (Settings → Pages) to serve from that branch.
 - Skip the landing-page assembly step and publish `tutorial-site-dist/` directly if you only want the gallery at the site root.
 

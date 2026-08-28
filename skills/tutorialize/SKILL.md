@@ -1,6 +1,6 @@
 ---
 name: tutorialize
-description: Transform a Playwright E2E test into a narrated tutorial video. Load before writing or reviewing any tutorial.step(), tutorial.context(), or tutorial.complete() call. Covers persona analysis, storytelling arc, choreography rules, and the pw-tutorial-video API.
+description: Transform a Playwright E2E test into a narrated tutorial video. Load before writing or reviewing any tutorial.step(), tutorial.context(), or tutorial.complete() call. Covers persona analysis, storytelling arc, choreography rules, and the playwright-director API.
 ---
 
 # /tutorialize — Tutorial Design Skill
@@ -9,7 +9,7 @@ Turn a Playwright test into a tutorial that **teaches**, not just demonstrates.
 
 Two reference files support this skill:
 - [`references/storytelling.md`](references/storytelling.md) — Persona analysis, emotional arc, narration voice, pacing decisions
-- [`references/api.md`](references/api.md) — `pw-tutorial-video` API, timing model, technical rules, checklist
+- [`references/api.md`](references/api.md) — `playwright-director` API, timing model, technical rules, checklist
 
 **Read both before tutorializing.** Storytelling comes first — it drives every API decision.
 
@@ -50,5 +50,5 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Test passes with `TUTORIAL_MODE=true` (video generation)
 - Watch the generated video — does it feel human?
 - Narration texts also become the gallery site's step-by-step guide
-  (`npx pw-tutorial-video build-site`) — even `skipVoice` steps show their
+  (`npx playwright-director build-site`) — even `skipVoice` steps show their
   text there, so write every step text to read well on the page too.

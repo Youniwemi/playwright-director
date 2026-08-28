@@ -42,7 +42,7 @@ export async function buildSite(configPath?: string) {
 		config = { ...DEFAULT_CONFIG, ...imported.default };
 	} else {
 		console.log('  No config file found. Generating tutorial-site.config.js with defaults...');
-		const configContent = `/** @type {import('pw-tutorial-video/site').SiteConfig} */
+		const configContent = `/** @type {import('playwright-director/site').SiteConfig} */
 export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 `;
 		writeFileSync(resolvedConfigPath, configContent);

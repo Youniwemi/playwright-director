@@ -1,11 +1,11 @@
-# API Reference — pw-tutorial-video
+# API Reference — playwright-director
 
 Technical reference for the `Tutorial` class, timing model, and implementation rules.
 
 ## 1. Setup
 
 ```typescript
-import { Tutorial } from 'pw-tutorial-video';
+import { Tutorial } from 'playwright-director';
 
 const tutorial = new Tutorial(page, {
   title: 'My Tutorial',
@@ -284,7 +284,7 @@ Auto-merges audio into video after each tutorial test:
 // playwright.config.ts
 export default defineConfig({
   reporter: [
-    ['pw-tutorial-video/reporter', {
+    ['playwright-director/reporter', {
       mappingFile: 'path/to/tutorial-mapping.txt',
       tutorialsJson: 'path/to/tutorials.json',
     }],
@@ -308,12 +308,12 @@ tutorials/
     └── {name}-step-{n}.webp      # Per-step screenshots
 ```
 
-`npx pw-tutorial-video build-site` turns this directory into a static gallery
+`npx playwright-director build-site` turns this directory into a static gallery
 site. Besides the pages, the build emits `widget.js` + `embed/<slug>.json`
 payloads so any app can embed a tutorial in-app: load
 `<script src="<site>/widget.js" defer>` and add a `data-tutorial="<slug>"`
 attribute to any element (slug = video id, i.e. the tutorial `name` plus
-`-<variant>` if any). `window.PwTutorial.open(slug)` is the programmatic
+`-<variant>` if any). `window.PlaywrightDirector.open(slug)` is the programmatic
 equivalent.
 
 ### Reviewing & correcting narration
@@ -442,7 +442,7 @@ tutorial.step('Look here', async () => { ... }, {
 Record a second, phone-sized version of the same tutorial without touching the spec: run with `TUTORIAL_VARIANT=mobile` (or pass `variant: 'mobile'`).
 
 ```typescript
-import { Tutorial, mobileStage } from 'pw-tutorial-video';
+import { Tutorial, mobileStage } from 'playwright-director';
 
 // Top of the spec: widens viewport + video to N phones side by side.
 // Inert unless TUTORIAL_VARIANT=mobile.

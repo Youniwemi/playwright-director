@@ -12,7 +12,7 @@ export interface SkillStamp {
 	agent?: string;
 }
 
-export const STAMP_FILE = '.pw-tutorial-video.json';
+export const STAMP_FILE = '.playwright-director.json';
 
 export function stampPath(claudeDir: string): string {
 	return join(claudeDir, STAMP_FILE);

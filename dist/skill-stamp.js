@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-export const STAMP_FILE = '.pw-tutorial-video.json';
+export const STAMP_FILE = '.playwright-director.json';
 export function stampPath(claudeDir) {
     return join(claudeDir, STAMP_FILE);
 }
