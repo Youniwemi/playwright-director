@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pw-tutorial-video — Turn Playwright tests into narrated tutorial videos</title>
-<meta name="description" content="Turn your Playwright end-to-end tests into professional narrated tutorial videos — TTS voice, animated cursor, step overlays, ffmpeg post-processing. Zero screen recording.">
-<meta property="og:title" content="pw-tutorial-video">
-<meta property="og:description" content="Your Playwright tests are your tutorial source. Run them for CI; flip a flag and they produce narrated how-to videos.">
+<title>playwright-director — Turn Playwright tests into directed video guides</title>
+<meta name="description" content="Turn your Playwright end-to-end tests into directed video guides — voice narration, animated cursor, step overlays, ffmpeg post-processing. Zero screen recording.">
+<meta property="og:title" content="playwright-director">
+<meta property="og:description" content="Your Playwright tests are your tutorial source. Run them for CI; flip a flag and they produce directed video guides.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
 :root{
@@ -121,29 +121,29 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
 
 <div class="wrap">
   <header>
-    <a class="brand" href="./">🎬 pw-tutorial-video</a>
+    <a class="brand" href="./">🎬 playwright-director</a>
     <nav>
       <a class="hide-sm" href="#how">How it works</a>
       <a class="hide-sm" href="#features">Features</a>
       <a class="hide-sm" href="#widget">In-app widget</a>
       <a href="./gallery/">Gallery</a>
-      <a class="gh" href="https://github.com/Youniwemi/pw-tutorial-video">GitHub</a>
+      <a class="gh" href="https://github.com/Youniwemi/playwright-director">GitHub</a>
     </nav>
   </header>
 </div>
 
 <div class="hero">
   <div class="wrap">
-    <h1>Your Playwright tests are<br><em>your tutorial videos</em></h1>
-    <p class="sub">Write your e2e tests once — get polished how-to videos with voice narration,
+    <h1>Your Playwright tests are<br><em>your directed video guides</em></h1>
+    <p class="sub">Write your e2e tests once — get directed video guides with voice narration,
       animated cursor, step overlays and background music. Publish them as a gallery site, then
       embed any tutorial back into your app with a single <code style="font-family:ui-monospace,Menlo,monospace;font-size:16px">data-tutorial</code> attribute.
       No screen recording, no video editor, no docs that lag behind the product.</p>
     <div class="cta">
       <a class="btn btn-primary" href="./gallery/">▶ Watch the demo gallery</a>
-      <a class="btn btn-ghost" href="https://github.com/Youniwemi/pw-tutorial-video#quick-start">Get started</a>
+      <a class="btn btn-ghost" href="https://github.com/Youniwemi/playwright-director#quick-start">Get started</a>
     </div>
-    <div class="install"><span class="dollar">$</span> npm install --save-dev pw-tutorial-video</div>
+    <div class="install"><span class="dollar">$</span> npm install --save-dev playwright-director</div>
   </div>
 </div>
 
@@ -172,7 +172,7 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
 
     <div class="codebox">
       <div class="bar"><i></i><i></i><i></i></div>
-      <pre><span class="c-kw">import</span> { Tutorial } <span class="c-kw">from</span> <span class="c-str">'pw-tutorial-video'</span>;
+      <pre><span class="c-kw">import</span> { Tutorial } <span class="c-kw">from</span> <span class="c-str">'playwright-director'</span>;
 
 <span class="c-fn">test</span>(<span class="c-str">'Create your first invoice'</span>, <span class="c-kw">async</span> ({ page }, testInfo) =&gt; {
   <span class="c-kw">const</span> tutorial = <span class="c-kw">new</span> <span class="c-fn">Tutorial</span>(page, { title: <span class="c-str">'Create Your First Invoice'</span>, lang: <span class="c-str">'en'</span> });
@@ -259,8 +259,8 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
   <footer>
     <span>MIT licensed</span>
     <span>
-      <a href="https://github.com/Youniwemi/pw-tutorial-video">GitHub</a> ·
-      <a href="https://www.npmjs.com/package/pw-tutorial-video">npm</a> ·
+      <a href="https://github.com/Youniwemi/playwright-director">GitHub</a> ·
+      <a href="https://www.npmjs.com/package/playwright-director">npm</a> ·
       <a href="./gallery/">Gallery</a>
     </span>
   </footer>
