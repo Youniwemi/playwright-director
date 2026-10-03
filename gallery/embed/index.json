@@ -44,6 +44,11 @@
       "id": "type-blurred-demo",
       "title": "Typing a secret without leaking it",
       "duration": "0:15"
+    },
+    {
+      "id": "zoom-demo",
+      "title": "Zooming on what matters",
+      "duration": "0:46"
     }
   ]
 }

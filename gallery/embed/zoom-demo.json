@@ -1,0 +1,49 @@
+{
+  "id": "zoom-demo",
+  "title": "Zooming on what matters",
+  "description": "Point the camera at what matters. zoom() pushes in on any element — a badge, a card, a whole panel — with or without blurring the rest.",
+  "duration": "0:46",
+  "lang": "en",
+  "accent": "#6366f1",
+  "video": "videos/zoom-demo.webm",
+  "poster": "videos/zoom-demo-step-1.webp",
+  "page": "zoom-demo/",
+  "steps": [
+    {
+      "num": 1,
+      "title": "Revenue is up this month",
+      "text": "Revenue is up this month",
+      "image": "videos/zoom-demo-step-1.webp"
+    },
+    {
+      "num": 2,
+      "title": "October is the best month so far",
+      "text": "October is the best month so far",
+      "image": "videos/zoom-demo-step-2.webp"
+    },
+    {
+      "num": 3,
+      "title": "One invoice is late",
+      "text": "One invoice is late",
+      "image": "videos/zoom-demo-step-3.webp"
+    },
+    {
+      "num": 4,
+      "title": "The sidebar counts late invoices too",
+      "text": "The sidebar counts late invoices too",
+      "image": "videos/zoom-demo-step-4.webp"
+    },
+    {
+      "num": 5,
+      "title": "Turn on automatic reminders",
+      "text": "Turn on automatic reminders",
+      "image": "videos/zoom-demo-step-5.webp"
+    },
+    {
+      "num": 6,
+      "title": "Save",
+      "text": "Save",
+      "image": "videos/zoom-demo-step-6.webp"
+    }
+  ]
+}
