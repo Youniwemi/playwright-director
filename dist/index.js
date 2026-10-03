@@ -8,5 +8,6 @@ export { TutorialMusic } from './music.js';
 export { TutorialCursor } from './cursor.js';
 export { TutorialOverlay } from './overlay.js';
 export { TutorialTimeline } from './timeline.js';
+export { TutorialZoom, zoomScale, zoomFrame, zoomFrames } from './zoom.js';
 export { buildTranscriptMarkdown, parseTranscript, applyCorrections, TranscriptCorrections } from './transcript.js';
 //# sourceMappingURL=index.js.map

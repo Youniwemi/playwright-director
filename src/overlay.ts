@@ -65,7 +65,7 @@ export class TutorialOverlay {
 			const container = document.createElement('div');
 			container.innerHTML = html;
 			const overlay = container.firstElementChild!;
-			document.body.appendChild(overlay);
+			(document.getElementById('tutorial-zoom-layer') ?? document.body).appendChild(overlay);
 		}, html);
 	}
 
@@ -90,7 +90,7 @@ export class TutorialOverlay {
 			const container = document.createElement('div');
 			container.innerHTML = html;
 			const overlay = container.firstElementChild!;
-			document.body.appendChild(overlay);
+			(document.getElementById('tutorial-zoom-layer') ?? document.body).appendChild(overlay);
 		}, html);
 	}
 
@@ -139,7 +139,7 @@ export class TutorialOverlay {
 			const container = document.createElement('div');
 			container.innerHTML = html;
 			const preview = container.firstElementChild!;
-			document.body.appendChild(preview);
+			(document.getElementById('tutorial-zoom-layer') ?? document.body).appendChild(preview);
 		}, html);
 	}
 

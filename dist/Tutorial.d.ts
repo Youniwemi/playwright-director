@@ -1,6 +1,7 @@
 import type { Page, Locator, FrameLocator } from '@playwright/test';
 import type { TutorialOptions, StepOptions, ContextOptions, SceneFocus, FocusOptions } from './types.js';
 import { TutorialTimeline } from './timeline.js';
+import { type ZoomOptions } from './zoom.js';
 /**
  * When to start a step's action inside its narration clip (option B of
  * docs/narration-action-overlap.md — one merged clip, computed offset).
@@ -20,6 +21,7 @@ export declare class Tutorial {
     private music;
     private cursor;
     private overlay;
+    private zoomer;
     private timeline;
     private pendingItems;
     private stepCounter;
@@ -70,6 +72,17 @@ export declare class Tutorial {
     step(key: string, action: () => Promise<void>, options?: StepOptions): void;
     highlight(selector: string | Locator, duration?: number): Promise<void>;
     unhighlight(selector: string | Locator): Promise<void>;
+    /**
+     * Camera zoom on an element — a button, a card, a whole panel: the page
+     * zooms in around it (optionally blurring everything else), holds for
+     * `duration` ms, then zooms back out. The step banner and cursor stay
+     * crisp and unscaled. No-op outside tutorial mode.
+     */
+    zoom(selector: string | Locator, options?: ZoomOptions): Promise<void>;
+    /** Zoom in and stay zoomed — interact with the page, then call `zoomOut()` (same step). */
+    zoomIn(selector: string | Locator, options?: ZoomOptions): Promise<void>;
+    /** Undo `zoomIn()`. Safe to call when not zoomed. */
+    zoomOut(): Promise<void>;
     moveMouseToElement(locator: Locator): Promise<void>;
     moveMouse(targetX: number, targetY: number): Promise<void>;
     animateClick(): Promise<void>;

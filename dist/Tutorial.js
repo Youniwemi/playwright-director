@@ -7,6 +7,7 @@ import { TutorialMusic } from './music.js';
 import { TutorialCursor } from './cursor.js';
 import { TutorialOverlay } from './overlay.js';
 import { TutorialTimeline } from './timeline.js';
+import { TutorialZoom } from './zoom.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TUTORIAL_MODE = process.env.TUTORIAL_MODE === 'true';
@@ -58,6 +59,7 @@ export class Tutorial {
     music;
     cursor;
     overlay;
+    zoomer;
     timeline;
     pendingItems = [];
     stepCounter = 0;
@@ -123,6 +125,7 @@ export class Tutorial {
             highlightDuration: this.options.highlightDuration,
             position: this.options.overlayPosition ?? 'TR'
         });
+        this.zoomer = new TutorialZoom(page);
         this.timeline = new TutorialTimeline(this.testName, this.options.testFile, this.options.projectName, this.options.lang, options.testTitle ?? '', options.feature ?? '', {
             musicFile: this.options.backgroundMusic?.startsWith('http')
                 ? 'static/audio/tutorial-background.mp3'
@@ -259,6 +262,7 @@ export class Tutorial {
         this.music.switchPage(page);
         this.cursor.switchPage(page);
         this.overlay.switchPage(page);
+        this.zoomer.switchPage(page);
     }
     /** @deprecated Total steps are now calculated automatically. */
     setTotalSteps(total) {
@@ -404,6 +408,43 @@ export class Tutorial {
         if (!TUTORIAL_MODE)
             return;
         await this.overlay.unhighlight(selector);
+    }
+    /**
+     * Camera zoom on an element — a button, a card, a whole panel: the page
+     * zooms in around it (optionally blurring everything else), holds for
+     * `duration` ms, then zooms back out. The step banner and cursor stay
+     * crisp and unscaled. No-op outside tutorial mode.
+     */
+    async zoom(selector, options = {}) {
+        if (!TUTORIAL_MODE)
+            return;
+        await this.zoomIn(selector, options);
+        await this.page.waitForTimeout(options.duration ?? 1500);
+        await this.zoomOut();
+    }
+    /** Zoom in and stay zoomed — interact with the page, then call `zoomOut()` (same step). */
+    async zoomIn(selector, options = {}) {
+        if (!TUTORIAL_MODE)
+            return;
+        const locator = typeof selector === 'string' ? this.page.locator(selector) : selector;
+        await this.zoomer.zoomOut();
+        await locator.scrollIntoViewIfNeeded();
+        const box = await locator.boundingBox();
+        if (!box)
+            return;
+        const viewport = this.page.viewportSize()
+            ?? await this.page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+        const cursor = await this.zoomer.zoomIn(box, viewport, options);
+        if (cursor)
+            this.cursor.setPosition(cursor.x, cursor.y);
+    }
+    /** Undo `zoomIn()`. Safe to call when not zoomed. */
+    async zoomOut() {
+        if (!TUTORIAL_MODE)
+            return;
+        const cursor = await this.zoomer.zoomOut();
+        if (cursor)
+            this.cursor.setPosition(cursor.x, cursor.y);
     }
     async moveMouseToElement(locator) {
         if (!TUTORIAL_MODE)

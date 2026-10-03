@@ -127,12 +127,16 @@ Use these inside step actions instead of raw Playwright calls — they add curso
 | `tutorial.selectOption(locator, value)` | `page.selectOption(...)` | Highlight → select |
 | `tutorial.highlight(locator, duration?)` | — | Pulsing highlight around element |
 | `tutorial.unhighlight(locator)` | — | Remove highlight |
+| `tutorial.zoom(locator, options?)` | — | Camera zoom on the element (button, field, whole card), hold `duration` (1500ms), zoom back out. Options: `scale` (auto: fit ~70% of viewport, max 2.5×), `blur` (`true` = 4px, or px), `transition` (600ms per direction) |
+| `tutorial.zoomIn(locator, options?)` / `tutorial.zoomOut()` | — | Zoom in and stay zoomed — `tutorial.click()` etc. work in the zoomed view — then zoom out. Keep the pair inside one step |
 | `tutorial.moveMouseToElement(locator)` | — | Animate cursor to element |
 | `tutorial.showEmailPreview(options)` | — | Simulated email popup |
 | `tutorial.switchPage(page)` | — | Switch recording to another tab |
 | `tutorial.clearFields()` | — | Clear form fields on next load |
 
 `locator` can be a Playwright `Locator` or a CSS selector string.
+
+**Zoom timing:** `zoom()` takes `2 × transition + duration` (default 2.7s) of the step's action time. In a voiced step it runs inside the narration like any action; pick `duration` so the zoom covers the sentence that talks about the element. Use it for "look here" moments (a total, a setting, a whole panel) — not on every click.
 
 ## 4. Timing Model
 
