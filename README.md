@@ -48,6 +48,8 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **Step overlays** — On-screen banners showing current step, progress bar, and descriptions
 - **Context screens** — Goal / clarification / attention cards between steps to explain what's happening
 - **Background music** — Looping audio with fade-out on completion
+- **Camera zoom** — `zoom()` pushes in on a button, a field or a whole panel, optionally blurring the rest, then zooms back out
+- **Blurred secrets** — `typeBlurred()` types passwords and API keys into a field that stays blurred in the video
 - **Email previews** — Simulated email popups for verification flow demos
 - **Multiple user profiles** — Two signed-in personas as browser-like tabs in one video, with an optional side-by-side moment
 - **ffmpeg post-processing** — Automatic video + audio merge with timeline-accurate voice placement
@@ -221,6 +223,8 @@ const tutorial = new Tutorial(page, options);
 | `click(locator)` | Click with cursor animation and highlight |
 | `fill(locator, value)` | Fill input with highlight |
 | `typeSlowly(locator, value, delay?)` | Type character by character (visual effect) |
+| `typeBlurred(locator, value, options?)` | Type a secret into a field that stays blurred — options `{ delay?: 50, blur?: 4 (px), reveal?: false }` (or a number = `delay`). The blur is **not** removed afterwards unless `reveal: true` |
+| `unblur(locator)` | Remove the blur left by `typeBlurred()` |
 | `selectOption(locator, value)` | Select dropdown option with highlight |
 | `highlight(locator, duration?)` | Highlight an element |
 | `zoom(locator, options?)` | Camera zoom on an element, hold, zoom back out — see [Zooming on an element](#zooming-on-an-element) |
@@ -631,8 +635,8 @@ The skill bundles two reference documents that Claude reads before tutorializing
 | File | Content |
 |---|---|
 | `SKILL.md` | 4-phase process: understand the viewer → design the arc → implement with `playwright-director` → verify |
-| `references/storytelling.md` | Who is watching (role, expertise, emotional state), narration voice rules, pacing decisions, when to use context screens vs steps, multi-profile scene heuristics |
-| `references/api.md` | Complete `Tutorial` class API with timing model, critical rules (e.g., navigate before any tutorial call, never override `--reporter`), and a pre-commit checklist |
+| `references/storytelling.md` | Who is watching (role, expertise, emotional state), narration voice rules, pacing decisions, when to use context screens vs steps, multi-profile scene heuristics, directing attention (highlight vs camera zoom vs blur, secrets typed blurred) |
+| `references/api.md` | Complete `Tutorial` class API with timing model, critical rules (e.g., navigate before any tutorial call, never override `--reporter`), camera zoom options and rules, and a pre-commit checklist |
 
 ### Setup
 
@@ -666,7 +670,7 @@ This interactively copies the skill and agent into your `.claude/` directory. Ex
 Claude will:
 1. Read the test and identify the viewer persona
 2. Design a storytelling arc (goal → steps → completion)
-3. Write the tutorial code with `tutorial.context()`, `tutorial.step()`, voice narration text, and `tutorial.complete()`
+3. Write the tutorial code with `tutorial.context()`, `tutorial.step()`, voice narration text, camera zooms on the key moments, and `tutorial.complete()`
 4. Verify the test still passes in both normal and tutorial mode
 
 ### Keeping them up to date

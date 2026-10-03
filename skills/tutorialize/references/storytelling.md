@@ -191,3 +191,33 @@ Labels are on screen the whole tutorial, so they carry the cast:
 
 A named person makes the handoff feel like a story rather than a demo of two
 browser windows.
+
+## 9. Directing Attention — Highlight, Zoom, Blur
+
+The viewer's eye goes where the screen moves. You have three tools, from soft to strong:
+
+| Tool | What it says | Use for |
+|---|---|---|
+| `highlight()` (also implicit in `click`/`fill`) | "This is what we touch" | Every interaction — it's automatic |
+| `zoom()` | "Look closer — this matters" | A number, a status, a setting the story hinges on |
+| `zoom(…, { blur: true })` | "Nothing else matters right now" | The one thing on a busy screen the viewer must not miss |
+
+### When a zoom earns its place
+
+- **The payoff:** the total after adding lines, the "Paid" status after the client pays, the generated reference number.
+- **The tiny thing:** a badge, a toggle, an icon that is unreadable at video resolution.
+- **The panel in focus:** a settings block filled in while zoomed (`zoomIn` → actions → `zoomOut`), so the viewer reads the fields instead of hunting for them.
+
+### When it doesn't
+
+- Something the narration doesn't mention — the camera and the voice must point at the same thing.
+- Every step. Zooms lose their meaning by repetition: **1 to 3 per tutorial**.
+- Large, obvious elements on a sparse page — the viewer already sees them.
+
+### Pace it with the words
+
+A zoom is a beat. Let the narration name the thing *while* the camera pushes in — "your total, VAT included" — and let the hold breathe for the explain sentence. If the narration has moved on, the zoom has lasted too long.
+
+### Secrets stay secret
+
+Passwords, API keys and tokens are typed with `typeBlurred()` — the field is blurred before the first keystroke and stays blurred. Say so in the narration ("type your password — it stays hidden") so the blur reads as intentional, not as a glitch.

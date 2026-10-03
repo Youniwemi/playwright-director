@@ -124,6 +124,8 @@ Use these inside step actions instead of raw Playwright calls — they add curso
 | `tutorial.click(locator)` | `page.click(...)` | Cursor animation → highlight → click |
 | `tutorial.fill(locator, value)` | `page.fill(...)` | Highlight → fill |
 | `tutorial.typeSlowly(locator, value, delay?)` | `page.fill(...)` | Highlight → character-by-character typing |
+| `tutorial.typeBlurred(locator, value, options?)` | `page.fill(...)` | Highlight → blur the field → type. Options `{ delay?: 50, blur?: 4, reveal?: false }`; the field **stays blurred** afterwards (use for passwords, API keys, tokens) |
+| `tutorial.unblur(locator)` | — | Remove the blur left by `typeBlurred` |
 | `tutorial.selectOption(locator, value)` | `page.selectOption(...)` | Highlight → select |
 | `tutorial.highlight(locator, duration?)` | — | Pulsing highlight around element |
 | `tutorial.unhighlight(locator)` | — | Remove highlight |
@@ -468,7 +470,44 @@ Any other variant name only suffixes outputs and stamps `data-tutorial-variant` 
 
 In tutorial mode `mobileStage()` records **oversampled 2× by default** (Playwright never upscales video, so 1× phone video is blurry): it forces `--force-device-scale-factor=2`, aligns `deviceScaleFactor` and doubles `video.size` — layout unchanged. Tune with `mobileStage(2, 'Pixel 7', { scale })`. Caveat: `test.use()` replaces the config's `launchOptions`; repeat any tutorial-mode Chromium args via `{ launchArgs: [...] }`.
 
-## 13. Checklist
+## 13. Camera zoom
+
+`zoom()` is a camera push-in: the whole top-level page (stage and scenes included) scales up around an element, holds, and scales back. The step banner and cursor stay crisp and unscaled.
+
+```typescript
+// One-shot: zoom in, hold `duration`, zoom out
+tutorial.step('Your total includes VAT', async () => {
+  await tutorial.zoom(page.locator('.invoice-total'), { blur: true });
+}, { explain: 'That is the amount your client will pay.' });
+
+// Stay zoomed while acting — clicks, typing and the cursor all work zoomed
+tutorial.step('Turn on reminders', async () => {
+  await tutorial.zoomIn(page.locator('#reminders'), { blur: true });
+  await tutorial.click(page.locator('#auto-remind'));
+  await tutorial.typeSlowly(page.locator('#cc'), 'finance@acme.com');
+  await tutorial.zoomOut();
+});
+```
+
+| Option | Default | Effect |
+|---|---|---|
+| `scale` | auto | Auto fits the element to ~70% of the viewport, capped at 2.5×, never below 1× (a huge element only gets the blur) |
+| `duration` | `1500` | `zoom()` only — hold time in ms |
+| `blur` | `false` | Blur + slight dim of everything but the element. `true` = 4px, a number = radius in px |
+| `transition` | `600` | Each zoom-in / zoom-out animation in ms |
+
+### Rules
+
+- **Timing:** `zoom()` costs `2 × transition + duration` (2.7s by default) of action time. In a voiced step the action starts inside the narration — make the zoom cover the sentence that talks about the element.
+- **Pair `zoomIn()` / `zoomOut()` in the same step.** A new step's banner shown while zoomed would be scaled with the page.
+- **Target what the narration names.** Zoom on the total the narration mentions, not the whole invoice; on a whole panel when the narration is about the panel.
+- **Small targets get big:** a badge or icon goes straight to 2.5×. Pass `scale: 1.5`–`2` when context around it matters.
+- **Blur when the page is busy**, or when the element must read as "the only thing that matters". Skip it on sparse pages — it adds nothing.
+- **Highlight + zoom combine:** `highlight(el, 600)` then `zoom(el)` reads as "look here… closer".
+- Pure decoration: no-op without `TUTORIAL_MODE`, not recorded in the timeline, safe in plain E2E runs.
+- Don't zoom on every step — 1 to 3 zooms per tutorial, on the moments the viewer must not miss (see `storytelling.md` §9).
+
+## 14. Checklist
 
 Before submitting a tutorialized test:
 
@@ -484,6 +523,8 @@ Before submitting a tutorialized test:
 - [ ] Test passes without `TUTORIAL_MODE` (plain E2E)
 - [ ] Test passes with `TUTORIAL_MODE=true` (video generation)
 - [ ] Video watched — does it feel human?
+- [ ] Zooms (if any) land on what the narration names, ≤ 3 per tutorial, each `zoomIn` paired with a `zoomOut` in the same step
+- [ ] Secrets (passwords, API keys) typed with `typeBlurred`, never `fill`/`typeSlowly`
 
 Multi-scene tutorials, additionally:
 
