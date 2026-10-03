@@ -34,12 +34,17 @@ export class TutorialCursor {
             cursor.className = 'tutorial-cursor';
             cursor.innerHTML = cursorSvg;
             cursor.style.display = 'none';
-            document.body.appendChild(cursor);
+            (document.getElementById('tutorial-zoom-layer') ?? document.body).appendChild(cursor);
         }, CURSOR_SVG);
     }
     /** Ensure cursor is visible (re-inject after navigation) */
     async ensureVisible() {
         await this.injectCursor();
+    }
+    /** Sync the tracked position after the cursor was moved in-page (e.g. by a zoom). */
+    setPosition(x, y) {
+        this.x = x;
+        this.y = y;
     }
     async moveToElement(locator) {
         const box = await locator.boundingBox();

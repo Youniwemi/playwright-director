@@ -43,6 +43,9 @@ COMPLETE: Celebrate the outcome, suggest what's next
 ### 3. Implement (read `api.md`)
 - Use the Tutorial API: `context()`, `step()`, `complete()`
 - Follow timing rules, blank-screen prevention, navigation handling
+- Direct attention sparingly: `zoom()` (optionally `blur`) on the 1–3 moments
+  the viewer must not miss (`storytelling.md` §9, `api.md` §13); secrets go
+  through `typeBlurred()`
 - Apply the polish checklist before submitting
 
 ### 4. Verify

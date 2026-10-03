@@ -11,6 +11,8 @@ export { TutorialMusic } from './music.js';
 export { TutorialCursor } from './cursor.js';
 export { TutorialOverlay } from './overlay.js';
 export { TutorialTimeline } from './timeline.js';
+export { TutorialZoom, zoomScale, zoomFrame, zoomFrames } from './zoom.js';
+export type { ZoomOptions } from './zoom.js';
 export { buildTranscriptMarkdown, parseTranscript, applyCorrections, TranscriptCorrections } from './transcript.js';
 export type { TranscriptEntry, ApplyReport, ApplyChange, ApplyProblem, ApplyIO } from './transcript.js';
 //# sourceMappingURL=index.d.ts.map

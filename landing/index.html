@@ -136,7 +136,7 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
   <div class="wrap">
     <h1>Your Playwright tests are<br><em>your directed video guides</em></h1>
     <p class="sub">Write your e2e tests once — get directed video guides with voice narration,
-      animated cursor, step overlays and background music. Publish them as a gallery site, then
+      animated cursor, camera zooms, step overlays and background music. Publish them as a gallery site, then
       embed any tutorial back into your app with a single <code style="font-family:ui-monospace,Menlo,monospace;font-size:16px">data-tutorial</code> attribute.
       No screen recording, no video editor, no docs that lag behind the product.</p>
     <div class="cta">
@@ -181,6 +181,9 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
   tutorial.<span class="c-fn">step</span>(<span class="c-str">'Open the invoices page'</span>, <span class="c-kw">async</span> () =&gt; {
     <span class="c-kw">await</span> page.<span class="c-fn">click</span>(<span class="c-str">'a[href="/invoices"]'</span>);
   });
+  tutorial.<span class="c-fn">step</span>(<span class="c-str">'Check the total'</span>, <span class="c-kw">async</span> () =&gt; {
+    <span class="c-kw">await</span> tutorial.<span class="c-fn">zoom</span>(page.<span class="c-fn">locator</span>(<span class="c-str">'.total'</span>), { blur: <span class="c-kw">true</span> }); <span class="c-cm">// camera push-in</span>
+  });
 
   <span class="c-kw">await</span> tutorial.<span class="c-fn">complete</span>(<span class="c-str">'Done! Your invoice is on its way.'</span>);
   <span class="c-cm">// playwright test          → plain e2e run</span>
@@ -200,6 +203,13 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
       <div class="feat"><span class="ico">📋</span><h3>Step overlays</h3>
         <p>On-screen banners with step titles, progress and context cards — position and
            style configurable.</p></div>
+      <div class="feat"><span class="ico">🔍</span><h3>Camera zoom</h3>
+        <p><code>tutorial.zoom(locator)</code> pushes in on a button, a field or a whole
+           panel — optionally blurring the rest — then zooms back out.</p>
+        <button class="try-btn" data-tutorial="zoom-demo" style="margin-top:6px">▶ Watch the zoom demo</button></div>
+      <div class="feat"><span class="ico">🔒</span><h3>Blurred secrets</h3>
+        <p><code>tutorial.typeBlurred()</code> types passwords and API keys into a field that
+           stays blurred — the real value never becomes readable in the video.</p></div>
       <div class="feat"><span class="ico">🎵</span><h3>Background music</h3>
         <p>Looping soundtrack mixed by ffmpeg with fade-out on completion.</p></div>
       <div class="feat"><span class="ico">📱</span><h3>Variants &amp; mobile</h3>

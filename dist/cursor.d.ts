@@ -16,6 +16,8 @@ export declare class TutorialCursor {
     private injectCursor;
     /** Ensure cursor is visible (re-inject after navigation) */
     ensureVisible(): Promise<void>;
+    /** Sync the tracked position after the cursor was moved in-page (e.g. by a zoom). */
+    setPosition(x: number, y: number): void;
     moveToElement(locator: Locator): Promise<void>;
     moveTo(targetX: number, targetY: number): Promise<void>;
     animateClick(): Promise<void>;

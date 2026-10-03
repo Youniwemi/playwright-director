@@ -44,6 +44,11 @@ Follow all rules from `api.md`:
 - Dual-mode (test works with and without TUTORIAL_MODE)
 - `@tutorial` tag on the test
 - Acronyms have `voiceText` where TTS mispronounces
+- Camera zooms (`tutorial.zoom()`, `zoomIn()`/`zoomOut()`, optional `blur`) on
+  the 1–3 moments the narration names — a total, a status, a tiny badge, a
+  panel filled while zoomed (`storytelling.md` §9, `api.md` §13). Never on
+  every step
+- Passwords, API keys and tokens typed with `tutorial.typeBlurred()`
 - Multi-scene only: every step touching a scene carries `{ scene }`, scenes sit
   on distinct origins, each tab switch is acknowledged in the narration, and
   split ratios (`focus(['a','b'], { ratio: [30, 70] })`) are used to keep the
