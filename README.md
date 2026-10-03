@@ -274,7 +274,7 @@ tutorial.step('Pick it', async () => {
 });
 ```
 
-![Camera zoom on a card, rest of the page blurred](docs/images/zoom.png)
+![Camera zoom on a settings panel while typing, rest of the page blurred](docs/images/zoom.png)
 
 | Option | Type | Default | Description |
 |---|---|---|---|

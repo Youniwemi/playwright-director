@@ -128,8 +128,14 @@ export class TutorialZoom {
 		this.active = null;
 		try {
 			return await this.run({ frames, durationMs, rect, blurPx, direction: 'out' });
-		} catch {
-			return null; // page navigated or closed while zoomed — nothing left to restore
+		} catch (error) {
+			// Usually the page navigated or closed while zoomed — nothing left to restore.
+			console.warn(`[Tutorial] zoomOut failed: ${(error as Error).message}`);
+			// Best effort: put the page back without animating.
+			await this.page
+				.evaluate(() => (window as unknown as { __tutorialZoom?: { restore?: () => void } }).__tutorialZoom?.restore?.())
+				.catch(() => {});
+			return null;
 		}
 	}
 
@@ -147,32 +153,48 @@ export class TutorialZoom {
 				}
 			};
 
+			const restore = (st: any) => {
+				removeEventListener('scroll', st.onScroll);
+				html.style.transform = st.prevTransform;
+				html.style.transformOrigin = st.prevOrigin;
+				html.removeAttribute('data-tutorial-zoom');
+				for (const { el, prev } of st.fixed) el.style.translate = prev;
+				// Everything in the layer (incl. a banner shown while zoomed) goes back to <body>.
+				for (const el of Array.from(st.layer.children) as Element[]) {
+					if (el === st.blur) continue;
+					document.body.appendChild(el);
+					settle(el);
+				}
+				if (st.layer.matches(':popover-open')) st.layer.hidePopover();
+				st.layer.remove();
+				if (w.__tutorialZoom === st) delete w.__tutorialZoom;
+			};
+
 			if (direction === 'in') {
+				if (state) restore(state); // a zoom left behind (e.g. a failed zoomOut)
+
 				// <html> becomes the containing block of fixed elements once it has a
-				// transform; shift them back by its offset so a scrolled page keeps its
-				// fixed headers in place.
+				// transform: each frame shifts them back by the live scroll offset so
+				// fixed headers (and the stage) stay put.
 				const htmlRect = html.getBoundingClientRect();
-				const htmlTL = { x: htmlRect.left, y: htmlRect.top };
-				const fixed: { el: HTMLElement; prev: string }[] = [];
-				if (htmlTL.x !== 0 || htmlTL.y !== 0) {
-					const establishesBlock = (el: Element) => {
-						const cs = getComputedStyle(el);
-						return cs.transform !== 'none' || cs.filter !== 'none' || cs.perspective !== 'none'
-							|| cs.backdropFilter !== 'none' || /paint|layout|strict|content/.test(cs.contain)
-							|| /transform|filter|perspective/.test(cs.willChange);
-					};
-					for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('*'))) {
-						if (UI_IDS.includes(el.id) || getComputedStyle(el).position !== 'fixed') continue;
-						let contained = false;
-						for (let p = el.parentElement; p && p !== html; p = p.parentElement) {
-							if (establishesBlock(p)) { contained = true; break; }
-						}
-						if (contained) continue;
-						const [tx = '0px', ty = '0px'] = getComputedStyle(el).translate === 'none'
-							? [] : getComputedStyle(el).translate.split(' ');
-						fixed.push({ el, prev: el.style.translate });
-						el.style.translate = `calc(${tx} + ${-htmlTL.x}px) calc(${ty} + ${-htmlTL.y}px)`;
+				const base = { x: htmlRect.left + scrollX, y: htmlRect.top + scrollY };
+				const establishesBlock = (el: Element) => {
+					const cs = getComputedStyle(el);
+					return cs.transform !== 'none' || cs.filter !== 'none' || cs.perspective !== 'none'
+						|| cs.backdropFilter !== 'none' || /paint|layout|strict|content/.test(cs.contain)
+						|| /transform|filter|perspective/.test(cs.willChange);
+				};
+				const fixed: { el: HTMLElement; prev: string; tx: string; ty: string }[] = [];
+				for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('*'))) {
+					if (UI_IDS.includes(el.id) || getComputedStyle(el).position !== 'fixed') continue;
+					let contained = false;
+					for (let p = el.parentElement; p && p !== html; p = p.parentElement) {
+						if (establishesBlock(p)) { contained = true; break; }
 					}
+					if (contained) continue;
+					const translate = getComputedStyle(el).translate;
+					const [tx = '0px', ty = '0px'] = translate === 'none' ? [] : translate.split(' ');
+					fixed.push({ el, prev: el.style.translate, tx, ty });
 				}
 
 				const layer = document.createElement('div');
@@ -207,11 +229,14 @@ export class TutorialZoom {
 					: null;
 
 				state = w.__tutorialZoom = {
-					htmlTL,
+					base,
 					fixed,
 					layer,
 					blur,
 					cursorBase,
+					frame: null,
+					onScroll: null,
+					restore: null,
 					prevTransform: html.style.transform,
 					prevOrigin: html.style.transformOrigin
 				};
@@ -227,31 +252,46 @@ export class TutorialZoom {
 					: null;
 			}
 
+			const st = state;
 			const apply = (f: { k: number; ox: number; oy: number; e: number }) => {
-				const tx = f.ox - state.htmlTL.x * (1 - f.k);
-				const ty = f.oy - state.htmlTL.y * (1 - f.k);
-				html.style.transform = `translate(${tx}px, ${ty}px) scale(${f.k})`;
-				const cursor = document.getElementById('tutorial-cursor');
-				if (cursor && state.cursorBase) {
-					cursor.style.left = `${f.ox + f.k * state.cursorBase.x}px`;
-					cursor.style.top = `${f.oy + f.k * state.cursorBase.y}px`;
+				st.frame = f;
+				// The zoomed page can overflow, and a Playwright action may scroll it:
+				// use the live scroll so the picture stays put whatever happens.
+				const tl = { x: st.base.x - scrollX, y: st.base.y - scrollY };
+				html.style.transform = `translate(${f.ox - tl.x * (1 - f.k)}px, ${f.oy - tl.y * (1 - f.k)}px) scale(${f.k})`;
+				for (const { el, tx, ty } of st.fixed) {
+					el.style.translate = `calc(${tx} + ${-tl.x}px) calc(${ty} + ${-tl.y}px)`;
 				}
-				if (state.blur) {
+				const cursor = document.getElementById('tutorial-cursor');
+				if (cursor && st.cursorBase) {
+					cursor.style.left = `${f.ox + f.k * st.cursorBase.x}px`;
+					cursor.style.top = `${f.oy + f.k * st.cursorBase.y}px`;
+				}
+				if (st.blur) {
 					const pad = 6 * f.k;
 					const x1 = f.ox + f.k * rect.x - pad;
 					const y1 = f.oy + f.k * rect.y - pad;
 					const x2 = f.ox + f.k * (rect.x + rect.width) + pad;
 					const y2 = f.oy + f.k * (rect.y + rect.height) + pad;
-					state.blur.style.opacity = String(f.e);
-					state.blur.style.clipPath = `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, `
+					st.blur.style.opacity = String(f.e);
+					st.blur.style.clipPath = `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, `
 						+ `${x1}px ${y1}px, ${x2}px ${y1}px, ${x2}px ${y2}px, ${x1}px ${y2}px, ${x1}px ${y1}px)`;
 				}
 			};
+			if (direction === 'in') {
+				st.restore = () => restore(st);
+				st.onScroll = () => {
+					if (w.__tutorialZoom === st && st.frame) apply(st.frame);
+				};
+				addEventListener('scroll', st.onScroll, { passive: true });
+			}
 
 			const sequence = direction === 'in' ? frames : [...frames].reverse();
 			await new Promise<void>((resolve) => {
 				const start = performance.now();
 				const tick = (now: number) => {
+					// A newer zoom took over (or this one was torn down): stop touching the page.
+					if (w.__tutorialZoom !== st) return resolve();
 					const t = Math.min(1, (now - start) / durationMs);
 					const pos = t * (sequence.length - 1);
 					const i = Math.min(sequence.length - 2, Math.floor(pos));
@@ -264,10 +304,22 @@ export class TutorialZoom {
 						oy: a.oy + (b.oy - a.oy) * u,
 						e: a.e + (b.e - a.e) * u
 					});
-					if (t < 1) requestAnimationFrame(tick);
+					if (t < 1) schedule();
 					else resolve();
 				};
-				requestAnimationFrame(tick);
+				// rAF drives the animation; a timer takes over if frames stall, so
+				// the zoom always completes instead of hanging the step.
+				const schedule = () => {
+					let fired = false;
+					const go = () => {
+						if (fired) return;
+						fired = true;
+						tick(performance.now());
+					};
+					requestAnimationFrame(go);
+					setTimeout(go, 50);
+				};
+				schedule();
 			});
 
 			const cursor = document.getElementById('tutorial-cursor');
@@ -275,21 +327,7 @@ export class TutorialZoom {
 				? { x: parseFloat(cursor.style.left), y: parseFloat(cursor.style.top) }
 				: null;
 
-			if (direction === 'out') {
-				html.style.transform = state.prevTransform;
-				html.style.transformOrigin = state.prevOrigin;
-				html.removeAttribute('data-tutorial-zoom');
-				for (const { el, prev } of state.fixed) el.style.translate = prev;
-				// Everything in the layer (incl. a banner shown while zoomed) goes back to <body>.
-				for (const el of Array.from(state.layer.children) as Element[]) {
-					if (el === state.blur) continue;
-					document.body.appendChild(el);
-					settle(el);
-				}
-				if (state.layer.matches(':popover-open')) state.layer.hidePopover();
-				state.layer.remove();
-				delete w.__tutorialZoom;
-			}
+			if (direction === 'out' && w.__tutorialZoom === st) restore(st);
 			return cursorPos;
 		}, args);
 	}
