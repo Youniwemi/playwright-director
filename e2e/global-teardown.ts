@@ -55,6 +55,16 @@ export default function globalTeardown(): void {
 			throw new Error(`${video}: ${seconds.toFixed(1)}s for a ${expected.toFixed(1)}s timeline`);
 		}
 
+		// Fast-forwarded tapes: the final length must match the timeline's
+		// prediction (tape length minus what each span saved), not the tape.
+		if (timeline.fastForward?.length) {
+			if (Math.abs(seconds - expected) > 0.5) {
+				throw new Error(`${video}: ${seconds.toFixed(2)}s, fast-forward predicted ${expected.toFixed(2)}s`);
+			}
+			const tape = timeline.tapeDurationMs / 1000;
+			console.log(`[video] ${video} — fast-forwarded ${tape.toFixed(1)}s of tape into ${seconds.toFixed(2)}s (predicted ${expected.toFixed(2)}s)`);
+		}
+
 		console.log(`[video] ${video} — ${seconds.toFixed(1)}s, streams: ${kinds.join(' + ')}`);
 	}
 }

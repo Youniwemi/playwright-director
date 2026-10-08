@@ -1,3 +1,4 @@
+import { type FastForwardSegment } from './fast-forward.js';
 export interface TimelineStep {
     step: number;
     title: string;
@@ -20,7 +21,13 @@ export interface TimelineData {
     testFile: string;
     projectName: string;
     lang: string;
+    /** Duration of the final video — fast-forwarded spans count at their sped-up length. */
     totalDurationMs: number;
+    /** Recorded (tape) duration, only present when something was fast-forwarded. */
+    tapeDurationMs?: number;
+    /** Fast-forwarded spans, in order. Step `startMs` values are already in
+     *  final-video time; these carry tape time too, for ffmpeg's setpts. */
+    fastForward?: FastForwardSegment[];
     /** Milliseconds to trim from video start (preload time) */
     videoTrimMs: number;
     /** True when a full-screen black sync marker was recorded right before
@@ -61,6 +68,8 @@ export declare class TutorialTimeline {
     private videoTrimMs;
     private syncMarker;
     private steps;
+    private fastForwards;
+    private openFastForward;
     private videoPath;
     constructor(testName: string, testFile?: string, projectName?: string, lang?: string, testTitle?: string, feature?: string, musicOptions?: TimelineMusicOptions, title?: string, variant?: string);
     /**
@@ -71,8 +80,16 @@ export declare class TutorialTimeline {
      * Set the video path (from Playwright's page.video()?.path())
      */
     setVideoPath(path: string): void;
+    /** Open a fast-forwarded span at `timestamp` (epoch ms). */
+    startFastForward(speed: number, timestamp: number, vhs?: boolean): void;
+    /** Close the open fast-forwarded span at `timestamp` (epoch ms). No-op when none is open. */
+    endFastForward(timestamp: number): void;
+    private closeFastForward;
+    /** Spans so far, the open one (if any) closed at `tapeMs`. */
+    private segmentsAt;
     /**
-     * Record a step at a specific timestamp (for accurate voice timing)
+     * Record a step at a specific timestamp (for accurate voice timing).
+     * `startMs` is stored in final-video time, i.e. after fast-forwards.
      */
     addStep(step: number, title: string, audioFile: string, durationMs: number, timestamp: number, text?: string, key?: string, scene?: string | string[]): void;
     /**

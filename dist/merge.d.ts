@@ -1,3 +1,4 @@
+import { type FastForwardSegment } from './fast-forward.js';
 export interface MergeOptions {
     audioDir: string;
     musicFile: string;
@@ -7,8 +8,11 @@ export interface MergeOptions {
     checkFileExists?: (path: string) => boolean;
 }
 interface TimelineInput {
+    /** Final video duration (fast-forwards already applied) */
     totalDurationMs: number;
     videoTrimMs?: number;
+    /** Spans played sped up — the video stream is then re-timed by a filter */
+    fastForward?: FastForwardSegment[];
     steps: Array<{
         audioFile: string;
         startMs: number;

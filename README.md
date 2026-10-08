@@ -18,6 +18,7 @@ An AI agent can also write or adapt the test for a specific communication goal �
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
   - [Zooming on an element](#zooming-on-an-element)
+  - [Fast-forwarding long waits](#fast-forwarding-long-waits)
 - [Multiple user profiles](#multiple-user-profiles)
 - [Variants — record the same tutorial for mobile](#variants--record-the-same-tutorial-for-mobile)
 - [TTS Configuration](#tts-configuration)
@@ -49,6 +50,7 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **Context screens** — Goal / clarification / attention cards between steps to explain what's happening
 - **Background music** — Looping audio with fade-out on completion
 - **Camera zoom** — `zoom()` pushes in on a button, a field or a whole panel, optionally blurring the rest, then zooms back out
+- **Fast-forward** — `fastForward(speed, …)` plays a slow generation or a repetitive chore sped up in the final video, VHS-style (`▶▶ ×4` badge, scanlines, tape grain)
 - **Blurred secrets** — `typeBlurred()` types passwords and API keys into a field that stays blurred in the video
 - **Email previews** — Simulated email popups for verification flow demos
 - **Multiple user profiles** — Two signed-in personas as browser-like tabs in one video, with an optional side-by-side moment
@@ -229,6 +231,8 @@ const tutorial = new Tutorial(page, options);
 | `highlight(locator, duration?)` | Highlight an element |
 | `zoom(locator, options?)` | Camera zoom on an element, hold, zoom back out — see [Zooming on an element](#zooming-on-an-element) |
 | `zoomIn(locator, options?)` / `zoomOut()` | Zoom in and stay zoomed (interact while zoomed), then zoom back out |
+| `startFastForward(speed, options?)` / `endFastForward()` | Mark the start / end of a span played `speed`× faster in the final video — see [Fast-forwarding long waits](#fast-forwarding-long-waits) |
+| `fastForward(speed, action, options?)` | Run `action` fast-forwarded (start + end markers around it) and return its result |
 | `moveMouseToElement(locator)` | Animate cursor to element |
 | `showEmailPreview(options)` | Show simulated email popup |
 | `switchPage(page)` | Switch recording to another tab/window |
@@ -292,6 +296,55 @@ element near a corner stays off-center instead of revealing blank canvas.
 It works across scenes (the whole stage zooms) and on scrolled pages with
 fixed headers. Like the rest of the tutorial layer, it is a no-op when
 `TUTORIAL_MODE` is off. Keep a `zoomIn()`/`zoomOut()` pair inside one step.
+
+### Fast-forwarding long waits
+
+Some flows have a stretch nobody wants to watch in real time: a report that
+takes 30 seconds to generate, a twelve-row form filled one field at a time.
+Mark it with a start and an end marker and the final video plays it sped up,
+like fast-forwarding an old VHS tape — a `▶▶ ×N` badge, scanlines and a
+rolling tracking band in the page, tape grain and a chroma shift added by
+ffmpeg. The test itself still runs at normal speed: only the video is
+re-timed.
+
+```typescript
+tutorial.step('Generate the quarterly report', async () => {
+  await tutorial.click(page.locator('#generate'));
+  // Wrap the slow part — speed is the argument
+  await tutorial.fastForward(8, async () => {
+    await expect(page.locator('#report')).toBeVisible({ timeout: 60_000 });
+  });
+});
+
+// Or with explicit markers
+tutorial.step('Import the twelve invoices', async () => {
+  await tutorial.startFastForward(4);
+  for (const row of rows) await tutorial.fill(page.locator(`#amount-${row.id}`), row.amount);
+  await tutorial.endFastForward();
+});
+```
+
+![A report generation fast-forwarded at 8×, VHS badge and scanlines on screen](docs/images/fast-forward.png)
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `speed` (argument) | `number` | — | Playback speed of the span in the final video. Must be `> 1` |
+| `vhs` | `boolean` | `true` | VHS look (badge, scanlines, grain, chroma shift). `false` = a plain speed-up |
+
+The final length is predictable: each span of `L` ms recorded at speed `S`
+lasts `L / S` ms in the video, so the video is `tape − Σ L × (1 − 1/S)` long.
+The timeline JSON records it — `totalDurationMs` is the final length,
+`tapeDurationMs` the recorded one, `fastForward[]` the spans — and step
+timestamps, transcripts and the gallery all use final-video time.
+
+Rules:
+
+- Call it **inside a step's action** (it needs the running timeline of
+  `complete()`). A span never outlives its step — the next step closes it.
+- Narration is never sped up. If the step's narration is still playing,
+  `startFastForward()` waits for the clip to end first, so the voice never
+  runs over sped-up video.
+- No-op outside `TUTORIAL_MODE` (`fastForward()` just runs the action).
 
 ## Multiple user profiles
 

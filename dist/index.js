@@ -9,5 +9,6 @@ export { TutorialCursor } from './cursor.js';
 export { TutorialOverlay } from './overlay.js';
 export { TutorialTimeline } from './timeline.js';
 export { TutorialZoom, zoomScale, zoomFrame, zoomFrames } from './zoom.js';
+export { TutorialFastForward, fastForwardOutputMs, buildFastForwardFilter } from './fast-forward.js';
 export { buildTranscriptMarkdown, parseTranscript, applyCorrections, TranscriptCorrections } from './transcript.js';
 //# sourceMappingURL=index.js.map

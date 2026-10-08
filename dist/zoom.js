@@ -92,7 +92,7 @@ export class TutorialZoom {
     }
     run(args) {
         return this.page.evaluate(async ({ frames, durationMs, rect, blurPx, direction }) => {
-            const UI_IDS = ['tutorial-overlay', 'tutorial-email-preview', 'tutorial-cursor', 'tutorial-debug-clock'];
+            const UI_IDS = ['tutorial-overlay', 'tutorial-email-preview', 'tutorial-cursor', 'tutorial-debug-clock', 'tutorial-fast-forward'];
             const html = document.documentElement;
             const w = window;
             let state = w.__tutorialZoom;

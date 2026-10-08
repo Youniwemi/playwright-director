@@ -1,5 +1,6 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { buildFastForwardFilter } from './fast-forward.js';
 const DEFAULT_OPTIONS = {
     audioDir: 'static/audio/tutorial-voice',
     musicFile: 'static/audio/tutorial-background.mp3',
@@ -50,6 +51,12 @@ export function buildMergeCommand(timeline, videoPath, outputPath, options = {})
     else {
         filter = `${filterParts.join(';')};${audioLabels.join('')}amix=inputs=${totalStreams}:duration=longest:dropout_transition=0:normalize=0[aout]`;
     }
+    // Fast-forward: re-time the video stream. Audio needs nothing — step
+    // startMs values are already in final-video time.
+    const videoFilter = buildFastForwardFilter(timeline.fastForward ?? []);
+    if (videoFilter)
+        filter = `[0:v]${videoFilter}[vout];${filter}`;
+    const videoMap = videoFilter ? '"[vout]"' : '0:v';
     // Build input args
     const inputArgs = inputs.map((input, i) => {
         if (i === 1 && input === opts.musicFile) {
@@ -59,7 +66,7 @@ export function buildMergeCommand(timeline, videoPath, outputPath, options = {})
     }).join(' ');
     // Trim dead time from video start (preload period)
     const trimSs = timeline.videoTrimMs ? `-ss ${(timeline.videoTrimMs / 1000).toFixed(3)}` : '';
-    const command = `ffmpeg -y ${trimSs} ${inputArgs} -filter_complex "${filter}" -map 0:v -map "[aout]" -c:v libvpx-vp9 -b:v 330k -crf 40 -row-mt 1 -cpu-used 4 -c:a libopus -b:a 64k -t ${videoDuration} "${outputPath}"`;
+    const command = `ffmpeg -y ${trimSs} ${inputArgs} -filter_complex "${filter}" -map ${videoMap} -map "[aout]" -c:v libvpx-vp9 -b:v 330k -crf 40 -row-mt 1 -cpu-used 4 -c:a libopus -b:a 64k -t ${videoDuration} "${outputPath}"`;
     return { command, inputs, filter };
 }
 //# sourceMappingURL=merge.js.map

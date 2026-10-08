@@ -46,6 +46,8 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Direct attention sparingly: `zoom()` (optionally `blur`) on the 1–3 moments
   the viewer must not miss (`storytelling.md` §9, `api.md` §13); secrets go
   through `typeBlurred()`
+- Fast-forward the dead time: wrap slow generations or repetitive chores in
+  `fastForward(speed, …)` inside their step (`storytelling.md` §10, `api.md` §14)
 - Apply the polish checklist before submitting
 
 ### 4. Verify
