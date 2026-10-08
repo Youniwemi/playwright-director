@@ -536,6 +536,7 @@ tutorial.step('Fill the twelve rows', async () => {
 
 ### Timing
 
+- Any number of spans per video, each with its own speed.
 - A span of `L` ms at speed `S` lasts `L / S` ms on video. Final length = `tape − Σ L × (1 − 1/S)` — predictable to a few ms.
 - Timeline JSON: `totalDurationMs` = final length, `tapeDurationMs` = recorded length, `fastForward[]` = spans (`startMs`/`endMs` tape time, `outputStartMs`/`outputEndMs` video time, `speed`). Step `startMs` values are already video time, so voice clips, transcripts and the gallery need nothing special.
 - `startFastForward()` first **waits for the step's narration clip to finish** — speech is never sped up and never plays over sped-up video. So the step's narration plays at 1×, then the tape speeds up.
@@ -543,7 +544,7 @@ tutorial.step('Fill the twelve rows', async () => {
 ### Rules
 
 - Call it **inside a step's action** — outside `complete()` it warns and does nothing.
-- Keep the span inside its step; the next step (or `complete()`) closes a span left open.
+- Keep the span inside its step; one left open is closed when the step's action returns (before the step screenshot).
 - Say it in the narration ("this takes a moment — let's skip ahead") so the speed-up reads as intentional.
 - Fast-forward the wait, not the payoff: end the span before the result the viewer must see.
 - No-op without `TUTORIAL_MODE` — `fastForward()` just runs the action; a speed `≤ 1` throws in both modes.

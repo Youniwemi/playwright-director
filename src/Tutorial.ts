@@ -829,9 +829,6 @@ export class Tutorial {
 		let currentStep = 0;
 
 		for (const item of this.pendingItems) {
-			// A span never outlives its step: the next narration must not play
-			// over sped-up video.
-			await this.endFastForward();
 
 			await this.ensureStyles();
 
@@ -894,13 +891,15 @@ export class Tutorial {
 					await this.page.waitForTimeout(this.options.stepDelay);
 					await item.action();
 				}
+				// A span never outlives its action: the VHS overlay must not reach
+				// the step screenshot, nor the next narration play over sped-up video.
+				await this.endFastForward();
 				await this.page.waitForTimeout(item.delay ?? 300);
 
 				await this.captureStepScreenshot(currentStep);
 			}
 		}
 
-		await this.endFastForward();
 		await this.overlay.showComplete(completionMessage);
 
 		if (this.options.enableVoice) {

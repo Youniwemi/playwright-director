@@ -206,6 +206,27 @@ describe('Tutorial.fastForward', () => {
 		}
 	});
 
+	it('closes a span left open as soon as its step action returns, before the screenshot', async () => {
+		process.env.TUTORIAL_MODE = 'true';
+		const { Tutorial } = await import('../src/Tutorial');
+		const page = createMockPage();
+		const tutorial = new Tutorial(page as any, { title: 'T', backgroundMusic: '', enableVoice: false, testName: 'ff-open' });
+		const openAtScreenshot: boolean[] = [];
+		page.screenshot.mockImplementation(async () => {
+			openAtScreenshot.push((tutorial as any).fastForwarding);
+			throw new Error('no screenshots in unit tests');
+		});
+		tutorial.step('Start but never end', async () => {
+			await tutorial.startFastForward(4);
+			await new Promise((r) => setTimeout(r, 20));
+		});
+		tutorial.step('Next', async () => {});
+		await tutorial.complete();
+
+		expect(openAtScreenshot).toEqual([false, false]);
+		expect(tutorial.getTimeline().fastForward).toHaveLength(1);
+	});
+
 	it('warns and does nothing before complete() starts the timeline', async () => {
 		process.env.TUTORIAL_MODE = 'true';
 		const { Tutorial } = await import('../src/Tutorial');

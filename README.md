@@ -324,12 +324,15 @@ tutorial.step('Import the twelve invoices', async () => {
 });
 ```
 
-![A report generation fast-forwarded at 8×, VHS badge and scanlines on screen](docs/images/fast-forward.png)
+![A PDF export fast-forwarded at 8× (second span of the video), VHS badge and scanlines on screen](docs/images/fast-forward.png)
 
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `speed` (argument) | `number` | — | Playback speed of the span in the final video. Must be `> 1` |
 | `vhs` | `boolean` | `true` | VHS look (badge, scanlines, grain, chroma shift). `false` = a plain speed-up |
+
+A video can have any number of spans, each with its own speed — e.g. a
+report generation at `4` and a PDF export at `8` in the same tutorial.
 
 The final length is predictable: each span of `L` ms recorded at speed `S`
 lasts `L / S` ms in the video, so the video is `tape − Σ L × (1 − 1/S)` long.
@@ -340,7 +343,7 @@ timestamps, transcripts and the gallery all use final-video time.
 Rules:
 
 - Call it **inside a step's action** (it needs the running timeline of
-  `complete()`). A span never outlives its step — the next step closes it.
+  `complete()`). A span never outlives its step — one left open is closed as soon as the step's action returns.
 - Narration is never sped up. If the step's narration is still playing,
   `startFastForward()` waits for the clip to end first, so the voice never
   runs over sped-up video.
