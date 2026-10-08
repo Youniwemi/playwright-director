@@ -136,7 +136,7 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
   <div class="wrap">
     <h1>Your Playwright tests are<br><em>your directed video guides</em></h1>
     <p class="sub">Write your e2e tests once — get directed video guides with voice narration,
-      animated cursor, camera zooms, step overlays and background music. Publish them as a gallery site, then
+      animated cursor, camera zooms, fast-forwarded waits, step overlays and background music. Publish them as a gallery site, then
       embed any tutorial back into your app with a single <code style="font-family:ui-monospace,Menlo,monospace;font-size:16px">data-tutorial</code> attribute.
       No screen recording, no video editor, no docs that lag behind the product.</p>
     <div class="cta">
@@ -207,6 +207,10 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
         <p><code>tutorial.zoom(locator)</code> pushes in on a button, a field or a whole
            panel — optionally blurring the rest — then zooms back out.</p>
         <button class="try-btn" data-tutorial="zoom-demo" style="margin-top:6px">▶ Watch the zoom demo</button></div>
+      <div class="feat"><span class="ico">⏩</span><h3>Fast-forward</h3>
+        <p><code>tutorial.fastForward(8, …)</code> plays a slow generation or a repetitive
+           chore sped up in the final video — VHS badge, scanlines and tape grain included.</p>
+        <button class="try-btn" data-tutorial="fast-forward-demo" style="margin-top:6px">▶ Watch the ×4 / ×8 demo</button></div>
       <div class="feat"><span class="ico">🔒</span><h3>Blurred secrets</h3>
         <p><code>tutorial.typeBlurred()</code> types passwords and API keys into a field that
            stays blurred — the real value never becomes readable in the video.</p></div>

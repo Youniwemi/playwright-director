@@ -1,0 +1,31 @@
+{
+  "id": "fast-forward-demo",
+  "title": "Skipping the waits",
+  "description": "Skip the boring part. Long waits are fast-forwarded in the final video, like an old VHS tape.",
+  "duration": "0:24",
+  "lang": "en",
+  "accent": "#6366f1",
+  "video": "videos/fast-forward-demo.webm",
+  "poster": "videos/fast-forward-demo-step-1.webp",
+  "page": "fast-forward-demo/",
+  "steps": [
+    {
+      "num": 1,
+      "title": "Generate the quarterly report",
+      "text": "Generate the quarterly report",
+      "image": "videos/fast-forward-demo-step-1.webp"
+    },
+    {
+      "num": 2,
+      "title": "Export it as a PDF",
+      "text": "Export it as a PDF",
+      "image": "videos/fast-forward-demo-step-2.webp"
+    },
+    {
+      "num": 3,
+      "title": "The PDF is ready",
+      "text": "The PDF is ready",
+      "image": "videos/fast-forward-demo-step-3.webp"
+    }
+  ]
+}

@@ -1,6 +1,11 @@
 {
   "tutorials": [
     {
+      "id": "fast-forward-demo",
+      "title": "Skipping the waits",
+      "duration": "0:24"
+    },
+    {
       "id": "mobile-split-demo",
       "title": "Mobile split demo",
       "duration": "0:17"
@@ -48,7 +53,7 @@
     {
       "id": "zoom-demo",
       "title": "Zooming on what matters",
-      "duration": "0:46"
+      "duration": "0:45"
     }
   ]
 }

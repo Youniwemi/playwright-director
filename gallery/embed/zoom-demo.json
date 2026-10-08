@@ -2,7 +2,7 @@
   "id": "zoom-demo",
   "title": "Zooming on what matters",
   "description": "Point the camera at what matters. zoom() pushes in on any element — a badge, a card, a whole panel — with or without blurring the rest.",
-  "duration": "0:46",
+  "duration": "0:45",
   "lang": "en",
   "accent": "#6366f1",
   "video": "videos/zoom-demo.webm",
