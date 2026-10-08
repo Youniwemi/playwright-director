@@ -19,6 +19,7 @@ import { TutorialCursor } from './cursor.js';
 import { TutorialOverlay } from './overlay.js';
 import { TutorialTimeline } from './timeline.js';
 import { TutorialZoom, type ZoomOptions } from './zoom.js';
+import { TutorialFastForward, assertFastForwardSpeed, type FastForwardOptions } from './fast-forward.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -113,11 +114,17 @@ export class Tutorial {
 	private cursor: TutorialCursor;
 	private overlay: TutorialOverlay;
 	private zoomer: TutorialZoom;
+	private fastForwarder: TutorialFastForward;
 	private timeline: TutorialTimeline;
 
 	private pendingItems: PendingItem[] = [];
 	private stepCounter = 0;
 	private videoStartTime = 0;
+	/** True between timeline.start() and the end of complete() — fast-forward needs a running timeline. */
+	private recording = false;
+	/** Epoch ms when the narration clip playing now ends (fast-forward waits for it). */
+	private narrationEndsAt = 0;
+	private fastForwarding = false;
 
 	private scenes: Record<string, SceneOptions>;
 	private activeScenes: string[] = [];
@@ -189,6 +196,7 @@ export class Tutorial {
 		});
 
 		this.zoomer = new TutorialZoom(page);
+		this.fastForwarder = new TutorialFastForward(page);
 
 		this.timeline = new TutorialTimeline(
 			this.testName,
@@ -361,6 +369,7 @@ export class Tutorial {
 		this.cursor.switchPage(page);
 		this.overlay.switchPage(page);
 		this.zoomer.switchPage(page);
+		this.fastForwarder.switchPage(page);
 	}
 
 	/** @deprecated Total steps are now calculated automatically. */
@@ -549,6 +558,48 @@ export class Tutorial {
 		if (!TUTORIAL_MODE) return;
 		const cursor = await this.zoomer.zoomOut();
 		if (cursor) this.cursor.setPosition(cursor.x, cursor.y);
+	}
+
+	/**
+	 * Start a fast-forwarded span: from here until `endFastForward()`, the final
+	 * video plays `speed`× faster (VHS-style badge, scanlines and grain unless
+	 * `vhs: false`). For waits nobody wants to watch — a slow generation, a
+	 * repetitive fill. Call it inside a step's action: a narration clip still
+	 * playing is waited for first, so speech never runs over sped-up video.
+	 * The test itself runs at normal speed. No-op outside tutorial mode.
+	 */
+	async startFastForward(speed: number, options: FastForwardOptions = {}): Promise<void> {
+		assertFastForwardSpeed(speed);
+		if (!TUTORIAL_MODE) return;
+		if (!this.recording) {
+			console.warn('[Tutorial] startFastForward() ignored outside complete() — call it inside a step action');
+			return;
+		}
+		if (this.fastForwarding) await this.endFastForward();
+		const narrationLeft = this.narrationEndsAt - Date.now();
+		if (narrationLeft > 0) await this.page.waitForTimeout(narrationLeft);
+		const vhs = options.vhs ?? true;
+		this.timeline.startFastForward(speed, Date.now(), vhs);
+		this.fastForwarding = true;
+		if (vhs) await this.fastForwarder.show(speed).catch(() => {});
+	}
+
+	/** End the span opened by `startFastForward()`. Safe to call when not fast-forwarding. */
+	async endFastForward(): Promise<void> {
+		if (!TUTORIAL_MODE || !this.fastForwarding) return;
+		this.fastForwarding = false;
+		await this.fastForwarder.hide();
+		this.timeline.endFastForward(Date.now());
+	}
+
+	/** Run `action` fast-forwarded at `speed`× — `startFastForward` + `endFastForward` around it. */
+	async fastForward<T>(speed: number, action: () => Promise<T>, options: FastForwardOptions = {}): Promise<T> {
+		await this.startFastForward(speed, options);
+		try {
+			return await action();
+		} finally {
+			await this.endFastForward();
+		}
 	}
 
 	async moveMouseToElement(locator: Locator): Promise<void> {
@@ -769,6 +820,7 @@ export class Tutorial {
 			// No video or no birthtime on this platform — keep the constructor anchor.
 		}
 		this.timeline.start(videoTrimMs, syncMarker);
+		this.recording = true;
 
 		await this.initialize();
 
@@ -790,6 +842,7 @@ export class Tutorial {
 					const audioFilename = this.voice.getFilename(item.voiceText);
 					const voiceStartTime = Date.now();
 					const duration = await this.voice.startPlayback(item.voiceText);
+					this.narrationEndsAt = voiceStartTime + duration;
 					this.timeline.addStep(0, 'Context', audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
 					const remaining = duration - (Date.now() - voiceStartTime);
 					if (remaining > 0) await this.page.waitForTimeout(remaining);
@@ -825,6 +878,7 @@ export class Tutorial {
 					const audioFilename = this.voice.getFilename(item.voiceText);
 					const voiceStartTime = Date.now();
 					const duration = await this.voice.startPlayback(item.voiceText);
+					this.narrationEndsAt = voiceStartTime + duration;
 					this.timeline.addStep(currentStep, item.title, audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
 
 					const offset = narrationActionOffset(duration, item.voiceText, item.voiceDoText);
@@ -837,6 +891,9 @@ export class Tutorial {
 					await this.page.waitForTimeout(this.options.stepDelay);
 					await item.action();
 				}
+				// A span never outlives its action: the VHS overlay must not reach
+				// the step screenshot, nor the next narration play over sped-up video.
+				await this.endFastForward();
 				await this.page.waitForTimeout(item.delay ?? 300);
 
 				await this.captureStepScreenshot(currentStep);
@@ -849,6 +906,7 @@ export class Tutorial {
 			const audioFilename = this.voice.getFilename(completionMessage);
 			const voiceStartTime = Date.now();
 			const duration = await this.voice.startPlayback(completionMessage);
+			this.narrationEndsAt = voiceStartTime + duration;
 			this.timeline.addStep(this.stepCounter + 1, 'Complete', audioFilename, duration, voiceStartTime, completionMessage, undefined, this.stagedScene);
 			const remaining = duration - (Date.now() - voiceStartTime);
 			if (remaining > 0) await this.page.waitForTimeout(remaining);
@@ -873,6 +931,7 @@ export class Tutorial {
 			mkdirSync(outputDir, { recursive: true });
 		}
 		this.timeline.save(join(outputDir, `${this.testName}_timeline.json`));
+		this.recording = false;
 
 		await this.hideOverlay();
 	}

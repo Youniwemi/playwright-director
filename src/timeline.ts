@@ -2,6 +2,7 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { buildMergeCommand } from './merge.js';
 import { buildTranscriptMarkdown } from './transcript.js';
+import { fastForwardOutputMs, type FastForwardSegment } from './fast-forward.js';
 
 export interface TimelineStep {
 	step: number;
@@ -26,7 +27,13 @@ export interface TimelineData {
 	testFile: string;
 	projectName: string;
 	lang: string;
+	/** Duration of the final video — fast-forwarded spans count at their sped-up length. */
 	totalDurationMs: number;
+	/** Recorded (tape) duration, only present when something was fast-forwarded. */
+	tapeDurationMs?: number;
+	/** Fast-forwarded spans, in order. Step `startMs` values are already in
+	 *  final-video time; these carry tape time too, for ffmpeg's setpts. */
+	fastForward?: FastForwardSegment[];
 	/** Milliseconds to trim from video start (preload time) */
 	videoTrimMs: number;
 	/** True when a full-screen black sync marker was recorded right before
@@ -69,6 +76,8 @@ export class TutorialTimeline {
 	private videoTrimMs: number = 0;
 	private syncMarker: boolean = false;
 	private steps: TimelineStep[] = [];
+	private fastForwards: FastForwardSegment[] = [];
+	private openFastForward: { startMs: number; speed: number; vhs: boolean } | null = null;
 	private videoPath: string = '';
 
 	constructor(
@@ -110,11 +119,49 @@ export class TutorialTimeline {
 		this.videoPath = path;
 	}
 
+	/** Open a fast-forwarded span at `timestamp` (epoch ms). */
+	startFastForward(speed: number, timestamp: number, vhs: boolean = true): void {
+		if (this.openFastForward) this.endFastForward(timestamp);
+		this.openFastForward = { startMs: timestamp - this.startTime, speed, vhs };
+	}
+
+	/** Close the open fast-forwarded span at `timestamp` (epoch ms). No-op when none is open. */
+	endFastForward(timestamp: number): void {
+		const open = this.openFastForward;
+		if (!open) return;
+		this.openFastForward = null;
+		const segment = this.closeFastForward(open, timestamp - this.startTime);
+		if (segment) {
+			this.fastForwards.push(segment);
+			console.log(`[Timeline] Fast-forward ×${segment.speed}: ${segment.startMs}–${segment.endMs}ms tape → ${segment.outputStartMs}–${segment.outputEndMs}ms video`);
+		}
+	}
+
+	private closeFastForward(open: { startMs: number; speed: number; vhs: boolean }, endMs: number): FastForwardSegment | null {
+		if (endMs <= open.startMs) return null;
+		return {
+			startMs: open.startMs,
+			endMs,
+			speed: open.speed,
+			outputStartMs: fastForwardOutputMs(open.startMs, this.fastForwards),
+			outputEndMs: fastForwardOutputMs(endMs, [...this.fastForwards, { ...open, endMs }]),
+			...(open.vhs ? {} : { vhs: false })
+		};
+	}
+
+	/** Spans so far, the open one (if any) closed at `tapeMs`. */
+	private segmentsAt(tapeMs: number): FastForwardSegment[] {
+		const open = this.openFastForward && this.closeFastForward(this.openFastForward, tapeMs);
+		return open ? [...this.fastForwards, open] : this.fastForwards;
+	}
+
 	/**
-	 * Record a step at a specific timestamp (for accurate voice timing)
+	 * Record a step at a specific timestamp (for accurate voice timing).
+	 * `startMs` is stored in final-video time, i.e. after fast-forwards.
 	 */
 	addStep(step: number, title: string, audioFile: string, durationMs: number, timestamp: number, text?: string, key?: string, scene?: string | string[]): void {
-		const startMs = timestamp - this.startTime;
+		const tapeMs = timestamp - this.startTime;
+		const startMs = fastForwardOutputMs(tapeMs, this.segmentsAt(tapeMs));
 		this.steps.push({
 			step,
 			title,
@@ -132,6 +179,8 @@ export class TutorialTimeline {
 	 * Get the timeline data with merge command
 	 */
 	getData(): TimelineData {
+		const tapeDurationMs = Date.now() - this.startTime;
+		const fastForward = this.segmentsAt(tapeDurationMs);
 		const data = {
 			testName: this.testName,
 			testTitle: this.testTitle,
@@ -141,7 +190,9 @@ export class TutorialTimeline {
 			lang: this.lang,
 			feature: this.feature || undefined,
 			variant: this.variant || undefined,
-			totalDurationMs: Date.now() - this.startTime,
+			totalDurationMs: fastForwardOutputMs(tapeDurationMs, fastForward),
+			tapeDurationMs: fastForward.length ? tapeDurationMs : undefined,
+			fastForward: fastForward.length ? fastForward : undefined,
 			videoTrimMs: this.videoTrimMs,
 			syncMarker: this.syncMarker || undefined,
 			steps: this.steps,

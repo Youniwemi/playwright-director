@@ -18,6 +18,8 @@ export { TutorialOverlay } from './overlay.js';
 export { TutorialTimeline } from './timeline.js';
 export { TutorialZoom, zoomScale, zoomFrame, zoomFrames } from './zoom.js';
 export type { ZoomOptions } from './zoom.js';
+export { TutorialFastForward, fastForwardOutputMs, buildFastForwardFilter } from './fast-forward.js';
+export type { FastForwardOptions, FastForwardSegment } from './fast-forward.js';
 
 export { buildTranscriptMarkdown, parseTranscript, applyCorrections, TranscriptCorrections } from './transcript.js';
 export type { TranscriptEntry, ApplyReport, ApplyChange, ApplyProblem, ApplyIO } from './transcript.js';

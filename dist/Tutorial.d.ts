@@ -2,6 +2,7 @@ import type { Page, Locator, FrameLocator } from '@playwright/test';
 import type { TutorialOptions, StepOptions, ContextOptions, SceneFocus, FocusOptions } from './types.js';
 import { TutorialTimeline } from './timeline.js';
 import { type ZoomOptions } from './zoom.js';
+import { type FastForwardOptions } from './fast-forward.js';
 /**
  * When to start a step's action inside its narration clip (option B of
  * docs/narration-action-overlap.md — one merged clip, computed offset).
@@ -22,10 +23,16 @@ export declare class Tutorial {
     private cursor;
     private overlay;
     private zoomer;
+    private fastForwarder;
     private timeline;
     private pendingItems;
     private stepCounter;
     private videoStartTime;
+    /** True between timeline.start() and the end of complete() — fast-forward needs a running timeline. */
+    private recording;
+    /** Epoch ms when the narration clip playing now ends (fast-forward waits for it). */
+    private narrationEndsAt;
+    private fastForwarding;
     private scenes;
     private activeScenes;
     private sceneTransitionMs;
@@ -83,6 +90,19 @@ export declare class Tutorial {
     zoomIn(selector: string | Locator, options?: ZoomOptions): Promise<void>;
     /** Undo `zoomIn()`. Safe to call when not zoomed. */
     zoomOut(): Promise<void>;
+    /**
+     * Start a fast-forwarded span: from here until `endFastForward()`, the final
+     * video plays `speed`× faster (VHS-style badge, scanlines and grain unless
+     * `vhs: false`). For waits nobody wants to watch — a slow generation, a
+     * repetitive fill. Call it inside a step's action: a narration clip still
+     * playing is waited for first, so speech never runs over sped-up video.
+     * The test itself runs at normal speed. No-op outside tutorial mode.
+     */
+    startFastForward(speed: number, options?: FastForwardOptions): Promise<void>;
+    /** End the span opened by `startFastForward()`. Safe to call when not fast-forwarding. */
+    endFastForward(): Promise<void>;
+    /** Run `action` fast-forwarded at `speed`× — `startFastForward` + `endFastForward` around it. */
+    fastForward<T>(speed: number, action: () => Promise<T>, options?: FastForwardOptions): Promise<T>;
     moveMouseToElement(locator: Locator): Promise<void>;
     moveMouse(targetX: number, targetY: number): Promise<void>;
     animateClick(): Promise<void>;

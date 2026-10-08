@@ -141,7 +141,7 @@ export class TutorialZoom {
 
 	private run(args: ZoomRun): Promise<{ x: number; y: number } | null> {
 		return this.page.evaluate(async ({ frames, durationMs, rect, blurPx, direction }) => {
-			const UI_IDS = ['tutorial-overlay', 'tutorial-email-preview', 'tutorial-cursor', 'tutorial-debug-clock'];
+			const UI_IDS = ['tutorial-overlay', 'tutorial-email-preview', 'tutorial-cursor', 'tutorial-debug-clock', 'tutorial-fast-forward'];
 			const html = document.documentElement;
 			const w = window as unknown as { __tutorialZoom?: any };
 			let state = w.__tutorialZoom;

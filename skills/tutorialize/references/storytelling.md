@@ -221,3 +221,27 @@ A zoom is a beat. Let the narration name the thing *while* the camera pushes in 
 ### Secrets stay secret
 
 Passwords, API keys and tokens are typed with `typeBlurred()` — the field is blurred before the first keystroke and stays blurred. Say so in the narration ("type your password — it stays hidden") so the blur reads as intentional, not as a glitch.
+
+## 10. Pacing the Dead Time — Fast-Forward
+
+A real app makes the viewer wait: a report generates for 30 seconds, an import churns, twelve rows get filled one by one. In real time that is where viewers drop off. `fastForward(speed, …)` keeps the wait on screen — so the viewer sees that it happens and roughly how long it takes — but plays it sped up, VHS-style.
+
+### When to fast-forward
+
+- **A wait the viewer must know about but needn't sit through:** a generation, a sync, an upload. Seeing the progress bar race tells them "this takes a while, it's normal".
+- **Repetition after the first instance:** show the first row filled at normal speed, fast-forward the eleven others.
+
+### When not to
+
+- **The payoff.** End the span before the result appears — the viewer must see the report land at 1×.
+- **Anything the narration explains.** The voice is never sped up; it plays first, then the tape speeds up. Fast-forward the silent part.
+- **Short waits** (under ~3s) — a cut is smoother than a 1-second blur of scanlines.
+
+### Pick the speed
+
+- `4` — the viewer can still follow what changes (rows filling, a log scrolling).
+- `8`–`16` — pure dead time: a progress bar, a spinner.
+
+### Say it
+
+Announce the skip in the step's narration — "this takes a minute — let's skip ahead" — so the speed-up reads as a directing choice, not a glitch.

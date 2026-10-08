@@ -635,3 +635,53 @@ html[data-tutorial-variant='mobile'] .tutorial-progress {
 .tutorial-stage[data-layout='split'] .tutorial-scene[data-active='false'] .tutorial-scene-label {
 	opacity: var(--tutorial-scene-inactive-opacity);
 }
+
+/* ── Fast-forward (VHS look) ────────────────────────────────
+   Shown by startFastForward() for the span ffmpeg speeds up. Recorded at real
+   speed, so --tutorial-ff-roll is already scaled by the speed. */
+
+#tutorial-fast-forward {
+	position: fixed;
+	inset: 0;
+	z-index: 2147483646;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.tutorial-ff-scanlines {
+	position: absolute;
+	inset: 0;
+	background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px 3px);
+}
+
+.tutorial-ff-tracking {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 7%;
+	top: -10%;
+	background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.16) 40%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0.16) 60%, transparent);
+	mix-blend-mode: screen;
+	animation: tutorial-ff-roll var(--tutorial-ff-roll, 2.4s) linear infinite;
+}
+
+@keyframes tutorial-ff-roll {
+	to { top: 110%; }
+}
+
+.tutorial-ff-osd {
+	position: absolute;
+	left: var(--tutorial-ff-osd-left, 32px);
+	bottom: var(--tutorial-ff-osd-bottom, 28px);
+	font: 700 var(--tutorial-ff-osd-size, 44px)/1 'VCR OSD Mono', 'Courier New', ui-monospace, monospace;
+	letter-spacing: 0.06em;
+	color: #fff;
+	background: var(--tutorial-ff-osd-bg, rgba(0, 0, 0, 0.55));
+	padding: 8px 14px 6px;
+	border-radius: 6px;
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.75), -1px 0 rgba(255, 0, 80, 0.6), 1px 0 rgba(0, 200, 255, 0.6);
+}
+
+.tutorial-ff-arrows {
+	margin-right: 0.3em;
+}

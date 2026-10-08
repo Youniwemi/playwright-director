@@ -131,6 +131,8 @@ Use these inside step actions instead of raw Playwright calls — they add curso
 | `tutorial.unhighlight(locator)` | — | Remove highlight |
 | `tutorial.zoom(locator, options?)` | — | Camera zoom on the element (button, field, whole card), hold `duration` (1500ms), zoom back out. Options: `scale` (auto: fit ~70% of viewport, max 2.5×), `blur` (`true` = 4px, or px), `transition` (600ms per direction) |
 | `tutorial.zoomIn(locator, options?)` / `tutorial.zoomOut()` | — | Zoom in and stay zoomed — `tutorial.click()` etc. work in the zoomed view — then zoom out. Keep the pair inside one step |
+| `tutorial.fastForward(speed, action, options?)` | — | Run `action` with the final video playing `speed`× faster (VHS look). Returns the action's result. Options: `vhs` (default `true`). See §14 |
+| `tutorial.startFastForward(speed, options?)` / `tutorial.endFastForward()` | — | Explicit start / end markers of a fast-forwarded span. Keep the pair inside one step |
 | `tutorial.moveMouseToElement(locator)` | — | Animate cursor to element |
 | `tutorial.showEmailPreview(options)` | — | Simulated email popup |
 | `tutorial.switchPage(page)` | — | Switch recording to another tab |
@@ -305,7 +307,7 @@ Never override `--reporter` on the CLI — it disables the merge step.
 ```
 tutorials/
 ├── output/
-│   └── {name}_timeline.json      # Timing + ffmpeg command
+│   └── {name}_timeline.json      # Timing (+ fast-forward spans) + ffmpeg command
 ├── transcripts/
 │   └── {name}.md                 # Auto-generated transcript (editable — see below)
 └── videos/
@@ -507,7 +509,47 @@ tutorial.step('Turn on reminders', async () => {
 - Pure decoration: no-op without `TUTORIAL_MODE`, not recorded in the timeline, safe in plain E2E runs.
 - Don't zoom on every step — 1 to 3 zooms per tutorial, on the moments the viewer must not miss (see `storytelling.md` §9).
 
-## 14. Checklist
+## 14. Fast-forward
+
+For a stretch nobody wants to watch in real time — a slow generation, an import, a repetitive fill — mark it with start/end markers: ffmpeg plays it `speed`× faster in the final video, VHS-style (`▶▶ ×N` badge, scanlines, rolling tracking band, tape grain, chroma shift). The test still runs at normal speed.
+
+```typescript
+tutorial.step('Generate the quarterly report', async () => {
+  await tutorial.click(page.locator('#generate'));
+  await tutorial.fastForward(8, async () => {
+    await expect(page.locator('#report')).toBeVisible({ timeout: 60_000 });
+  });
+}, { explain: 'It takes a while — we skip ahead.' });
+
+// Explicit markers
+tutorial.step('Fill the twelve rows', async () => {
+  await tutorial.startFastForward(4, { vhs: false });   // plain speed-up, no VHS look
+  for (const row of rows) await tutorial.fill(page.locator(`#amount-${row.id}`), row.amount);
+  await tutorial.endFastForward();
+});
+```
+
+| Argument / option | Default | Effect |
+|---|---|---|
+| `speed` | — (required, `> 1`) | Playback speed of the span in the final video |
+| `vhs` | `true` | VHS look; `false` = plain speed-up |
+
+### Timing
+
+- Any number of spans per video, each with its own speed.
+- A span of `L` ms at speed `S` lasts `L / S` ms on video. Final length = `tape − Σ L × (1 − 1/S)` — predictable to a few ms.
+- Timeline JSON: `totalDurationMs` = final length, `tapeDurationMs` = recorded length, `fastForward[]` = spans (`startMs`/`endMs` tape time, `outputStartMs`/`outputEndMs` video time, `speed`). Step `startMs` values are already video time, so voice clips, transcripts and the gallery need nothing special.
+- `startFastForward()` first **waits for the step's narration clip to finish** — speech is never sped up and never plays over sped-up video. So the step's narration plays at 1×, then the tape speeds up.
+
+### Rules
+
+- Call it **inside a step's action** — outside `complete()` it warns and does nothing.
+- Keep the span inside its step; one left open is closed when the step's action returns (before the step screenshot).
+- Say it in the narration ("this takes a moment — let's skip ahead") so the speed-up reads as intentional.
+- Fast-forward the wait, not the payoff: end the span before the result the viewer must see.
+- No-op without `TUTORIAL_MODE` — `fastForward()` just runs the action; a speed `≤ 1` throws in both modes.
+
+## 15. Checklist
 
 Before submitting a tutorialized test:
 
@@ -525,6 +567,7 @@ Before submitting a tutorialized test:
 - [ ] Video watched — does it feel human?
 - [ ] Zooms (if any) land on what the narration names, ≤ 3 per tutorial, each `zoomIn` paired with a `zoomOut` in the same step
 - [ ] Secrets (passwords, API keys) typed with `typeBlurred`, never `fill`/`typeSlowly`
+- [ ] Long waits / repetitive chores wrapped in `fastForward(speed, …)` inside their step, and the narration announces the skip
 
 Multi-scene tutorials, additionally:
 

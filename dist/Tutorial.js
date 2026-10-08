@@ -8,6 +8,7 @@ import { TutorialCursor } from './cursor.js';
 import { TutorialOverlay } from './overlay.js';
 import { TutorialTimeline } from './timeline.js';
 import { TutorialZoom } from './zoom.js';
+import { TutorialFastForward, assertFastForwardSpeed } from './fast-forward.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TUTORIAL_MODE = process.env.TUTORIAL_MODE === 'true';
@@ -60,10 +61,16 @@ export class Tutorial {
     cursor;
     overlay;
     zoomer;
+    fastForwarder;
     timeline;
     pendingItems = [];
     stepCounter = 0;
     videoStartTime = 0;
+    /** True between timeline.start() and the end of complete() — fast-forward needs a running timeline. */
+    recording = false;
+    /** Epoch ms when the narration clip playing now ends (fast-forward waits for it). */
+    narrationEndsAt = 0;
+    fastForwarding = false;
     scenes;
     activeScenes = [];
     sceneTransitionMs;
@@ -126,6 +133,7 @@ export class Tutorial {
             position: this.options.overlayPosition ?? 'TR'
         });
         this.zoomer = new TutorialZoom(page);
+        this.fastForwarder = new TutorialFastForward(page);
         this.timeline = new TutorialTimeline(this.testName, this.options.testFile, this.options.projectName, this.options.lang, options.testTitle ?? '', options.feature ?? '', {
             musicFile: this.options.backgroundMusic?.startsWith('http')
                 ? 'static/audio/tutorial-background.mp3'
@@ -263,6 +271,7 @@ export class Tutorial {
         this.cursor.switchPage(page);
         this.overlay.switchPage(page);
         this.zoomer.switchPage(page);
+        this.fastForwarder.switchPage(page);
     }
     /** @deprecated Total steps are now calculated automatically. */
     setTotalSteps(total) {
@@ -445,6 +454,51 @@ export class Tutorial {
         const cursor = await this.zoomer.zoomOut();
         if (cursor)
             this.cursor.setPosition(cursor.x, cursor.y);
+    }
+    /**
+     * Start a fast-forwarded span: from here until `endFastForward()`, the final
+     * video plays `speed`× faster (VHS-style badge, scanlines and grain unless
+     * `vhs: false`). For waits nobody wants to watch — a slow generation, a
+     * repetitive fill. Call it inside a step's action: a narration clip still
+     * playing is waited for first, so speech never runs over sped-up video.
+     * The test itself runs at normal speed. No-op outside tutorial mode.
+     */
+    async startFastForward(speed, options = {}) {
+        assertFastForwardSpeed(speed);
+        if (!TUTORIAL_MODE)
+            return;
+        if (!this.recording) {
+            console.warn('[Tutorial] startFastForward() ignored outside complete() — call it inside a step action');
+            return;
+        }
+        if (this.fastForwarding)
+            await this.endFastForward();
+        const narrationLeft = this.narrationEndsAt - Date.now();
+        if (narrationLeft > 0)
+            await this.page.waitForTimeout(narrationLeft);
+        const vhs = options.vhs ?? true;
+        this.timeline.startFastForward(speed, Date.now(), vhs);
+        this.fastForwarding = true;
+        if (vhs)
+            await this.fastForwarder.show(speed).catch(() => { });
+    }
+    /** End the span opened by `startFastForward()`. Safe to call when not fast-forwarding. */
+    async endFastForward() {
+        if (!TUTORIAL_MODE || !this.fastForwarding)
+            return;
+        this.fastForwarding = false;
+        await this.fastForwarder.hide();
+        this.timeline.endFastForward(Date.now());
+    }
+    /** Run `action` fast-forwarded at `speed`× — `startFastForward` + `endFastForward` around it. */
+    async fastForward(speed, action, options = {}) {
+        await this.startFastForward(speed, options);
+        try {
+            return await action();
+        }
+        finally {
+            await this.endFastForward();
+        }
     }
     async moveMouseToElement(locator) {
         if (!TUTORIAL_MODE)
@@ -651,6 +705,7 @@ export class Tutorial {
             // No video or no birthtime on this platform — keep the constructor anchor.
         }
         this.timeline.start(videoTrimMs, syncMarker);
+        this.recording = true;
         await this.initialize();
         this.overlay.setTotalSteps(this.stepCounter);
         let currentStep = 0;
@@ -665,6 +720,7 @@ export class Tutorial {
                     const audioFilename = this.voice.getFilename(item.voiceText);
                     const voiceStartTime = Date.now();
                     const duration = await this.voice.startPlayback(item.voiceText);
+                    this.narrationEndsAt = voiceStartTime + duration;
                     this.timeline.addStep(0, 'Context', audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
                     const remaining = duration - (Date.now() - voiceStartTime);
                     if (remaining > 0)
@@ -697,6 +753,7 @@ export class Tutorial {
                     const audioFilename = this.voice.getFilename(item.voiceText);
                     const voiceStartTime = Date.now();
                     const duration = await this.voice.startPlayback(item.voiceText);
+                    this.narrationEndsAt = voiceStartTime + duration;
                     this.timeline.addStep(currentStep, item.title, audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
                     const offset = narrationActionOffset(duration, item.voiceText, item.voiceDoText);
                     if (offset > 0)
@@ -711,6 +768,9 @@ export class Tutorial {
                     await this.page.waitForTimeout(this.options.stepDelay);
                     await item.action();
                 }
+                // A span never outlives its action: the VHS overlay must not reach
+                // the step screenshot, nor the next narration play over sped-up video.
+                await this.endFastForward();
                 await this.page.waitForTimeout(item.delay ?? 300);
                 await this.captureStepScreenshot(currentStep);
             }
@@ -720,6 +780,7 @@ export class Tutorial {
             const audioFilename = this.voice.getFilename(completionMessage);
             const voiceStartTime = Date.now();
             const duration = await this.voice.startPlayback(completionMessage);
+            this.narrationEndsAt = voiceStartTime + duration;
             this.timeline.addStep(this.stepCounter + 1, 'Complete', audioFilename, duration, voiceStartTime, completionMessage, undefined, this.stagedScene);
             const remaining = duration - (Date.now() - voiceStartTime);
             if (remaining > 0)
@@ -742,6 +803,7 @@ export class Tutorial {
             mkdirSync(outputDir, { recursive: true });
         }
         this.timeline.save(join(outputDir, `${this.testName}_timeline.json`));
+        this.recording = false;
         await this.hideOverlay();
     }
     getTimeline() {
