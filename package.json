@@ -1,6 +1,6 @@
 {
   "name": "playwright-director",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "AI-assisted Playwright tool that turns executable tests into directed video guides — demos, tutorials, and documentation that never lag behind the product.",
   "repository": {
     "type": "git",
