@@ -33,7 +33,12 @@ export interface SiteConfig {
 export interface ManifestStep {
 	/** Timeline step number; absent for mid-flow context narrations */
 	n?: number;
+	/** Start time in the final video, seconds; absent for screenshot-only steps */
+	at?: number;
+	/** Human heading — the narration's first sentence when the step was never translated */
 	title?: string;
+	/** i18n key the step was declared with */
+	key?: string;
 	/** Narration text spoken during this step */
 	text?: string;
 	/** Screenshot filename relative to videos/ */
@@ -47,9 +52,15 @@ export interface VideoManifestEntry {
 	category: string;
 	title: string;
 	duration: string;
+	/** Final video length in seconds (0 when unknown) */
+	durationSeconds: number;
+	/** Narration language, from the timeline */
+	lang?: string;
 	premium: boolean;
 	/** Filename relative to videos/ */
 	file: string;
+	/** `<id>-poster.*` filename relative to videos/, when recorded */
+	poster?: string;
 	feature?: string;
 	/** Recording variant (e.g. 'mobile'); absent = regular/desktop */
 	variant?: string;

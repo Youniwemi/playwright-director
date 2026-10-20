@@ -50,8 +50,8 @@ describe('buildStepsDetail', () => {
 
 		expect(description).toBe('Bienvenue dans ce tutoriel.');
 		expect(stepsDetail).toEqual([
-			{ n: 1, title: 'Créer un compte', text: 'Cliquez sur inscription. Aucune carte requise.', image: 'demo-step-1.webp' },
-			{ n: 2, title: 'Configurer', text: 'Renseignez vos informations.', image: 'demo-step-2.webp' }
+			{ n: 1, at: 1, title: 'Créer un compte', text: 'Cliquez sur inscription. Aucune carte requise.', image: 'demo-step-1.webp' },
+			{ n: 2, at: 2, title: 'Configurer', text: 'Renseignez vos informations.', image: 'demo-step-2.webp' }
 		]);
 	});
 
@@ -76,7 +76,7 @@ describe('buildStepsDetail', () => {
 		// Step 2 was non-voiced (no timeline entry) — its screenshot still lands
 		// between steps 1 and 3.
 		expect(stepsDetail.map((s) => s.n)).toEqual([1, undefined, 2, 3]);
-		expect(stepsDetail[1]).toEqual({ text: 'Passons à la configuration.', context: true });
+		expect(stepsDetail[1]).toEqual({ at: 0, text: 'Passons à la configuration.', context: true });
 		expect(stepsDetail[2]).toEqual({ n: 2, image: 'demo-step-2.webp' });
 	});
 
@@ -94,6 +94,7 @@ describe('buildStepsDetail', () => {
 
 		expect(stepsDetail[1]).toEqual({
 			n: 2,
+			at: 5,
 			title: 'Étape muette',
 			text: 'Texte affiché sans narration.',
 			image: 'demo-step-2.webp'
@@ -115,6 +116,23 @@ describe('buildStepsDetail', () => {
 		]);
 	});
 
+	it('replaces an untranslated key title with the narration heading, and keeps the key', () => {
+		const t = makeTutorial(
+			[
+				{ ...step(1, 'tg.open', 'Ouvrez Telegram. Le QR code apparaît.'), key: 'tg.open', startMs: 7299 },
+				{ ...step(2, 'Copiez le lien', 'Copiez-le.'), key: 'link.copy' }
+			],
+			[]
+		);
+
+		const { stepsDetail } = buildStepsDetail(t);
+
+		expect(stepsDetail).toEqual([
+			{ n: 1, at: 7.3, title: 'Ouvrez Telegram', key: 'tg.open', text: 'Ouvrez Telegram. Le QR code apparaît.' },
+			{ n: 2, at: 2, title: 'Copiez le lien', key: 'link.copy', text: 'Copiez-le.' }
+		]);
+	});
+
 	it('joins multiple leading contexts into the description', () => {
 		const t = makeTutorial(
 			[context('Première phrase.'), context('Deuxième phrase.'), step(1, 'Go', 'Allons-y.')],
@@ -124,6 +142,6 @@ describe('buildStepsDetail', () => {
 		const { description, stepsDetail } = buildStepsDetail(t);
 
 		expect(description).toBe('Première phrase. Deuxième phrase.');
-		expect(stepsDetail).toEqual([{ n: 1, title: 'Go', text: 'Allons-y.' }]);
+		expect(stepsDetail).toEqual([{ n: 1, at: 1, title: 'Go', text: 'Allons-y.' }]);
 	});
 });

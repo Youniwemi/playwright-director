@@ -784,6 +784,13 @@ narration text paired with its screenshot. Context narrations recorded
 mid-flow appear as callouts between steps, and steps recorded without voice
 still show their text.
 
+Each voiced step also shows its start time (`▶ 0:13`): clicking it seeks the
+video there, and the step that is playing is highlighted (`aria-current="step"`).
+Seeking needs a host that answers HTTP Range requests with `206` — Cloudflare
+Pages, Netlify, GitHub Pages and `playwright-director serve` do. A step
+declared with an untranslated key (`tg.open`) is titled with the first
+sentence of its narration instead.
+
 ![Video page with thumbnail strip and text guide](docs/images/video-page.png)
 
 Two settings control the guide (`tutorials` block of the config):

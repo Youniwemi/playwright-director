@@ -25,11 +25,12 @@ export function buildStepsDetail(t) {
     const leadingContext = [];
     let seenStep = false;
     for (const s of t.timeline.steps) {
+        const at = Math.round(s.startMs / 10) / 100;
         if (s.step === 0 && s.title === 'Context') {
             if (!s.text)
                 continue;
             if (seenStep)
-                stepsDetail.push({ text: s.text, context: true });
+                stepsDetail.push({ at, text: s.text, context: true });
             else
                 leadingContext.push(s.text);
             continue;
@@ -40,7 +41,16 @@ export function buildStepsDetail(t) {
         const image = shotByN.get(s.step);
         if (image !== undefined)
             usedShots.add(s.step);
-        stepsDetail.push({ n: s.step, title: s.title, ...(s.text ? { text: s.text } : {}), ...(image ? { image } : {}) });
+        // An untranslated step (identity translate) has its key as title — show the narration's first sentence instead.
+        const title = s.key && s.title === s.key && s.text ? s.text.split('. ')[0].replace(/\.$/, '') : s.title;
+        stepsDetail.push({
+            n: s.step,
+            at,
+            title,
+            ...(s.key ? { key: s.key } : {}),
+            ...(s.text ? { text: s.text } : {}),
+            ...(image ? { image } : {})
+        });
     }
     for (const shot of t.stepScreenshots) {
         if (usedShots.has(shot.n))
@@ -84,8 +94,11 @@ export function generateManifest(tutorials, config) {
             // fall back to the Playwright test title, then the slug.
             title: t.timeline.title || t.timeline.testTitle || humanize(t.timeline.testName),
             duration: durationSec > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : '',
+            durationSeconds: Math.round(t.timeline.totalDurationMs / 100) / 10,
+            lang: t.timeline.lang,
             premium: false,
             file: t.videoFile,
+            ...(t.poster ? { poster: t.poster } : {}),
             feature: t.timeline.feature,
             variant: t.timeline.variant,
             uploadDate: new Date().toISOString().slice(0, 10),

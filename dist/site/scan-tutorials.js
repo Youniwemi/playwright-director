@@ -39,10 +39,12 @@ export function scanTutorials(inputDir, outputDir = join(inputDir, 'output'), vi
             // No timeline to read the variant from — recognize the common suffixes.
             variant: baseName.match(/-(mobile|tablet)$/)?.[1]
         };
+        const posterPattern = new RegExp(`^${escapeRegex(baseName)}-poster\\.(png|jpe?g|webp|avif)$`);
         results.push({
             timeline: syntheticTimeline,
             videoFile: videoFileName,
-            stepScreenshots: steps.sort((a, b) => a.n - b.n)
+            stepScreenshots: steps.sort((a, b) => a.n - b.n),
+            poster: allVideoDirFiles.find((f) => posterPattern.test(f))
         });
     }
     return results;

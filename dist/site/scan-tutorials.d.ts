@@ -7,6 +7,8 @@ export interface ScannedTutorial {
         n: number;
         file: string;
     }[];
+    /** `<name>-poster.*` filename, when the recording wrote one */
+    poster?: string;
 }
 /** Timelines default to `<input>/output`, videos to `<input>/videos`. */
 export declare function scanTutorials(inputDir: string, outputDir?: string, videosDir?: string): ScannedTutorial[];

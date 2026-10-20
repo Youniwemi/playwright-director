@@ -19,15 +19,16 @@ const layout = (siteConfig as any).stepsLayout || 'text';
 // The thumbnail strip is independent of the guide layout (SiteConfig.tutorials.showStrip)
 const showStrip = (siteConfig as any).showStrip !== false;
 
-type Step = { n?: number; title?: string; text?: string; image?: string; context?: boolean };
+type Step = { n?: number; at?: number; title?: string; text?: string; image?: string; context?: boolean };
 const stepsDetail: Step[] = video.stepsDetail ?? [];
 
 // Sequential display numbers for numbered entries (contexts don't count)
 let counter = 0;
 const numbered = stepsDetail.map((s) => ({ ...s, num: s.context ? undefined : ++counter }));
 const shots = numbered.filter((s) => s.image);
+const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
 
-const poster = shots[0]?.image;
+const poster = video.poster ?? shots[0]?.image;
 const prev = index > 0 ? allVideos[index - 1] : null;
 const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 ---
@@ -37,7 +38,7 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 		<a href={`${base}/`} class="back-link">← All tutorials</a>
 
 		<div class="video-player-wrap">
-			<video controls class="video-player" poster={poster ? `${base}/videos/${poster}` : undefined}>
+			<video controls class="video-player" id="tutorial-video" poster={poster ? `${base}/videos/${poster}` : undefined}>
 				<source src={`${base}/videos/${video.file}`} type="video/webm" />
 			</video>
 		</div>
@@ -76,13 +77,14 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 					s.context ? (
 						<p class="step-context">{s.text}</p>
 					) : (
-						<div class="step-block">
+						<div class="step-block" data-at={s.at}>
 							<div class="step-header">
 								<span class="step-number">{s.num}</span>
 								<div class="step-copy">
 									{s.title && <h2 class="step-title">{s.title}</h2>}
 									{s.text && <p class="step-text">{s.text}</p>}
 								</div>
+								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
 							</div>
 							{s.image && (
 								<img
@@ -104,12 +106,13 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 					s.context ? (
 						<p class="step-context">{s.text}</p>
 					) : (
-						<div class="step-card">
+						<div class="step-card" data-at={s.at}>
 							<span class="step-number">{s.num}</span>
 							<div class="step-copy">
 								{s.title && <h2 class="step-title">{s.title}</h2>}
 								{s.text && <p class="step-text">{s.text}</p>}
 							</div>
+							{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
 							{s.image && (
 								<button
 									class="step-thumb"
@@ -135,15 +138,18 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 					s.context ? (
 						<p class="step-context">{s.text}</p>
 					) : (
-						<div class:list={['step-row', { 'has-shot': !!s.image }]}>
-							<button class="step-row-head" aria-expanded="false" disabled={!s.image}>
-								<span class="step-number">{s.num}</span>
-								<span class="step-copy">
-									{s.title && <span class="step-title">{s.title}</span>}
-									{s.text && <span class="step-text">{s.text}</span>}
-								</span>
-								{s.image && <span class="step-chevron">▾</span>}
-							</button>
+						<div class:list={['step-row', { 'has-shot': !!s.image }]} data-at={s.at}>
+							<div class="step-row-top">
+								<button class="step-row-head" aria-expanded="false" disabled={!s.image}>
+									<span class="step-number">{s.num}</span>
+									<span class="step-copy">
+										{s.title && <span class="step-title">{s.title}</span>}
+										{s.text && <span class="step-text">{s.text}</span>}
+									</span>
+									{s.image && <span class="step-chevron">▾</span>}
+								</button>
+								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
+							</div>
 							{s.image && (
 								<div class="step-reveal">
 									<img src={`${base}/videos/${s.image}`} alt={s.title || `Step ${s.num}`} loading="lazy" />
@@ -223,6 +229,28 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 		lightbox.addEventListener('click', close);
 		document.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape' && !lightbox.hidden) close();
+		});
+	}
+
+	// Chapters: a step's time button seeks the video (the host must answer HTTP
+	// Range requests); while playing, the current step gets aria-current.
+	const player = document.getElementById('tutorial-video') as HTMLVideoElement | null;
+	const chapters = [...document.querySelectorAll<HTMLElement>('[data-at].step-block, [data-at].step-card, [data-at].step-row')];
+	if (player) {
+		document.querySelectorAll<HTMLElement>('.step-time').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				player.currentTime = Number(btn.dataset.at);
+				player.play().catch(() => {});
+				player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			});
+		});
+		let current: HTMLElement | undefined;
+		player.addEventListener('timeupdate', () => {
+			const now = chapters.filter((c) => Number(c.dataset.at) <= player.currentTime + 0.25).pop();
+			if (now === current) return;
+			current?.removeAttribute('aria-current');
+			now?.setAttribute('aria-current', 'step');
+			current = now;
 		});
 	}
 
@@ -338,6 +366,43 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 		line-height: 1.6;
 		margin: 0;
 		font-size: 0.95rem;
+	}
+
+	.step-time {
+		flex-shrink: 0;
+		align-self: center;
+		min-height: 44px;
+		min-width: 44px;
+		padding: 0 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		background: var(--color-bg-card);
+		color: var(--color-primary);
+		font: inherit;
+		font-size: 0.85rem;
+		font-variant-numeric: tabular-nums;
+		cursor: pointer;
+	}
+
+	.step-time:hover {
+		border-color: var(--color-primary);
+	}
+
+	[aria-current='step'] {
+		border-color: var(--color-primary) !important;
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 25%, transparent);
+	}
+
+	.step-block[aria-current='step'] .step-number,
+	.step-row[aria-current='step'] .step-number,
+	.step-card[aria-current='step'] .step-number {
+		outline: 3px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+	}
+
+	.step-row-top {
+		display: flex;
+		align-items: center;
+		padding-inline-end: 1rem;
 	}
 
 	.step-context {

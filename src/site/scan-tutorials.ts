@@ -7,6 +7,8 @@ export interface ScannedTutorial {
 	videoFile: string;
 	/** Screenshot filenames with their step number, sorted by step number */
 	stepScreenshots: { n: number; file: string }[];
+	/** `<name>-poster.*` filename, when the recording wrote one */
+	poster?: string;
 }
 
 /** Timelines default to `<input>/output`, videos to `<input>/videos`. */
@@ -57,10 +59,12 @@ export function scanTutorials(
 			variant: baseName.match(/-(mobile|tablet)$/)?.[1]
 		};
 
+		const posterPattern = new RegExp(`^${escapeRegex(baseName)}-poster\\.(png|jpe?g|webp|avif)$`);
 		results.push({
 			timeline: syntheticTimeline,
 			videoFile: videoFileName,
-			stepScreenshots: steps.sort((a, b) => a.n - b.n)
+			stepScreenshots: steps.sort((a, b) => a.n - b.n),
+			poster: allVideoDirFiles.find((f) => posterPattern.test(f))
 		});
 	}
 
