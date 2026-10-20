@@ -107,6 +107,16 @@ export function generateManifest(tutorials, config) {
             stepsDetail: stepsDetail.length > 0 ? stepsDetail : undefined
         };
     });
+    // Group the languages of one tutorial: `look`, `look.en`, `look.ar` share the slug `look`.
+    const langsBySlug = new Map();
+    for (const v of videos) {
+        const lang = v.lang ?? '';
+        v.slug = lang && v.id.endsWith(`.${lang}`) ? v.id.slice(0, -lang.length - 1) : v.id;
+        if (lang)
+            (langsBySlug.get(v.slug) ?? langsBySlug.set(v.slug, new Set()).get(v.slug)).add(lang);
+    }
+    for (const v of videos)
+        v.langs = [...(langsBySlug.get(v.slug) ?? [])].sort();
     return {
         categories,
         videos,

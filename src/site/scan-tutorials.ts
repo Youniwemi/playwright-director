@@ -44,19 +44,20 @@ export function scanTutorials(
 			if (m) steps.push({ n: parseInt(m[1], 10), file });
 		}
 
+		// No timeline to read from — recognize the `.<lang>` and `-mobile`/`-tablet` suffixes.
+		const langSuffix = baseName.match(/\.([a-z]{2,3})$/)?.[1];
 		const syntheticTimeline: TimelineData = timeline ?? {
 			testName: baseName,
 			testTitle: baseName,
 			testFile: '',
 			projectName: '',
-			lang: 'fr',
+			lang: langSuffix ?? 'fr',
 			totalDurationMs: 0,
 			videoTrimMs: 0,
 			steps: [],
 			videoPath: '',
 			mergeCommand: '',
-			// No timeline to read the variant from — recognize the common suffixes.
-			variant: baseName.match(/-(mobile|tablet)$/)?.[1]
+			variant: baseName.replace(/\.[a-z]{2,3}$/, '').match(/-(mobile|tablet)$/)?.[1]
 		};
 
 		const posterPattern = new RegExp(`^${escapeRegex(baseName)}-poster\\.(png|jpe?g|webp|avif)$`);

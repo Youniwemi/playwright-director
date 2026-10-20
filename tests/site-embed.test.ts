@@ -87,9 +87,12 @@ describe('buildEmbedFiles', () => {
 		expect(files.map((f) => f.path)).toEqual([
 			'embed/create-account.json',
 			'embed/create-account-mobile.json',
+			'embed/create-account.fr.json',
+			'embed/create-account-mobile.fr.json',
 			'embed/index.json'
 		]);
-		const index = files[2].data as { tutorials: { id: string; variant?: string }[] };
+		const index = files[4].data as { defaultLang: string; tutorials: { id: string; variant?: string }[] };
+		expect(index.defaultLang).toBe('fr');
 		expect(index.tutorials).toEqual([
 			{ id: 'create-account', title: 'Créer un compte', duration: '1:24', durationSeconds: 84, lang: 'fr' },
 			{ id: 'create-account-mobile', title: 'Créer un compte', duration: '1:24', durationSeconds: 84, lang: 'fr', variant: 'mobile' }

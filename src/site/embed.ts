@@ -32,6 +32,10 @@ export interface EmbedTutorial {
 	durationSeconds: number;
 	variant?: string;
 	lang: string;
+	/** id without its `.<lang>` suffix */
+	slug?: string;
+	/** Every language this tutorial was recorded in */
+	langs?: string[];
 	/** Site primary color — the widget's default accent */
 	accent: string;
 	/** Base-relative video path ("videos/<file>") */
@@ -45,15 +49,19 @@ export interface EmbedTutorial {
 
 export interface EmbedIndexEntry {
 	id: string;
+	slug?: string;
 	title: string;
 	duration: string;
 	durationSeconds: number;
 	lang: string;
+	langs?: string[];
 	variant?: string;
 }
 
 export interface EmbedIndex {
 	schemaVersion: number;
+	/** Site default language — embed/<slug>.json holds it */
+	defaultLang?: string;
 	tutorials: EmbedIndexEntry[];
 }
 
@@ -82,7 +90,9 @@ export function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig
 		duration: video.duration,
 		durationSeconds: video.durationSeconds ?? 0,
 		...(video.variant ? { variant: video.variant } : {}),
+		...(video.slug ? { slug: video.slug } : {}),
 		lang: video.lang || siteLang(config),
+		...(video.langs?.length ? { langs: video.langs } : {}),
 		accent: config.primaryColor || '#6366f1',
 		video: `videos/${video.file}`,
 		...(poster ? { poster: `videos/${poster}` } : {}),
@@ -95,23 +105,44 @@ export function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig
  *  index (slug discovery). Paths are relative to the site root — scaffold
  *  writes them under public/. */
 export function buildEmbedFiles(manifest: VideoManifest, config: SiteConfig): { path: string; data: EmbedTutorial | EmbedIndex }[] {
-	const files: { path: string; data: EmbedTutorial | EmbedIndex }[] = manifest.videos.map((v) => ({
-		path: `embed/${v.id}.json`,
-		data: buildEmbedTutorial(v, config)
-	}));
+	const defaultLang = siteLang(config);
+	const files = new Map<string, EmbedTutorial | EmbedIndex>();
+	for (const v of manifest.videos) files.set(`embed/${v.id}.json`, buildEmbedTutorial(v, config));
+
+	// Per-language aliases: embed/<slug>.<lang>.json for every recorded language,
+	// and embed/<slug>.json = the default language (else the first one recorded).
+	const bySlug = new Map<string, VideoManifestEntry[]>();
+	for (const v of manifest.videos) {
+		const slug = v.slug ?? v.id;
+		bySlug.set(slug, [...(bySlug.get(slug) ?? []), v]);
+	}
+	const primary: VideoManifestEntry[] = [];
+	for (const [slug, group] of bySlug) {
+		const langOf = (v: VideoManifestEntry) => v.lang || defaultLang;
+		for (const v of group) {
+			const path = `embed/${slug}.${langOf(v)}.json`;
+			if (!files.has(path)) files.set(path, buildEmbedTutorial(v, config));
+		}
+		const main = group.find((v) => langOf(v) === defaultLang) ?? group[0];
+		primary.push(main);
+		if (!files.has(`embed/${slug}.json`)) files.set(`embed/${slug}.json`, buildEmbedTutorial(main, config));
+	}
 
 	const index: EmbedIndex = {
 		schemaVersion: EMBED_SCHEMA_VERSION,
-		tutorials: manifest.videos.map((v) => ({
+		defaultLang,
+		tutorials: primary.map((v) => ({
 			id: v.id,
+			...(v.slug ? { slug: v.slug } : {}),
 			title: v.title,
 			duration: v.duration,
 			durationSeconds: v.durationSeconds ?? 0,
-			lang: v.lang || siteLang(config),
+			lang: v.lang || defaultLang,
+			...(v.langs?.length ? { langs: v.langs } : {}),
 			...(v.variant ? { variant: v.variant } : {})
 		}))
 	};
-	files.push({ path: 'embed/index.json', data: index });
+	files.set('embed/index.json', index);
 
-	return files;
+	return [...files].map(([path, data]) => ({ path, data }));
 }

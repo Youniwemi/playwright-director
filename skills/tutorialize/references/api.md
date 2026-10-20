@@ -25,7 +25,7 @@ Or use a fixture that wraps this (the consuming project typically provides a `tu
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `title` | `string` | *required* | Overlay title |
-| `lang` | `string` | `'en'` | Language for TTS and UI |
+| `lang` | `string` | `'en'` (`env TUTORIAL_LANG` wins) | Narration + TTS language. `TUTORIAL_LANG=xx` records one spec per language: outputs get `.<lang>`; read `tutorial.lang` to drive the app UI (`?lang=`) |
 | `translate` | `(key: string) => string` | identity | i18n function — pass your `t()` |
 | `audioBaseUrl` | `string` | `'http://localhost:5173'` | Base URL for audio files |
 | `testTitle` | `string` | auto | Raw test title (for reporter matching) |

@@ -5,13 +5,13 @@ import siteConfig from '../data/site-config.json';
 
 export function getStaticPaths() {
 	const all = (tutorials as any).videos;
-	return all.map((v: any, i: number) => ({
+	return all.map((v: any) => ({
 		params: { slug: v.id },
-		props: { video: v, index: i, allVideos: all },
+		props: { video: v, allVideos: all },
 	}));
 }
 
-const { video, index, allVideos } = Astro.props as any;
+const { video, allVideos } = Astro.props as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // 'text' | 'cards' | 'full' | 'none' — see SiteConfig.tutorials.stepsLayout
@@ -29,13 +29,28 @@ const shots = numbered.filter((s) => s.image);
 const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
 
 const poster = video.poster ?? shots[0]?.image;
-const prev = index > 0 ? allVideos[index - 1] : null;
-const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
+// Prev/next stay in this page's language; the switcher lists the same tutorial in the other languages.
+const sameLang = allVideos.filter((v: any) => (v.lang ?? '') === (video.lang ?? ''));
+const at = sameLang.findIndex((v: any) => v.id === video.id);
+const prev = at > 0 ? sameLang[at - 1] : null;
+const next = at < sameLang.length - 1 ? sameLang[at + 1] : null;
+const LANG_NAMES: Record<string, string> = { fr: 'Français', en: 'English', ar: 'العربية', es: 'Español', de: 'Deutsch' };
+const translations = allVideos
+	.filter((v: any) => (v.slug ?? v.id) === (video.slug ?? video.id) && (v.variant ?? '') === (video.variant ?? ''))
+	.sort((a: any, b: any) => String(a.lang).localeCompare(String(b.lang)));
 ---
 
-<Base title={video.title}>
+<Base title={video.title} lang={video.lang}>
 	<div class="video-page">
 		<a href={`${base}/`} class="back-link">← All tutorials</a>
+
+		{translations.length > 1 && (
+			<nav class="lang-switch" aria-label="Language">
+				{translations.map((v: any) => (
+					<a href={`${base}/${v.id}/`} lang={v.lang} hreflang={v.lang} aria-current={v.id === video.id ? 'page' : undefined}>{LANG_NAMES[v.lang] ?? v.lang}</a>
+				))}
+			</nav>
+		)}
 
 		<div class="video-player-wrap">
 			<video controls class="video-player" id="tutorial-video" poster={poster ? `${base}/videos/${poster}` : undefined}>
@@ -277,6 +292,31 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 		text-decoration: none;
 		font-size: 0.9rem;
 		transition: color 0.2s;
+	}
+
+	.lang-switch {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		float: inline-end;
+	}
+
+	.lang-switch a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 0.9rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		color: var(--color-text-muted);
+		text-decoration: none;
+		font-size: 0.9rem;
+	}
+
+	.lang-switch a[aria-current='page'] {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: #fff;
 	}
 
 	.back-link:hover {
@@ -731,7 +771,7 @@ const next = index < allVideos.length - 1 ? allVideos[index + 1] : null;
 	}
 
 	.nav-next {
-		text-align: right;
+		text-align: end;
 	}
 
 	.nav-link {

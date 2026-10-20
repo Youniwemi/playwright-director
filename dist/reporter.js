@@ -139,6 +139,7 @@ class TutorialMergeReporter {
         // TUTORIAL_VARIANT (older JSONs without the field count as no-variant),
         // and break remaining ties by most recent mtime.
         const runVariant = process.env.TUTORIAL_VARIANT || undefined;
+        const runLang = process.env.TUTORIAL_LANG || undefined;
         const candidates = [];
         for (const entry of readdirSync(OUTPUT_DIR)) {
             if (!entry.endsWith('_timeline.json'))
@@ -149,6 +150,8 @@ class TutorialMergeReporter {
                 if (data.testTitle !== testTitle)
                     continue;
                 if ((data.variant || undefined) !== runVariant)
+                    continue;
+                if (runLang && data.lang !== runLang)
                     continue;
                 candidates.push({ path, mtimeMs: statSync(path).mtimeMs });
             }

@@ -158,6 +158,7 @@ class TutorialMergeReporter implements Reporter {
 		// TUTORIAL_VARIANT (older JSONs without the field count as no-variant),
 		// and break remaining ties by most recent mtime.
 		const runVariant = process.env.TUTORIAL_VARIANT || undefined;
+		const runLang = process.env.TUTORIAL_LANG || undefined;
 		const candidates: { path: string; mtimeMs: number }[] = [];
 		for (const entry of readdirSync(OUTPUT_DIR)) {
 			if (!entry.endsWith('_timeline.json')) continue;
@@ -166,6 +167,7 @@ class TutorialMergeReporter implements Reporter {
 				const data = JSON.parse(readFileSync(path, 'utf-8'));
 				if (data.testTitle !== testTitle) continue;
 				if ((data.variant || undefined) !== runVariant) continue;
+				if (runLang && data.lang !== runLang) continue;
 				candidates.push({ path, mtimeMs: statSync(path).mtimeMs });
 			} catch {
 				// ignore malformed

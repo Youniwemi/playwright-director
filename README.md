@@ -417,6 +417,33 @@ await tutorial.complete();
   stage, so narration audio loads same-origin. Point `audioBaseUrl` at the app
   serving `static/audio/tutorial-voice/`.
 
+## Languages — one spec, one recording per language
+
+Run the same spec once per language with `TUTORIAL_LANG`. It overrides the
+`lang` option (narration + TTS voice: macOS Thomas / Samantha / Majed, Edge
+Henri / Guy / Hamed, or your `TUTORIAL_TTS_CMD` with `{lang}`) and suffixes
+every output with `.<lang>`. Drive the app UI and your texts from
+`tutorial.lang`:
+
+```typescript
+const tutorial = new Tutorial(page, { title: t('look.title'), testName: 'look', lang: 'fr', translate: t });
+await page.goto(`/properties/1/look?lang=${tutorial.lang}`);  // app UI in the recorded language
+```
+
+```bash
+TUTORIAL_MODE=true npx playwright test tutorial                    # → look.webm (default, lang option)
+TUTORIAL_MODE=true TUTORIAL_LANG=en npx playwright test tutorial   # → look.en.webm
+TUTORIAL_MODE=true TUTORIAL_LANG=ar npx playwright test tutorial   # → look.ar.webm
+```
+
+The gallery groups the recordings by slug (`look`): the home page gets a
+language filter (starting on the site's default `lang`), each video page a
+language switcher, and Arabic/Hebrew/Persian/Urdu pages render right-to-left.
+Embed data: `embed/<slug>.<lang>.json` per language, `embed/<slug>.json` =
+the default language (or the only one recorded), and `index.json` lists each
+slug once with its `langs`. `load(slug, { lang })` falls back to the default
+language when that language was not recorded.
+
 ## Variants — record the same tutorial for mobile
 
 Set `TUTORIAL_VARIANT=mobile` (or pass `variant: 'mobile'`) to record a second,
@@ -521,7 +548,7 @@ import { buildMergeCommand } from 'playwright-director';
 Uses the built-in `say` command. Voices per language:
 - French: Thomas
 - English: Samantha
-- Arabic: Maged
+- Arabic: Majed
 
 ### Edge TTS
 
@@ -563,6 +590,7 @@ run picks the clips up from cache.
 |---|---|---|
 | `TUTORIAL_MODE` | `false` | Enable tutorial video generation |
 | `TUTORIAL_VARIANT` | none | Recording variant — suffixes outputs; `mobile` also compacts the overlay and pins the split |
+| `TUTORIAL_LANG` | none | Recording language — overrides `lang`, suffixes outputs `.<lang>` (one run per language) |
 | `TUTORIAL_VOICE` | `true` | Enable/disable voice narration |
 | `TUTORIAL_VOICE_NAME` | auto | TTS voice name override |
 | `TUTORIAL_TTS_CMD` | `say` (macOS) | Custom TTS command |

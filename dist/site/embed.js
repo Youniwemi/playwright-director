@@ -22,7 +22,9 @@ export function buildEmbedTutorial(video, config) {
         duration: video.duration,
         durationSeconds: video.durationSeconds ?? 0,
         ...(video.variant ? { variant: video.variant } : {}),
+        ...(video.slug ? { slug: video.slug } : {}),
         lang: video.lang || siteLang(config),
+        ...(video.langs?.length ? { langs: video.langs } : {}),
         accent: config.primaryColor || '#6366f1',
         video: `videos/${video.file}`,
         ...(poster ? { poster: `videos/${poster}` } : {}),
@@ -34,22 +36,45 @@ export function buildEmbedTutorial(video, config) {
  *  index (slug discovery). Paths are relative to the site root — scaffold
  *  writes them under public/. */
 export function buildEmbedFiles(manifest, config) {
-    const files = manifest.videos.map((v) => ({
-        path: `embed/${v.id}.json`,
-        data: buildEmbedTutorial(v, config)
-    }));
+    const defaultLang = siteLang(config);
+    const files = new Map();
+    for (const v of manifest.videos)
+        files.set(`embed/${v.id}.json`, buildEmbedTutorial(v, config));
+    // Per-language aliases: embed/<slug>.<lang>.json for every recorded language,
+    // and embed/<slug>.json = the default language (else the first one recorded).
+    const bySlug = new Map();
+    for (const v of manifest.videos) {
+        const slug = v.slug ?? v.id;
+        bySlug.set(slug, [...(bySlug.get(slug) ?? []), v]);
+    }
+    const primary = [];
+    for (const [slug, group] of bySlug) {
+        const langOf = (v) => v.lang || defaultLang;
+        for (const v of group) {
+            const path = `embed/${slug}.${langOf(v)}.json`;
+            if (!files.has(path))
+                files.set(path, buildEmbedTutorial(v, config));
+        }
+        const main = group.find((v) => langOf(v) === defaultLang) ?? group[0];
+        primary.push(main);
+        if (!files.has(`embed/${slug}.json`))
+            files.set(`embed/${slug}.json`, buildEmbedTutorial(main, config));
+    }
     const index = {
         schemaVersion: EMBED_SCHEMA_VERSION,
-        tutorials: manifest.videos.map((v) => ({
+        defaultLang,
+        tutorials: primary.map((v) => ({
             id: v.id,
+            ...(v.slug ? { slug: v.slug } : {}),
             title: v.title,
             duration: v.duration,
             durationSeconds: v.durationSeconds ?? 0,
-            lang: v.lang || siteLang(config),
+            lang: v.lang || defaultLang,
+            ...(v.langs?.length ? { langs: v.langs } : {}),
             ...(v.variant ? { variant: v.variant } : {})
         }))
     };
-    files.push({ path: 'embed/index.json', data: index });
-    return files;
+    files.set('embed/index.json', index);
+    return [...files].map(([path, data]) => ({ path, data }));
 }
 //# sourceMappingURL=embed.js.map

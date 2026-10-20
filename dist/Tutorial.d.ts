@@ -64,6 +64,8 @@ export declare class Tutorial {
     private get stagedScene();
     private sameFocus;
     static get isEnabled(): boolean;
+    /** Narration language (TUTORIAL_LANG, else the `lang` option) — drive the app UI with it, e.g. `?lang=${tutorial.lang}`. */
+    get lang(): string;
     private translate;
     clearFields(): void;
     get hasSteps(): boolean;

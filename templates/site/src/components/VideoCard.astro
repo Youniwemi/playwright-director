@@ -8,12 +8,15 @@ interface Props {
 	href?: string;
 	/** Recording variant (e.g. 'mobile'); absent = regular/desktop */
 	variant?: string;
+	/** Narration language */
+	lang?: string;
 }
 
-const { id, title, duration, videoUrl, steps = [], href, variant } = Astro.props;
+const { id, title, duration, videoUrl, steps = [], href, variant, lang } = Astro.props;
+const rtl = ['ar', 'he', 'fa', 'ur'].includes(lang ?? '');
 ---
 
-<div class="video-card" data-video-url={videoUrl} data-video-id={id} data-variant={variant ?? ''}>
+<div class="video-card" data-video-url={videoUrl} data-video-id={id} data-variant={variant ?? ''} data-lang={lang ?? ''} lang={lang} dir={rtl ? 'rtl' : undefined}>
 	<div class="video-thumbnail">
 		{steps.length > 0 ? (
 			<div class="step-carousel">

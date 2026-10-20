@@ -60,6 +60,10 @@ export interface VideoManifestEntry {
     durationSeconds: number;
     /** Narration language, from the timeline */
     lang?: string;
+    /** id without its `.<lang>` suffix (TUTORIAL_LANG recordings) — groups one tutorial's languages */
+    slug?: string;
+    /** Every language this slug was recorded in, sorted */
+    langs?: string[];
     premium: boolean;
     /** Filename relative to videos/ */
     file: string;

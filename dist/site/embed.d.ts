@@ -29,6 +29,10 @@ export interface EmbedTutorial {
     durationSeconds: number;
     variant?: string;
     lang: string;
+    /** id without its `.<lang>` suffix */
+    slug?: string;
+    /** Every language this tutorial was recorded in */
+    langs?: string[];
     /** Site primary color — the widget's default accent */
     accent: string;
     /** Base-relative video path ("videos/<file>") */
@@ -41,14 +45,18 @@ export interface EmbedTutorial {
 }
 export interface EmbedIndexEntry {
     id: string;
+    slug?: string;
     title: string;
     duration: string;
     durationSeconds: number;
     lang: string;
+    langs?: string[];
     variant?: string;
 }
 export interface EmbedIndex {
     schemaVersion: number;
+    /** Site default language — embed/<slug>.json holds it */
+    defaultLang?: string;
     tutorials: EmbedIndexEntry[];
 }
 export declare function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig): EmbedTutorial;

@@ -31,7 +31,7 @@ export class CommandTTSProvider {
     static VOICES = {
         fr: 'Thomas',
         en: 'Samantha',
-        ar: 'Maged'
+        ar: 'Majed'
     };
     static LANG_NAMES = {
         fr: 'french',
