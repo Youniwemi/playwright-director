@@ -106,6 +106,7 @@ describe('scaffold widget output', () => {
 		scaffold(config, manifest, tempDir);
 
 		expect(existsSync(join(tempDir, 'public', 'widget.js'))).toBe(true);
+		expect(readFileSync(join(tempDir, 'public', 'client.js'), 'utf-8')).toContain('export async function load');
 		const payload = JSON.parse(readFileSync(join(tempDir, 'public', 'embed', 'create-account.json'), 'utf-8'));
 		expect(payload.video).toBe('videos/create-account.webm');
 		const index = JSON.parse(readFileSync(join(tempDir, 'public', 'embed', 'index.json'), 'utf-8'));

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Youniwemi/playwright-director/schemas/embed-v1.schema.json",
+  "title": "playwright-director embed payloads, schema version 1",
+  "description": "Files written by `build-site` under <site>/embed/. All paths (video, poster, page, steps[].image) are relative to the site base URL: the directory that serves widget.js and embed/. Version 1 only gains optional fields; a breaking change bumps schemaVersion.",
+  "oneOf": [{ "$ref": "#/$defs/tutorial" }, { "$ref": "#/$defs/index" }],
+  "$defs": {
+    "tutorial": {
+      "title": "embed/<id>.json",
+      "type": "object",
+      "required": ["schemaVersion", "id", "title", "duration", "durationSeconds", "lang", "accent", "video", "page", "steps"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "id": { "type": "string", "description": "Video id: the tutorial name, plus -<variant> and .<lang> suffixes when recorded with them" },
+        "slug": { "type": "string", "description": "Id without the .<lang> suffix — groups the languages of one tutorial" },
+        "title": { "type": "string" },
+        "description": { "type": "string", "description": "Intro narration (leading context steps)" },
+        "duration": { "type": "string", "description": "m:ss display string, empty when unknown" },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "lang": { "type": "string", "description": "Narration language (BCP 47 primary tag)" },
+        "langs": { "type": "array", "items": { "type": "string" }, "description": "All languages this tutorial exists in" },
+        "variant": { "type": "string", "description": "Recording variant, e.g. mobile" },
+        "accent": { "type": "string", "description": "Site primary color" },
+        "video": { "type": "string", "description": "Base-relative video path. Serve with HTTP Range (206) so seeking works." },
+        "poster": { "type": "string", "description": "Base-relative poster image" },
+        "page": { "type": "string", "description": "Base-relative path of the full tutorial page" },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } }
+      }
+    },
+    "step": {
+      "type": "object",
+      "properties": {
+        "num": { "type": "integer", "minimum": 1, "description": "Display number; contexts have none" },
+        "at": { "type": "number", "minimum": 0, "description": "Start time in the video, seconds. Absent for screenshot-only steps." },
+        "title": { "type": "string", "description": "Human heading, never the raw i18n key" },
+        "key": { "type": "string", "description": "i18n key the step was declared with" },
+        "text": { "type": "string", "description": "Narration text" },
+        "image": { "type": "string", "description": "Base-relative screenshot path" },
+        "context": { "const": true, "description": "An unnumbered narration between steps" }
+      }
+    },
+    "index": {
+      "title": "embed/index.json",
+      "type": "object",
+      "required": ["schemaVersion", "tutorials"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "defaultLang": { "type": "string" },
+        "tutorials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "duration", "durationSeconds", "lang"],
+            "properties": {
+              "id": { "type": "string" },
+              "slug": { "type": "string" },
+              "title": { "type": "string" },
+              "duration": { "type": "string" },
+              "durationSeconds": { "type": "number" },
+              "lang": { "type": "string" },
+              "langs": { "type": "array", "items": { "type": "string" } },
+              "variant": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

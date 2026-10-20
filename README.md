@@ -768,6 +768,7 @@ tutorial-site-dist/          # Static site output (configurable)
 ├── index.html               # Gallery home — videos grouped by category
 ├── {video-slug}/index.html  # Dedicated page per video: player + step-by-step guide
 ├── widget.js                # Embeddable in-app help widget (see below)
+├── client.js                # Headless data API (ESM) — widget.js builds on it
 ├── embed/                   # Widget data
 │   ├── {video-slug}.json    # One payload per tutorial: video, description, steps
 │   └── index.json           # All available slugs (discovery/debugging)
@@ -855,6 +856,49 @@ Notes:
   elements and need no CORS.
 - **RTL** tutorials (`lang: 'ar'`, …) render the whole panel right-to-left;
   individual texts use `dir="auto"` either way.
+
+### Headless data API — bring your own player
+
+Apps with their own player or dialog read the same data with no UI.
+
+**Script tag** (with `widget.js` loaded):
+
+```js
+const t = await window.PlaywrightDirector.load('create-account', { lang: 'fr' });
+```
+
+**Bundled ESM** (no script tag):
+
+```js
+import { load, loadIndex, currentStep } from 'playwright-director/client';
+
+const t = await load('create-account', { baseUrl: 'https://tutorials.myapp.com/', lang: 'fr' });
+video.src = t.video;                       // absolute URL
+for (const s of t.steps) if (s.at !== undefined) addChapter(s.at, s.title);
+video.ontimeupdate = () => highlight(currentStep(t.steps, video.currentTime));
+```
+
+`load()` resolves to the payload of `embed/<slug>.json` with **every URL made
+absolute** (`video`, `poster`, `page`, `steps[].image`) plus `baseUrl`. With
+`lang`, it tries `embed/<slug>.<lang>.json` first and falls back to the default
+language. It rejects with a message that names the URL and the reason
+(unknown slug → HTTP 404 and the index URL; network/CORS failure → the missing
+`Access-Control-Allow-Origin` header).
+
+The payloads are versioned: [`schemas/embed-v1.schema.json`](schemas/embed-v1.schema.json)
+(also importable as `playwright-director/schemas/embed-v1.schema.json`).
+In the raw files, all paths are **relative to the site base URL** (the
+directory serving `widget.js` and `embed/`).
+
+| `embed/<slug>.json` field | Meaning |
+|---|---|
+| `schemaVersion` | `1` — only gains optional fields; a breaking change bumps it |
+| `id`, `title`, `description?`, `lang`, `variant?` | Identity and intro narration |
+| `duration` / `durationSeconds` | `"m:ss"` display string / number |
+| `video`, `poster?`, `page` | Video, poster image, full gallery page |
+| `steps[]` | `{ num?, at?, title?, key?, text?, image?, context? }` — `at` = start in seconds (chapters), `title` = human heading, `key` = the i18n key, `context: true` = unnumbered narration |
+
+`embed/index.json` is `{ schemaVersion, tutorials: [{ id, title, duration, durationSeconds, lang, variant? }] }`.
 
 ### Configuration
 

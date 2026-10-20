@@ -323,7 +323,11 @@ payloads so any app can embed a tutorial in-app: load
 `<script src="<site>/widget.js" defer>` and add a `data-tutorial="<slug>"`
 attribute to any element (slug = video id, i.e. the tutorial `name` plus
 `-<variant>` if any). `window.PlaywrightDirector.open(slug)` is the programmatic
-equivalent.
+equivalent. Apps with their own player use the headless API:
+`PlaywrightDirector.load(slug, { lang })` or, bundled,
+`import { load } from 'playwright-director/client'` — the payload with absolute
+URLs and chapter times (`steps[].at`, seconds). Schema:
+`schemas/embed-v1.schema.json`.
 
 ### Reviewing & correcting narration
 

@@ -12,7 +12,9 @@
  * `playwright-director build-site` next to this file).
  *
  * Zero dependencies, styles isolated in a shadow root. Programmatic API:
- * window.PlaywrightDirector.open(slug) / window.PlaywrightDirector.close().
+ * window.PlaywrightDirector.open(slug, { lang }) / .close(), and the headless
+ * .load(slug, { lang }) → Promise<TutorialData> (no UI; absolute URLs, steps
+ * with `at` seconds) for apps with their own player.
  *
  * Theming: the site's primaryColor is the default accent; override it from
  * the host page with `.playwright-director-widget { --playwright-director-accent: #16a34a }`.
@@ -34,14 +36,22 @@
 	var lastFocus = null;
 	var seq = 0; // bumped on every open/close so a stale fetch can't reopen a dismissed dialog
 
-	function fetchTutorial(slug) {
-		if (cache[slug]) return cache[slug];
-		cache[slug] = fetch(BASE + 'embed/' + encodeURIComponent(slug) + '.json').then(function (res) {
-			if (!res.ok) throw new Error('HTTP ' + res.status);
-			return res.json();
+	// Data comes from the headless client served next to this file (one implementation
+	// for widget and bundling apps: `playwright-director/client`).
+	var client = null;
+	function load(slug, options) {
+		var lang = (options && options.lang) || '';
+		var key = slug + '|' + lang;
+		if (cache[key]) return cache[key];
+		if (!client) {
+			client = import(BASE + 'client.js');
+			client.catch(function () { client = null; });
+		}
+		cache[key] = client.then(function (c) {
+			return c.load(slug, { baseUrl: BASE, lang: lang || undefined });
 		});
-		cache[slug].catch(function () { delete cache[slug]; });
-		return cache[slug];
+		cache[key].catch(function () { delete cache[key]; });
+		return cache[key];
 	}
 
 	var CSS = [
@@ -178,8 +188,8 @@
 		var video = document.createElement('video');
 		video.controls = true;
 		video.preload = 'metadata';
-		video.src = BASE + data.video;
-		if (data.poster) video.poster = BASE + data.poster;
+		video.src = data.video;
+		if (data.poster) video.poster = data.poster;
 		body.appendChild(video);
 
 		if (data.description) {
@@ -219,7 +229,7 @@
 					var shot = el('div', 'shot');
 					var img = document.createElement('img');
 					img.loading = 'lazy';
-					img.src = BASE + s.image;
+					img.src = s.image;
 					img.alt = s.title || (s.num !== undefined ? 'Step ' + s.num : '');
 					shot.appendChild(img);
 					step.appendChild(shot);
@@ -233,7 +243,7 @@
 
 		var foot = el('div', 'foot');
 		var link = document.createElement('a');
-		link.href = BASE + data.page;
+		link.href = data.page;
 		link.target = '_blank';
 		link.rel = 'noopener';
 		link.textContent = 'Open full tutorial ↗';
@@ -241,20 +251,21 @@
 		shell.panel.appendChild(foot);
 	}
 
-	function open(slug) {
+	function open(slug, options) {
 		var shell = renderShell('');
 		var my = ++seq;
 		shell.panel.appendChild(el('div', 'state', 'Loading…'));
-		fetchTutorial(slug).then(
+		load(slug, options).then(
 			function (data) {
 				if (my !== seq) return;
 				renderTutorial(data);
 			},
-			function () {
+			function (err) {
 				if (my !== seq) return;
+				if (window.console) console.error(err);
 				var failed = renderShell('Tutorial unavailable');
 				failed.panel.appendChild(
-					el('div', 'state', 'Could not load tutorial "' + slug + '". Check the slug against ' + BASE + 'embed/index.json')
+					el('div', 'state', (err && err.message) || String(err))
 				);
 			}
 		);
@@ -269,5 +280,5 @@
 		open(trigger.getAttribute('data-tutorial'));
 	});
 
-	window.PlaywrightDirector = { open: open, close: close, base: BASE };
+	window.PlaywrightDirector = { open: open, close: close, load: load, base: BASE };
 })();

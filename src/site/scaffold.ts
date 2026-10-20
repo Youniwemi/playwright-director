@@ -46,6 +46,11 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 
 	// In-app widget data: one JSON payload per tutorial + an index, served
 	// next to widget.js (template public/) so any app can embed tutorials.
+	// The headless client (dist/client.js) is served as <site>/client.js — widget.js imports it.
+	// From src/ (unit tests) the compiled copy lives in dist/.
+	const clientJs = [join(__dirname, '..', 'client.js'), join(__dirname, '..', '..', 'dist', 'client.js')].find(existsSync);
+	if (clientJs) cpSync(clientJs, join(tempDir, 'public', 'client.js'));
+
 	const embedDir = join(tempDir, 'public', 'embed');
 	mkdirSync(embedDir, { recursive: true });
 	for (const file of buildEmbedFiles(manifest, config)) {
