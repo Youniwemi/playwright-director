@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import tutorials from '../data/tutorials.json';
 import siteConfig from '../data/site-config.json';
+import { t, siteLang, LANG_NAMES } from '../i18n';
 
 export function getStaticPaths() {
 	const all = (tutorials as any).videos;
@@ -12,6 +13,7 @@ export function getStaticPaths() {
 }
 
 const { video, allVideos } = Astro.props as any;
+const L = video.lang as string | undefined;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // 'text' | 'cards' | 'full' | 'none' — see SiteConfig.tutorials.stepsLayout
@@ -34,7 +36,6 @@ const sameLang = allVideos.filter((v: any) => (v.lang ?? '') === (video.lang ?? 
 const at = sameLang.findIndex((v: any) => v.id === video.id);
 const prev = at > 0 ? sameLang[at - 1] : null;
 const next = at < sameLang.length - 1 ? sameLang[at + 1] : null;
-const LANG_NAMES: Record<string, string> = { fr: 'Français', en: 'English', ar: 'العربية', es: 'Español', de: 'Deutsch' };
 const translations = allVideos
 	.filter((v: any) => (v.slug ?? v.id) === (video.slug ?? video.id) && (v.variant ?? '') === (video.variant ?? ''))
 	.sort((a: any, b: any) => String(a.lang).localeCompare(String(b.lang)));
@@ -42,10 +43,10 @@ const translations = allVideos
 
 <Base title={video.title} lang={video.lang}>
 	<div class="video-page">
-		<a href={`${base}/`} class="back-link">← All tutorials</a>
+		<a href={!L || L === siteLang ? `${base}/` : `${base}/${L}/`} class="back-link"><span class="back-arrow" aria-hidden="true">←</span> {t(L, 'allTutorials')}</a>
 
 		{translations.length > 1 && (
-			<nav class="lang-switch" aria-label="Language">
+			<nav class="lang-switch" aria-label={t(L, 'language')}>
 				{translations.map((v: any) => (
 					<a href={`${base}/${v.id}/`} lang={v.lang} hreflang={v.lang} aria-current={v.id === video.id ? 'page' : undefined}>{LANG_NAMES[v.lang] ?? v.lang}</a>
 				))}
@@ -76,9 +77,9 @@ const translations = allVideos
 							data-num={s.num}
 							data-title={s.title || ''}
 							data-text={s.text || ''}
-							aria-label={`Step ${s.num}${s.title ? `: ${s.title}` : ''}`}
+							aria-label={`${t(L, 'step', { n: s.num! })}${s.title ? `: ${s.title}` : ''}`}
 						>
-							<img src={`${base}/videos/${s.image}`} alt={s.title || `Step ${s.num}`} loading={s.num === 1 ? 'eager' : 'lazy'} />
+							<img src={`${base}/videos/${s.image}`} alt={s.title || t(L, 'step', { n: s.num! })} loading={s.num === 1 ? 'eager' : 'lazy'} />
 							<span class="step-num">{s.num}</span>
 						</button>
 					))}
@@ -99,13 +100,13 @@ const translations = allVideos
 									{s.title && <h2 class="step-title">{s.title}</h2>}
 									{s.text && <p class="step-text">{s.text}</p>}
 								</div>
-								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
+								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
 							</div>
 							{s.image && (
 								<img
 									class="step-shot"
 									src={`${base}/videos/${s.image}`}
-									alt={s.title || `Step ${s.num}`}
+									alt={s.title || t(L, 'step', { n: s.num! })}
 									loading={s.num === 1 ? 'eager' : 'lazy'}
 								/>
 							)}
@@ -127,7 +128,7 @@ const translations = allVideos
 								{s.title && <h2 class="step-title">{s.title}</h2>}
 								{s.text && <p class="step-text">{s.text}</p>}
 							</div>
-							{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
+							{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
 							{s.image && (
 								<button
 									class="step-thumb"
@@ -135,9 +136,9 @@ const translations = allVideos
 									data-num={s.num}
 									data-title={s.title || ''}
 									data-text={s.text || ''}
-									aria-label={`Enlarge screenshot of step ${s.num}`}
+									aria-label={t(L, 'enlarge', { n: s.num! })}
 								>
-									<img src={`${base}/videos/${s.image}`} alt={s.title || `Step ${s.num}`} loading="lazy" />
+									<img src={`${base}/videos/${s.image}`} alt={s.title || t(L, 'step', { n: s.num! })} loading="lazy" />
 									<span class="step-zoom">⤢</span>
 								</button>
 							)}
@@ -163,11 +164,11 @@ const translations = allVideos
 									</span>
 									{s.image && <span class="step-chevron">▾</span>}
 								</button>
-								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={`Play from ${mmss(s.at)}`}>▶ {mmss(s.at)}</button>}
+								{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
 							</div>
 							{s.image && (
 								<div class="step-reveal">
-									<img src={`${base}/videos/${s.image}`} alt={s.title || `Step ${s.num}`} loading="lazy" />
+									<img src={`${base}/videos/${s.image}`} alt={s.title || t(L, 'step', { n: s.num! })} loading="lazy" />
 								</div>
 							)}
 						</div>
@@ -176,7 +177,7 @@ const translations = allVideos
 			</section>
 		)}
 
-		<nav class="video-nav-row" aria-label="navigation">
+		<nav class="video-nav-row" aria-label={t(L, 'navigation')}>
 			<div class="nav-prev">
 				{prev && (
 					<a href={`${base}/${prev.id}`} class="nav-link nav-link-prev">
@@ -317,6 +318,12 @@ const translations = allVideos
 		background: var(--color-primary);
 		border-color: var(--color-primary);
 		color: #fff;
+	}
+
+	:global([dir='rtl']) .back-arrow,
+	:global([dir='rtl']) .nav-arrow {
+		display: inline-block;
+		transform: scaleX(-1);
 	}
 
 	.back-link:hover {

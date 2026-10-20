@@ -1,6 +1,7 @@
 ---
 import '../styles/tutorials.css';
 import siteConfig from '../data/site-config.json';
+import { t, siteLang, RTL_LANGS } from '../i18n';
 
 interface Props {
 	title: string;
@@ -12,8 +13,8 @@ interface Props {
 const config = siteConfig as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const { title, description = config.title } = Astro.props;
-const lang = Astro.props.lang || String(config.lang || 'en').split(',')[0].trim();
-const dir = ['ar', 'he', 'fa', 'ur'].includes(lang) ? 'rtl' : 'ltr';
+const lang = Astro.props.lang || siteLang;
+const dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
 
 const cssVars = [
 	config.primaryColor && `--color-primary: ${config.primaryColor}`,
@@ -53,7 +54,7 @@ const cssVars = [
 			<div class="footer-content">
 				<span>© {new Date().getFullYear()} {config.title}</span>
 				<span>·</span>
-				<span>Built with playwright-director</span>
+				<span>{t(lang, 'builtWith')}</span>
 			</div>
 		</footer>
 	</body>

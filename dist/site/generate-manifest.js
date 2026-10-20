@@ -1,3 +1,4 @@
+import { mergeStrings, uiString } from './strings.js';
 const DEFAULT_CATEGORY_ICONS = {
     'getting-started': '⭐',
     premium: '💎',
@@ -122,7 +123,8 @@ export function generateManifest(tutorials, config) {
         videos,
         ui: {
             heroTitle: config.tutorials?.ui?.heroTitle || config.title,
-            heroSubtitle: config.tutorials?.ui?.heroSubtitle || 'Video tutorials'
+            heroSubtitle: config.tutorials?.ui?.heroSubtitle ||
+                uiString(mergeStrings(config.strings), (config.lang || 'en').split(',')[0].trim(), 'videoTutorials')
         }
     };
 }

@@ -1,15 +1,16 @@
 ---
 // Video modal component - handles inline video playback with prev/next navigation
+import { t, siteLang } from '../i18n';
 ---
 
 <div id="video-modal" class="video-modal" style="display: none;">
-	<button class="video-modal-close" aria-label="Close">×</button>
+	<button class="video-modal-close" aria-label={t(siteLang, 'close')}>×</button>
 	<div class="video-container">
-		<button class="video-nav video-nav-prev" aria-label="Previous" style="display: none;">‹</button>
+		<button class="video-nav video-nav-prev" aria-label={t(siteLang, 'previous')} style="display: none;">‹</button>
 		<video controls id="modal-video">
 			<source src="" type="video/webm" />
 		</video>
-		<button class="video-nav video-nav-next" aria-label="Next" style="display: none;">›</button>
+		<button class="video-nav video-nav-next" aria-label={t(siteLang, 'next')} style="display: none;">›</button>
 	</div>
 	<div class="video-title-bar">
 		<span id="video-title"></span>

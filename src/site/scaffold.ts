@@ -2,6 +2,7 @@ import { cpSync, mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { buildEmbedFiles } from './embed.js';
+import { mergeStrings, type UiStrings } from './strings.js';
 import type { SiteConfig, VideoManifest } from './types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,7 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 		lang: string;
 		stepsLayout: string;
 		showStrip: boolean;
+		strings: Record<string, UiStrings>;
 	} = {
 		title: config.title,
 		logo: config.logo,
@@ -30,7 +32,8 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 		baseUrl: config.baseUrl,
 		lang: config.lang,
 		stepsLayout: config.tutorials?.stepsLayout || 'text',
-		showStrip: config.tutorials?.showStrip !== false
+		showStrip: config.tutorials?.showStrip !== false,
+		strings: mergeStrings(config.strings)
 	};
 
 	if (config.logo && existsSync(config.logo)) {
@@ -50,7 +53,6 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 	// From src/ (unit tests) the compiled copy lives in dist/.
 	const clientJs = [join(__dirname, '..', 'client.js'), join(__dirname, '..', '..', 'dist', 'client.js')].find(existsSync);
 	if (clientJs) cpSync(clientJs, join(tempDir, 'public', 'client.js'));
-
 	const embedDir = join(tempDir, 'public', 'embed');
 	mkdirSync(embedDir, { recursive: true });
 	for (const file of buildEmbedFiles(manifest, config)) {

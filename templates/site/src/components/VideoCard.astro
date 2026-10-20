@@ -1,4 +1,6 @@
 ---
+import { t, RTL_LANGS } from '../i18n';
+
 interface Props {
 	id: string;
 	title: string;
@@ -13,7 +15,7 @@ interface Props {
 }
 
 const { id, title, duration, videoUrl, steps = [], href, variant, lang } = Astro.props;
-const rtl = ['ar', 'he', 'fa', 'ur'].includes(lang ?? '');
+const rtl = RTL_LANGS.includes(lang ?? '');
 ---
 
 <div class="video-card" data-video-url={videoUrl} data-video-id={id} data-variant={variant ?? ''} data-lang={lang ?? ''} lang={lang} dir={rtl ? 'rtl' : undefined}>
@@ -23,15 +25,15 @@ const rtl = ['ar', 'he', 'fa', 'ur'].includes(lang ?? '');
 				{steps.map((src, i) => (
 					<img
 						src={src}
-						alt={`Step ${i + 1}`}
+						alt={t(lang, 'step', { n: i + 1 })}
 						loading={i === 0 ? 'eager' : 'lazy'}
 						class:list={['step-img', { active: i === 0 }]}
 					/>
 				))}
 				{steps.length > 1 && (
 					<>
-						<button class="step-prev" aria-label="Previous step">‹</button>
-						<button class="step-next" aria-label="Next step">›</button>
+						<button class="step-prev" aria-label={t(lang, 'previousStep')}>‹</button>
+						<button class="step-next" aria-label={t(lang, 'nextStep')}>›</button>
 						<div class="step-dots">
 							{steps.map((_, i) => (
 								<span class:list={['step-dot', { active: i === 0 }]}></span>

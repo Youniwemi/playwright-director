@@ -2,6 +2,7 @@ import { cpSync, mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { buildEmbedFiles } from './embed.js';
+import { mergeStrings } from './strings.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export function scaffold(config, manifest, tempDir) {
@@ -16,7 +17,8 @@ export function scaffold(config, manifest, tempDir) {
         baseUrl: config.baseUrl,
         lang: config.lang,
         stepsLayout: config.tutorials?.stepsLayout || 'text',
-        showStrip: config.tutorials?.showStrip !== false
+        showStrip: config.tutorials?.showStrip !== false,
+        strings: mergeStrings(config.strings)
     };
     if (config.logo && existsSync(config.logo)) {
         const logoExt = config.logo.split('.').pop();

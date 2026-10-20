@@ -1,3 +1,4 @@
+import type { UiStrings } from './strings.js';
 export interface SiteConfig {
     title: string;
     logo?: string;
@@ -10,8 +11,11 @@ export interface SiteConfig {
     /** Videos + step screenshots dir (default `<input>/videos`) */
     videos?: string;
     baseUrl: string;
-    /** Single lang or comma-separated list, e.g. "fr,en,ar" */
+    /** Single lang or comma-separated list, e.g. "fr,en,ar" — the first one is the default */
     lang: string;
+    /** UI string overrides per language, merged over the built-in en/fr/ar
+     *  (site chrome + widget), e.g. `{ fr: { allTutorials: 'Toute l’aide' }, es: { … } }` */
+    strings?: Record<string, Partial<UiStrings>>;
     tutorials?: {
         categories?: Record<string, {
             icon: string;

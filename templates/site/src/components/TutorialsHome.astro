@@ -5,10 +5,24 @@ import Base from '../layouts/Base.astro';
 import VideoCard from './VideoCard.astro';
 import VideoModal from './VideoModal.astro';
 import tutorials from '../data/tutorials.json';
-import siteConfig from '../data/site-config.json';
+import { t, siteLang, LANG_NAMES } from '../i18n';
 
-const { categories, videos, ui } = tutorials as any;
+interface Props {
+	/** Page language — `/` is the site default, `/<lang>/` the others */
+	lang?: string;
+}
+
+const { categories, videos: allVideos, ui } = tutorials as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// One home page per language: each lists only the tutorials recorded in it
+// (all of them when a single language was recorded).
+const langs: string[] = ([...new Set(allVideos.map((v: any) => v.lang).filter(Boolean))] as string[]).sort();
+const lang = Astro.props.lang ?? siteLang;
+const videos = langs.length > 1 ? allVideos.filter((v: any) => (v.lang ?? siteLang) === lang) : allVideos;
+const homeOf = (l: string) => (l === siteLang ? `${base}/` : `${base}/${l}/`);
+// The default subtitle is a UI string — translate it; a configured one stays as is.
+const subtitle = ui.heroSubtitle === t(siteLang, 'videoTutorials') ? t(lang, 'videoTutorials') : ui.heroSubtitle;
 
 // Scan for step screenshots at build time
 const videosDir = join(process.cwd(), 'public/videos');
@@ -42,33 +56,26 @@ const videosByCategory = videos.reduce((acc: Record<string, any[]>, video: any) 
 // was recorded in a variant.
 const variants: string[] = [...new Set(videos.map((v: any) => v.variant ?? ''))] as string[];
 const hasVariants = variants.some((v) => v !== '');
-const variantLabel = (v: string) => (v === '' ? 'Desktop' : v.charAt(0).toUpperCase() + v.slice(1));
-
-// Language filter — shown when tutorials were recorded in several languages
-// (TUTORIAL_LANG); starts on the site default language.
-const langs: string[] = ([...new Set(videos.map((v: any) => v.lang).filter(Boolean))] as string[]).sort();
-const defaultLang = String((siteConfig as any).lang || 'en').split(',')[0].trim();
-const LANG_NAMES: Record<string, string> = { fr: 'Français', en: 'English', ar: 'العربية', es: 'Español', de: 'Deutsch' };
-const initialLang = langs.length > 1 ? (langs.includes(defaultLang) ? defaultLang : langs[0]) : '';
+const variantLabel = (v: string) => (v === '' ? t(lang, 'desktop') : v.charAt(0).toUpperCase() + v.slice(1));
 ---
 
-<Base title={ui.heroTitle}>
+<Base title={ui.heroTitle} lang={lang}>
 	<section class="hero">
 		<h1>{ui.heroTitle}</h1>
-		<p>{ui.heroSubtitle}</p>
+		<p>{subtitle}</p>
 	</section>
 
 	{langs.length > 1 && (
-		<nav class="variant-filter lang-filter" aria-label="Language" data-initial={initialLang}>
+		<nav class="variant-filter" aria-label={t(lang, 'language')}>
 			{langs.map((l) => (
-				<button class:list={['variant-btn', { active: l === initialLang }]} data-lang={l} lang={l} aria-pressed={String(l === initialLang)}>{LANG_NAMES[l] ?? l}</button>
+				<a class:list={['variant-btn', { active: l === lang }]} href={homeOf(l)} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>{LANG_NAMES[l] ?? l}</a>
 			))}
 		</nav>
 	)}
 
 	{hasVariants && (
-		<nav class="variant-filter" aria-label="Filter by variant">
-			<button class="variant-btn active" data-variant="all">All</button>
+		<nav class="variant-filter" aria-label={t(lang, 'filterVariant')}>
+			<button class="variant-btn active" data-variant="all">{t(lang, 'all')}</button>
 			{variants.sort().map((v) => (
 				<button class="variant-btn" data-variant={v}>{variantLabel(v)}</button>
 			))}
@@ -114,7 +121,11 @@ const initialLang = langs.length > 1 ? (langs.includes(defaultLang) ? defaultLan
 	}
 
 	.variant-btn {
-		padding: 0.4rem 1rem;
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 1rem;
+		text-decoration: none;
 		border: 1px solid var(--color-border, #ddd);
 		border-radius: 999px;
 		background: transparent;
@@ -137,17 +148,14 @@ const initialLang = langs.length > 1 ? (langs.includes(defaultLang) ? defaultLan
 </style>
 
 <script>
-	// Variant and language filters combine; the language one starts on the site default.
-	const state = {
-		variant: 'all',
-		lang: document.querySelector<HTMLElement>('.lang-filter')?.dataset.initial ?? ''
-	};
-
-	const apply = () => {
+	const bar = document.querySelector('[data-variant]')?.closest('.variant-filter');
+	bar?.addEventListener('click', (e) => {
+		const btn = (e.target as HTMLElement).closest<HTMLElement>('.variant-btn');
+		if (!btn) return;
+		const filter = btn.dataset.variant!;
+		bar.querySelectorAll('.variant-btn').forEach((b) => b.classList.toggle('active', b === btn));
 		document.querySelectorAll<HTMLElement>('.video-card').forEach((card) => {
-			const match =
-				(state.variant === 'all' || (card.dataset.variant ?? '') === state.variant) &&
-				(!state.lang || card.dataset.lang === state.lang);
+			const match = filter === 'all' || (card.dataset.variant ?? '') === filter;
 			card.style.display = match ? '' : 'none';
 		});
 		// Hide categories left with no visible card
@@ -157,20 +165,5 @@ const initialLang = langs.length > 1 ? (langs.includes(defaultLang) ? defaultLan
 			);
 			section.style.display = anyVisible ? '' : 'none';
 		});
-	};
-
-	document.querySelectorAll<HTMLElement>('.variant-filter').forEach((bar) => {
-		bar.addEventListener('click', (e) => {
-			const btn = (e.target as HTMLElement).closest<HTMLElement>('.variant-btn');
-			if (!btn) return;
-			if (btn.dataset.lang) state.lang = btn.dataset.lang;
-			else state.variant = btn.dataset.variant!;
-			bar.querySelectorAll('.variant-btn').forEach((b) => {
-				b.classList.toggle('active', b === btn);
-				b.setAttribute('aria-pressed', String(b === btn));
-			});
-			apply();
-		});
 	});
-	apply();
 </script>

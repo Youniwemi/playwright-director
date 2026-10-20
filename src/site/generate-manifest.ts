@@ -1,5 +1,6 @@
 import type { ManifestStep, SiteConfig, VideoManifest, VideoManifestEntry } from './types.js';
 import type { ScannedTutorial } from './scan-tutorials.js';
+import { mergeStrings, uiString } from './strings.js';
 
 const DEFAULT_CATEGORY_ICONS: Record<string, string> = {
 	'getting-started': '⭐',
@@ -127,7 +128,9 @@ export function generateManifest(tutorials: ScannedTutorial[], config: SiteConfi
 		videos,
 		ui: {
 			heroTitle: config.tutorials?.ui?.heroTitle || config.title,
-			heroSubtitle: config.tutorials?.ui?.heroSubtitle || 'Video tutorials'
+			heroSubtitle:
+				config.tutorials?.ui?.heroSubtitle ||
+				uiString(mergeStrings(config.strings), (config.lang || 'en').split(',')[0].trim(), 'videoTutorials')
 		}
 	};
 }
