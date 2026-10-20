@@ -436,9 +436,12 @@ TUTORIAL_MODE=true TUTORIAL_LANG=en npx playwright test tutorial   # → look.en
 TUTORIAL_MODE=true TUTORIAL_LANG=ar npx playwright test tutorial   # → look.ar.webm
 ```
 
-The gallery groups the recordings by slug (`look`): the home page gets a
-language filter (starting on the site's default `lang`), each video page a
-language switcher, and Arabic/Hebrew/Persian/Urdu pages render right-to-left.
+The gallery groups the recordings by slug (`look`). It gets one home page per
+language — `/` for the site's default `lang`, `/en/`, `/ar/`… for the others,
+linked to each other — each video page links to the same tutorial in the other
+languages, and Arabic/Hebrew/Persian/Urdu pages render right-to-left. The site
+chrome (buttons, labels) is translated in English, French and Arabic; see
+`strings` in the site configuration to change a text or add a language.
 Embed data: `embed/<slug>.<lang>.json` per language, `embed/<slug>.json` =
 the default language (or the only one recorded), and `index.json` lists each
 slug once with its `langs`. `load(slug, { lang })` falls back to the default
@@ -856,9 +859,10 @@ element with `data-tutorial="<video-slug>"`:
 <button data-tutorial="create-account">📘 How does this work?</button>
 ```
 
-Clicking the element opens an overlay right inside your app — the tutorial
-video, its intro narration, and the full step-by-step guide (click a step to
-reveal its screenshot), with a link to the full tutorial page on the gallery:
+Clicking the element opens a modal dialog right inside your app — the tutorial
+video, its intro narration and its chapters (click a chapter to jump to it in
+the video; the playing one is highlighted), with a link to the full tutorial
+page on the gallery:
 
 ![In-app widget opened over a host application](docs/images/widget.png)
 
@@ -871,19 +875,45 @@ Notes:
 - **Slugs** are the video ids — the file names in the gallery's `videos/`
   directory (a tutorial's `name`, plus `-<variant>` for variant recordings).
   `GET <site>/embed/index.json` lists them all.
-- **Programmatic API**: `window.PlaywrightDirector.open('create-account')` and
-  `window.PlaywrightDirector.close()` — e.g. to launch a tutorial from an onboarding
-  checklist instead of a button.
-- **Theming**: the gallery's `primaryColor` is the default accent; override it
-  from the host page with `.playwright-director-widget { --playwright-director-accent: #16a34a; }`.
-- **Cross-origin**: the widget fetches `embed/<slug>.json` from the gallery
-  host, so the gallery must send `Access-Control-Allow-Origin` for your app's
-  origin. GitHub Pages sends `*` out of the box; on Netlify or Cloudflare
-  Pages add a headers rule for `/embed/*` (e.g. a `_headers` file with
-  `Access-Control-Allow-Origin: *`). Video and screenshots are plain media
-  elements and need no CORS.
-- **RTL** tutorials (`lang: 'ar'`, …) render the whole panel right-to-left;
-  individual texts use `dir="auto"` either way.
+- **Programmatic API**: `window.PlaywrightDirector.open('create-account', { lang: 'fr' })`
+  and `window.PlaywrightDirector.close()` — e.g. to launch a tutorial from an
+  onboarding checklist instead of a button. `load()` returns the data with no
+  UI (see the next section).
+- **Language**: `open()`'s `lang`, else the trigger's `data-tutorial-lang`,
+  else your page's `<html lang>`. It picks the tutorial language (falling back
+  to the default one) and the widget texts — English, French and Arabic are
+  built in; add one from your page with
+  `PlaywrightDirector.strings.es = { close: 'Cerrar', steps: 'Pasos', … }`.
+  Arabic, Hebrew, Persian and Urdu render right-to-left.
+- **Accessibility**: a native modal `<dialog>` — the page behind is inert, Esc
+  or a click on the backdrop closes it, focus goes to the labelled close
+  button and returns to the trigger afterwards. Chapters are a list of
+  buttons (`aria-current="step"` on the playing one; ↑/↓, Home/End move
+  between them, Enter seeks); every target is at least 44 px. The e2e suite
+  runs axe (WCAG 2.1 AA) on the open dialog in French and Arabic.
+- **Theming**: set CSS custom properties on the widget host from your app's
+  stylesheet — your rules win over the defaults:
+
+  ```css
+  .playwright-director-widget {
+    --pd-accent: #16a34a;        /* default: the gallery's primaryColor */
+    --pd-surface: #ffffff;       /* dialog background */
+    --pd-text: #0f172a;
+    --pd-muted: #64748b;         /* secondary text */
+    --pd-border: #e2e8f0;
+    --pd-radius: 12px;
+    --pd-font: "Inter", sans-serif;  /* default: your app's font */
+    --pd-focus-ring: 0 0 0 3px rgb(22 163 74 / 45%);  /* a box-shadow */
+  }
+  ```
+
+  The pre-0.5 `--playwright-director-accent` still works.
+- **Cross-origin**: the widget loads `client.js` and `embed/<slug>.json` from
+  the gallery host, so the gallery must send `Access-Control-Allow-Origin` for
+  your app's origin. GitHub Pages sends `*` out of the box; on Netlify or
+  Cloudflare Pages add a headers rule for `/embed/*` and `/client.js` (e.g. a
+  `_headers` file with `Access-Control-Allow-Origin: *`). Video and screenshots
+  are plain media elements and need no CORS.
 
 ### Headless data API — bring your own player
 
@@ -947,7 +977,11 @@ export default {
 
   // Site
   baseUrl: "https://tutorials.myapp.com",  // For SEO (optional)
-  lang: "fr",                              // Site language
+  lang: "fr",                              // Default language (served at /, others at /<lang>/)
+  strings: {                               // Optional: site UI texts, merged over the built-in en/fr/ar
+    fr: { allTutorials: "Toute l’aide" },
+    es: { allTutorials: "Todos los tutoriales", close: "Cerrar" },  // a new language starts from English
+  },
 
   // Content overrides (optional)
   tutorials: {
