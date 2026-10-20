@@ -11,7 +11,10 @@ export interface SiteConfig {
 	timelines?: string;
 	/** Videos + step screenshots dir (default `<input>/videos`) */
 	videos?: string;
+	/** Full public URL ("https://docs.example.com/help/") or a path ("/help/") — the base path prefixes every link */
 	baseUrl: string;
+	/** Access-Control-Allow-Origin written to the `_headers` file (Cloudflare Pages / Netlify): '*' (default), one origin, or false for no file */
+	cors?: string | false;
 	/** Single lang or comma-separated list, e.g. "fr,en,ar" — the first one is the default */
 	lang: string;
 	/** UI string overrides per language, merged over the built-in en/fr/ar

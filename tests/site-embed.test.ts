@@ -3,7 +3,7 @@ import { existsSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { buildEmbedFiles, buildEmbedTutorial } from '../src/site/embed.js';
-import { scaffold } from '../src/site/scaffold.js';
+import { scaffold, buildHeadersFile } from '../src/site/scaffold.js';
 import type { SiteConfig, VideoManifest, VideoManifestEntry } from '../src/site/types.js';
 
 const config: SiteConfig = {
@@ -114,5 +114,19 @@ describe('scaffold widget output', () => {
 		expect(payload.video).toBe('videos/create-account.webm');
 		const index = JSON.parse(readFileSync(join(tempDir, 'public', 'embed', 'index.json'), 'utf-8'));
 		expect(index.tutorials).toHaveLength(2);
+	});
+
+	it('writes a _headers file under the base path and a base directive for a path-only baseUrl', () => {
+		scaffold({ ...config, baseUrl: '/help/' }, manifest, tempDir);
+		const headers = readFileSync(join(tempDir, 'public', '_headers'), 'utf-8');
+		expect(headers).toContain('/help/embed/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=300');
+		expect(headers).toContain('/help/videos/*\n  Access-Control-Allow-Origin: *\n  Cache-Control: public, max-age=604800');
+		expect(readFileSync(join(tempDir, 'astro.config.mjs'), 'utf-8')).toContain('base: "/help/"');
+	});
+
+	it('restricts CORS to one origin, or writes no _headers with cors: false', () => {
+		expect(buildHeadersFile('/', 'https://app.example.com')).toContain('/client.js\n  Access-Control-Allow-Origin: https://app.example.com');
+		scaffold({ ...config, cors: false }, manifest, tempDir);
+		expect(existsSync(join(tempDir, 'public', '_headers'))).toBe(false);
 	});
 });

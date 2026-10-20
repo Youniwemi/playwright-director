@@ -54,7 +54,12 @@ function ask(question: string): Promise<string> {
 	});
 }
 
-export async function buildSite(configPath?: string) {
+export interface BuildSiteOptions {
+	/** Overrides config.baseUrl, e.g. "/help/" for a sub-path deployment */
+	base?: string;
+}
+
+export async function buildSite(configPath?: string, options: BuildSiteOptions = {}) {
 	const resolvedConfigPath = resolve(configPath || join(process.cwd(), 'tutorial-site.config.js'));
 
 	let config: SiteConfig;
@@ -79,6 +84,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 		config = { ...DEFAULT_CONFIG };
 	}
 
+	if (options.base) config.baseUrl = options.base;
 	config.input = resolve(config.input);
 	config.output = resolve(config.output);
 	config.timelines = resolve(config.timelines ?? join(config.input, 'output'));

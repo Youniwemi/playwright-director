@@ -5,6 +5,20 @@ import { buildEmbedFiles } from './embed.js';
 import { mergeStrings } from './strings.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+/**
+ * Cloudflare Pages / Netlify `_headers`: CORS on what an app on another origin
+ * fetches (embed JSON, client.js, widget.js, videos/posters), a short cache on
+ * the data and scripts (they change on every build) and a longer one on media.
+ * Returns '' when `cors` is false.
+ */
+export function buildHeadersFile(basePath, cors) {
+    if (cors === false)
+        return '';
+    const base = basePath.endsWith('/') ? basePath : `${basePath}/`;
+    const rule = (path, maxAge) => `${base}${path}\n  Access-Control-Allow-Origin: ${cors}\n  Cache-Control: public, max-age=${maxAge}\n`;
+    // shortcut: media keep their name across re-recordings, so a week, not immutable — upgrade with hashed names.
+    return [rule('embed/*', 300), rule('client.js', 300), rule('widget.js', 300), rule('videos/*', 604800)].join('\n');
+}
 export function scaffold(config, manifest, tempDir) {
     const templateDir = join(__dirname, '..', '..', 'templates', 'site');
     mkdirSync(tempDir, { recursive: true });
@@ -47,18 +61,23 @@ export function scaffold(config, manifest, tempDir) {
         mkdirSync(publicVideos, { recursive: true });
         cpSync(videosDir, publicVideos, { recursive: true });
     }
+    // baseUrl is a full URL (site + base) or just a path ("/docs/") for a sub-path deployment.
     let siteDirective = '';
-    let baseDirective = '';
+    let basePath = '/';
     if (config.baseUrl && config.baseUrl.startsWith('http')) {
         siteDirective = `site: ${JSON.stringify(config.baseUrl)},`;
         try {
-            const basePath = new URL(config.baseUrl).pathname;
-            if (basePath && basePath !== '/') {
-                baseDirective = `base: ${JSON.stringify(basePath)},`;
-            }
+            basePath = new URL(config.baseUrl).pathname || '/';
         }
         catch { /* invalid URL, skip */ }
     }
+    else if (config.baseUrl?.startsWith('/')) {
+        basePath = config.baseUrl;
+    }
+    const baseDirective = basePath !== '/' ? `base: ${JSON.stringify(basePath)},` : '';
+    const headers = buildHeadersFile(basePath, config.cors ?? '*');
+    if (headers)
+        writeFileSync(join(tempDir, 'public', '_headers'), headers);
     const astroConfig = `import { defineConfig } from 'astro/config';
 
 export default defineConfig({

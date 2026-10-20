@@ -49,7 +49,7 @@ function ask(question) {
         });
     });
 }
-export async function buildSite(configPath) {
+export async function buildSite(configPath, options = {}) {
     const resolvedConfigPath = resolve(configPath || join(process.cwd(), 'tutorial-site.config.js'));
     let config;
     if (existsSync(resolvedConfigPath)) {
@@ -71,6 +71,8 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
         }
         config = { ...DEFAULT_CONFIG };
     }
+    if (options.base)
+        config.baseUrl = options.base;
     config.input = resolve(config.input);
     config.output = resolve(config.output);
     config.timelines = resolve(config.timelines ?? join(config.input, 'output'));

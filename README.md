@@ -910,10 +910,9 @@ Notes:
   The pre-0.5 `--playwright-director-accent` still works.
 - **Cross-origin**: the widget loads `client.js` and `embed/<slug>.json` from
   the gallery host, so the gallery must send `Access-Control-Allow-Origin` for
-  your app's origin. GitHub Pages sends `*` out of the box; on Netlify or
-  Cloudflare Pages add a headers rule for `/embed/*` and `/client.js` (e.g. a
-  `_headers` file with `Access-Control-Allow-Origin: *`). Video and screenshots
-  are plain media elements and need no CORS.
+  your app's origin. GitHub Pages sends `*` out of the box; for Cloudflare
+  Pages and Netlify, `build-site` writes a `_headers` file (see
+  [Deploying to Cloudflare Pages](#deploying-to-cloudflare-pages)).
 
 ### Headless data API — bring your own player
 
@@ -976,7 +975,8 @@ export default {
   videos: "e2e/videos/",           // Optional: videos + screenshots dir (default <input>/videos)
 
   // Site
-  baseUrl: "https://tutorials.myapp.com",  // For SEO (optional)
+  baseUrl: "https://tutorials.myapp.com",  // Full URL, or just a path ("/help/") for a sub-path deployment
+  cors: "*",                               // _headers Access-Control-Allow-Origin: "*", one origin, or false (no file)
   lang: "fr",                              // Default language (served at /, others at /<lang>/)
   strings: {                               // Optional: site UI texts, merged over the built-in en/fr/ar
     fr: { allTutorials: "Toute l’aide" },
@@ -1021,7 +1021,29 @@ npx serve tutorial-site-dist
 ```bash
 playwright-director build-site                      # Uses ./tutorial-site.config.js
 playwright-director build-site --config=path/to.js   # Custom config path
+playwright-director build-site --base=/help/         # Deploy under a sub-path (overrides baseUrl)
 ```
+
+### Deploying to Cloudflare Pages
+
+Publish the output directory as is. It contains a `_headers` file (also read
+by Netlify) so that an app on another origin can load the tutorials:
+
+```
+/embed/*      Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/client.js    Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/widget.js    Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/videos/*     Access-Control-Allow-Origin: *   Cache-Control: public, max-age=604800
+```
+
+Set `cors` in the config to one origin (`"https://app.example.com"`) to
+restrict it, or `false` to write no file. With a sub-path (`--base=/help/`)
+the rules are prefixed with it. Videos keep their name when re-recorded, so
+their cache is one week, not "immutable".
+
+Seeking a video (chapters, the player's timeline) needs a host that answers
+HTTP Range requests with `206 Partial Content`. Cloudflare Pages, Netlify and
+GitHub Pages do; some simple static servers (`python -m http.server`) do not.
 
 ### Deploying to GitHub Pages from CI
 
