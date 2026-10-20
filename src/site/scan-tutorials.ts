@@ -9,9 +9,12 @@ export interface ScannedTutorial {
 	stepScreenshots: { n: number; file: string }[];
 }
 
-export function scanTutorials(inputDir: string): ScannedTutorial[] {
-	const outputDir = join(inputDir, 'output');
-	const videosDir = join(inputDir, 'videos');
+/** Timelines default to `<input>/output`, videos to `<input>/videos`. */
+export function scanTutorials(
+	inputDir: string,
+	outputDir = join(inputDir, 'output'),
+	videosDir = join(inputDir, 'videos')
+): ScannedTutorial[] {
 	const results: ScannedTutorial[] = [];
 
 	if (!existsSync(videosDir)) return results;

@@ -317,7 +317,8 @@ tutorials/
 ```
 
 `npx playwright-director build-site` turns this directory into a static gallery
-site. Besides the pages, the build emits `widget.js` + `embed/<slug>.json`
+site (no astro needed in the project; `timelines` / `videos` in the site config
+point elsewhere when `TUTORIAL_OUTPUT_DIR` is overridden). Besides the pages, the build emits `widget.js` + `embed/<slug>.json`
 payloads so any app can embed a tutorial in-app: load
 `<script src="<site>/widget.js" defer>` and add a `data-tutorial="<slug>"`
 attribute to any element (slug = video id, i.e. the tutorial `name` plus

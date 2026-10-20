@@ -1,8 +1,7 @@
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-export function scanTutorials(inputDir) {
-    const outputDir = join(inputDir, 'output');
-    const videosDir = join(inputDir, 'videos');
+/** Timelines default to `<input>/output`, videos to `<input>/videos`. */
+export function scanTutorials(inputDir, outputDir = join(inputDir, 'output'), videosDir = join(inputDir, 'videos')) {
     const results = [];
     if (!existsSync(videosDir))
         return results;

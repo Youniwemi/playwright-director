@@ -1,7 +1,8 @@
-import { existsSync, writeFileSync, cpSync, rmSync } from 'fs';
+import { existsSync, writeFileSync, cpSync, rmSync, mkdirSync, symlinkSync, readFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { pathToFileURL, fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 import { createInterface } from 'readline';
 import { scanTutorials } from './scan-tutorials.js';
 import { generateManifest } from './generate-manifest.js';
@@ -20,6 +21,28 @@ const DEFAULT_CONFIG: SiteConfig = {
 	baseUrl: '/',
 	lang: 'fr'
 };
+
+/**
+ * Astro is playwright-director's dependency, not the consuming app's: resolve
+ * it from here and link it into the scaffold's node_modules, so `astro/config`
+ * and the compiled components' `astro/*` imports resolve from the build dir
+ * under any linker (bun isolated, pnpm, npm workspaces). Returns the CLI path.
+ */
+export function linkAstro(buildDir: string): string {
+	let pkgPath: string;
+	try {
+		pkgPath = createRequire(import.meta.url).resolve('astro/package.json');
+	} catch {
+		throw new Error('[build-site] astro is not installed next to playwright-director — reinstall playwright-director.');
+	}
+	const astroDir = dirname(pkgPath);
+	const link = join(buildDir, 'node_modules', 'astro');
+	mkdirSync(dirname(link), { recursive: true });
+	rmSync(link, { recursive: true, force: true });
+	symlinkSync(astroDir, link, 'junction');
+	const { bin } = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+	return join(astroDir, typeof bin === 'string' ? bin : bin.astro);
+}
 
 function ask(question: string): Promise<string> {
 	const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -58,13 +81,15 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 
 	config.input = resolve(config.input);
 	config.output = resolve(config.output);
+	config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
+	config.videos = resolve(config.videos ?? join(config.input, 'videos'));
 
-	console.log(`\n  Scanning ${config.input} for tutorials...`);
-	const tutorials = scanTutorials(config.input);
+	console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
+	const tutorials = scanTutorials(config.input, config.timelines, config.videos);
 
 	if (tutorials.length === 0) {
 		console.error(
-			'  No tutorials found. Make sure you have _timeline.json files in the output/ subdirectory and .webm files in the videos/ subdirectory.'
+			`  No tutorials found: need .webm files in ${config.videos} (timelines in ${config.timelines}). Set \`videos\` / \`timelines\` in the config if they live elsewhere.`
 		);
 		process.exit(1);
 	}
@@ -82,7 +107,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 
 	console.log('  Building static site...');
 	try {
-		execSync('npx astro build', {
+		execFileSync(process.execPath, [linkAstro(tempDir), 'build'], {
 			cwd: tempDir,
 			stdio: 'inherit',
 			env: { ...process.env, NODE_ENV: 'production' }

@@ -8,5 +8,6 @@ export interface ScannedTutorial {
         file: string;
     }[];
 }
-export declare function scanTutorials(inputDir: string): ScannedTutorial[];
+/** Timelines default to `<input>/output`, videos to `<input>/videos`. */
+export declare function scanTutorials(inputDir: string, outputDir?: string, videosDir?: string): ScannedTutorial[];
 //# sourceMappingURL=scan-tutorials.d.ts.map

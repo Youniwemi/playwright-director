@@ -34,7 +34,7 @@ export function scaffold(config, manifest, tempDir) {
     for (const file of buildEmbedFiles(manifest, config)) {
         writeFileSync(join(tempDir, 'public', file.path), JSON.stringify(file.data, null, 2));
     }
-    const videosDir = join(resolve(config.input), 'videos');
+    const videosDir = resolve(config.videos ?? join(config.input, 'videos'));
     const publicVideos = join(tempDir, 'public', 'videos');
     if (existsSync(videosDir)) {
         mkdirSync(publicVideos, { recursive: true });

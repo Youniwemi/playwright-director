@@ -759,6 +759,8 @@ On the first run, a `tutorial-site.config.js` file is created with sensible defa
 
 The command scans your `tutorials/` directory for videos, screenshots, and timeline metadata, then builds a static site ready to deploy (e.g., to Cloudflare Pages, Netlify, or any static host).
 
+Astro, which renders the site, is playwright-director's own dependency: your project does not need it, and the build works in npm, pnpm and bun workspaces (including bun's isolated linker).
+
 ### What gets generated
 
 ```
@@ -860,7 +862,9 @@ export default {
 
   // Paths
   input: "tutorials/",             // Where videos + timelines live
-  output: "tutorial-site-dist/",   // Where the static site is built
+  output: "tutorial-site-dist/",   // Where the static site is built (may sit inside input)
+  timelines: "e2e/output/",        // Optional: timeline JSON dir (default <input>/output — match TUTORIAL_OUTPUT_DIR)
+  videos: "e2e/videos/",           // Optional: videos + screenshots dir (default <input>/videos)
 
   // Site
   baseUrl: "https://tutorials.myapp.com",  // For SEO (optional)
@@ -884,9 +888,9 @@ export default {
 
 ### How videos are discovered
 
-The scanner looks for `.webm` files in `<input>/videos/`. For each video:
+The scanner looks for `.webm` files in `<input>/videos/` (or `videos`). For each video:
 
-- If a matching `_timeline.json` exists in `<input>/output/`, its metadata is used (title from narration steps, duration, category from `@feature:*` tag)
+- If a matching `_timeline.json` exists in `<input>/output/` (or `timelines`), its metadata is used (title from narration steps, duration, category from `@feature:*` tag)
 - Otherwise, a human-readable title is derived from the filename and duration is left blank
 
 Step screenshots (`{video}-step-{n}.{png,webp}`) are auto-detected and displayed as a carousel on each video card.

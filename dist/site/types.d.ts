@@ -5,6 +5,10 @@ export interface SiteConfig {
     font: string;
     input: string;
     output: string;
+    /** Timeline JSON dir (default `<input>/output`) — match TUTORIAL_OUTPUT_DIR if you override it */
+    timelines?: string;
+    /** Videos + step screenshots dir (default `<input>/videos`) */
+    videos?: string;
     baseUrl: string;
     /** Single lang or comma-separated list, e.g. "fr,en,ar" */
     lang: string;
