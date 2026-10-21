@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import { existsSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
 import { createTTSProvider, type TTSProvider } from './tts-provider.js';
+import { voiceCacheDir, adoptLegacyClip, VOICE_URL_PATH } from './voice-dir.js';
 
 const TUTORIAL_MODE = process.env.TUTORIAL_MODE === 'true';
 
@@ -15,9 +16,13 @@ export interface VoiceOptions {
 	audioBaseUrl?: string;
 }
 
-// Audio files stored in static folder to be served by dev server
-const AUDIO_STATIC_DIR = join(process.cwd(), 'static', 'audio', 'tutorial-voice');
-const AUDIO_URL_BASE = '/audio/tutorial-voice';
+/** Cache path of a clip, adopting a pre-0.5 clip from static/ on the way. */
+function clipPath(filename: string): string {
+	const dir = voiceCacheDir();
+	if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+	adoptLegacyClip(filename, dir);
+	return join(dir, filename);
+}
 
 /**
  * Get hash-based filename for text
@@ -63,6 +68,20 @@ export class TutorialVoice {
 		this.page = page;
 	}
 
+	private routedPages = new WeakSet<Page>();
+
+	/** The app server no longer serves the clips: Playwright answers the voice URLs from the cache. */
+	private async ensureVoiceRoute(): Promise<void> {
+		if (this.routedPages.has(this.page) || typeof this.page.route !== 'function') return;
+		this.routedPages.add(this.page);
+		await this.page
+			.route(`**${VOICE_URL_PATH}/*`, (route) => {
+				const path = join(voiceCacheDir(), basename(new URL(route.request().url()).pathname));
+				return existsSync(path) ? route.fulfill({ path }) : route.fulfill({ status: 404 });
+			})
+			.catch(() => {});
+	}
+
 	/**
 	 * Pre-generate a single audio file (non-blocking).
 	 * Returns a promise that resolves when preload is complete.
@@ -79,11 +98,6 @@ export class TutorialVoice {
 	 */
 	async preload(texts: string[]): Promise<void> {
 		if (!TUTORIAL_MODE) return;
-		// Ensure output directory exists
-		if (!existsSync(AUDIO_STATIC_DIR)) {
-			mkdirSync(AUDIO_STATIC_DIR, { recursive: true });
-		}
-
 		// Initialize TTS provider
 		if (!this.ttsProvider) {
 			this.ttsProvider = await createTTSProvider({
@@ -99,8 +113,8 @@ export class TutorialVoice {
 
 		for (const text of texts) {
 			const filename = getAudioFilename(text, this.options.lang);
-			const filePath = join(AUDIO_STATIC_DIR, filename);
-			const url = `${AUDIO_URL_BASE}/${filename}`;
+			const filePath = clipPath(filename);
+			const url = `${VOICE_URL_PATH}/${filename}`;
 
 			let durationMs: number;
 
@@ -166,6 +180,7 @@ export class TutorialVoice {
 		}
 
 		if (this.options.playInBrowser) {
+			await this.ensureVoiceRoute();
 			// Fire-and-forget: a navigation during the step action may kill the
 			// context — playback loss is acceptable, timing comes from durationMs.
 			await this.page
@@ -201,6 +216,7 @@ export class TutorialVoice {
 		}
 
 		if (this.options.playInBrowser) {
+			await this.ensureVoiceRoute();
 			await this.page.evaluate(
 				({ url }) => {
 					return new Promise<void>((resolve) => {
@@ -224,11 +240,6 @@ export class TutorialVoice {
 	 * Generate audio for a single text on demand
 	 */
 	private async generateAudio(text: string): Promise<PreloadedAudio | null> {
-		// Ensure output directory exists
-		if (!existsSync(AUDIO_STATIC_DIR)) {
-			mkdirSync(AUDIO_STATIC_DIR, { recursive: true });
-		}
-
 		// Initialize TTS provider if needed
 		if (!this.ttsProvider) {
 			this.ttsProvider = await createTTSProvider({
@@ -239,8 +250,8 @@ export class TutorialVoice {
 		}
 
 		const filename = getAudioFilename(text, this.options.lang);
-		const filePath = join(AUDIO_STATIC_DIR, filename);
-		const url = `${AUDIO_URL_BASE}/${filename}`;
+		const filePath = clipPath(filename);
+		const url = `${VOICE_URL_PATH}/${filename}`;
 
 		let durationMs: number;
 

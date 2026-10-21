@@ -153,9 +153,8 @@ else if (command === 'regen-voices') {
         // no .env — environment variables alone drive the TTS
     }
     const flag = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
-    const audioDir = join(process.cwd(), 'static', 'audio', 'tutorial-voice');
-    import('./voice-prerender.js')
-        .then(({ regenVoices }) => regenVoices(audioDir, {
+    Promise.all([import('./voice-prerender.js'), import('./voice-dir.js')])
+        .then(([{ regenVoices }, { voiceCacheDir }]) => regenVoices(voiceCacheDir(), {
         lang: flag('lang'),
         workers: flag('workers') ? parseInt(flag('workers'), 10) : undefined,
         force: process.argv.includes('--force')

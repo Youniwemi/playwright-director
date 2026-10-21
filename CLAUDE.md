@@ -76,7 +76,7 @@ Entry points: `playwright-director` (main), `playwright-director/reporter`, `pla
 
 - **Docs surfaces for user-facing actions:** README (Key Features + Methods table + a section), `skills/tutorialize/references/api.md` (§3 table + a section + checklist), `references/storytelling.md` (when to use it), `SKILL.md` and `agent.md` (one line each), `landing/index.html` (feature card). Zoom and `typeBlurred` are the reference examples.
 
-- **TTS audio is written to `static/audio/tutorial-voice/`** in the consuming project (not configurable). Files are content-hashed for caching.
+- **Voice cache** (`src/voice-dir.ts`): clips go to `voiceCacheDir()` = `TUTORIAL_VOICE_DIR` or `tutorials/.cache/voice` (outside the app's `static/`/`public/`, so they never ship in its build); recording, merge (`buildMergeCommand` default `audioDir`) and `regen-voices` all use it. Files are content-hashed (`md5(lang:text)`). The browser plays `<audioBaseUrl>/__playwright-director/voice/<file>`, answered from the cache by a `page.route` registered once per page (`TutorialVoice.ensureVoiceRoute()`). A clip missing from the cache but present in the pre-0.5 `static/audio/tutorial-voice/` is copied in on first use (`adoptLegacyClip()`), so upgrades re-synthesize nothing.
 - **`testTitle`, `testFile`, `projectName`** must be passed to the constructor for the reporter to match timelines to test results. Without `testTitle`, the merge step silently skips.
 - **`backgroundMusic` defaults to empty string** for external consumers. Pass `backgroundMusic: ''` explicitly if you have no music asset.
 - **Voice playback errors are silent** (`audio.onerror = () => resolve()`) — a wrong `audioBaseUrl` produces no narration without any error.
@@ -111,6 +111,7 @@ Entry points: `playwright-director` (main), `playwright-director/reporter`, `pla
 |---|---|
 | `TUTORIAL_MODE` | Master switch — must be `'true'` to generate video |
 | `TUTORIAL_VARIANT` | Recording variant (suffixes outputs; `mobile` = compact overlay + pinned split) |
+| `TUTORIAL_VOICE_DIR` | Voice clip cache (default `tutorials/.cache/voice`) |
 | `TUTORIAL_LANG` | Recording language (overrides `lang`, suffixes outputs `.<lang>`) |
 | `TUTORIAL_VOICE` | `'false'` disables TTS (default: enabled) |
 | `TUTORIAL_TTS_CMD` | Custom TTS command with `{lang}`, `{text}`, `{output}` placeholders |

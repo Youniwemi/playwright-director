@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { buildFastForwardFilter } from './fast-forward.js';
+import { voiceCacheDir } from './voice-dir.js';
 const DEFAULT_OPTIONS = {
-    audioDir: 'static/audio/tutorial-voice',
     musicFile: 'static/audio/tutorial-background.mp3',
     musicVolume: 0.15,
     voiceVolume: 2.5
@@ -11,7 +11,7 @@ const DEFAULT_OPTIONS = {
  * Build the ffmpeg command to merge video with audio
  */
 export function buildMergeCommand(timeline, videoPath, outputPath, options = {}) {
-    const opts = { ...DEFAULT_OPTIONS, ...options };
+    const opts = { ...DEFAULT_OPTIONS, audioDir: voiceCacheDir(), ...options };
     const fileExists = opts.checkFileExists ?? existsSync;
     const videoDuration = (timeline.totalDurationMs / 1000).toFixed(3);
     const inputs = [videoPath];

@@ -161,10 +161,17 @@ Videos are saved to `tutorials/videos/`, timelines to `tutorials/output/`.
 Tutorial runs create files in your project. Add these to `.gitignore`:
 
 ```gitignore
-# playwright-director generated files
+# playwright-director generated files (the voice cache is tutorials/.cache/voice)
 tutorials/
-static/audio/tutorial-voice/
 ```
+
+The narration clips are cached in `tutorials/.cache/voice/` (`TUTORIAL_VOICE_DIR`
+changes it). They stay out of your app's `static/` or `public/` folder, so they
+never ship in its production build: during the recording Playwright serves
+them to the page itself. Upgrading from 0.4: clips found in the old
+`static/audio/tutorial-voice/` are copied into the new cache the first time
+they are needed, so nothing is re-synthesized; delete the old folder after a
+run.
 
 ### 5. Converting an existing test
 
@@ -197,7 +204,7 @@ const tutorial = new Tutorial(page, options);
 |---|---|---|---|
 | `title` | `string` | *required* | Tutorial title shown in overlay |
 | `translate` | `(key: string) => string` | `k => k` | Translation function — pass your i18n `t()` |
-| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Base URL for serving audio files |
+| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Origin the narration audio plays from (Playwright serves the clips; any page origin works) |
 | `lang` | `string` | `'en'` | Language for UI text and TTS (e.g. `'en'`, `'fr'`, `'ar'`) |
 | `testName` | `string` | auto | Output filename slug |
 | `testFile` | `string` | `''` | Test file path for metadata |
@@ -414,8 +421,8 @@ await tutorial.complete();
   or `DENY` (Google, Bing, many SaaS apps) **cannot** be used as scenes. For
   your own app, relax `frame-ancestors` in tutorial mode only.
 - `stage()` navigates the parent page to `audioBaseUrl` before injecting the
-  stage, so narration audio loads same-origin. Point `audioBaseUrl` at the app
-  serving `static/audio/tutorial-voice/`.
+  stage, so narration audio loads same-origin (Playwright answers the voice
+  URLs from the cache; the app does not need to serve them).
 
 ## Languages — one spec, one recording per language
 
@@ -578,7 +585,7 @@ npx playwright-director regen-voices                    # synthesize the missing
 npx playwright-director regen-voices --workers=4        # parallel TTS (default 2)
 npx playwright-director regen-voices --force            # after a voice change: redo everything
 npx playwright-director regen-voices --lang=fr          # one language only
-rm -rf static/audio/tutorial-voice && npx playwright-director regen-voices   # full rebuild
+rm -rf tutorials/.cache/voice && npx playwright-director regen-voices   # full rebuild
 ```
 
 Narration texts are collected from the artifacts that record them verbatim:
@@ -593,6 +600,7 @@ run picks the clips up from cache.
 |---|---|---|
 | `TUTORIAL_MODE` | `false` | Enable tutorial video generation |
 | `TUTORIAL_VARIANT` | none | Recording variant — suffixes outputs; `mobile` also compacts the overlay and pins the split |
+| `TUTORIAL_VOICE_DIR` | `tutorials/.cache/voice` | Voice clip cache (read by recording, merge and `regen-voices`) |
 | `TUTORIAL_LANG` | none | Recording language — overrides `lang`, suffixes outputs `.<lang>` (one run per language) |
 | `TUTORIAL_VOICE` | `true` | Enable/disable voice narration |
 | `TUTORIAL_VOICE_NAME` | auto | TTS voice name override |

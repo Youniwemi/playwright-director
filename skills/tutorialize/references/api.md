@@ -27,7 +27,7 @@ Or use a fixture that wraps this (the consuming project typically provides a `tu
 | `title` | `string` | *required* | Overlay title |
 | `lang` | `string` | `'en'` (`env TUTORIAL_LANG` wins) | Narration + TTS language. `TUTORIAL_LANG=xx` records one spec per language: outputs get `.<lang>`; read `tutorial.lang` to drive the app UI (`?lang=`) |
 | `translate` | `(key: string) => string` | identity | i18n function — pass your `t()` |
-| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Base URL for audio files |
+| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Origin the narration plays from — Playwright serves the clips from `tutorials/.cache/voice` (`TUTORIAL_VOICE_DIR`) |
 | `testTitle` | `string` | auto | Raw test title (for reporter matching) |
 | `testFile` | `string` | `''` | Test file path (metadata) |
 | `projectName` | `string` | `''` | Playwright project name |
