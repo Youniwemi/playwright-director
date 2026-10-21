@@ -1,0 +1,20 @@
+---
+// Links to the same tutorial in its other recorded languages (hidden when there is only one).
+import { t, LANG_NAMES } from '../i18n';
+import { translationsOf, videoHref, type Video } from '../lib/site';
+
+interface Props {
+	video: Video;
+}
+
+const { video } = Astro.props;
+const translations = translationsOf(video);
+---
+
+{translations.length > 1 && (
+	<nav class="lang-switch" aria-label={t(video.lang, 'language')}>
+		{translations.map((v) => (
+			<a href={videoHref(v)} lang={v.lang} hreflang={v.lang} aria-current={v.id === video.id ? 'page' : undefined}>{LANG_NAMES[v.lang!] ?? v.lang}</a>
+		))}
+	</nav>
+)}

@@ -1,0 +1,75 @@
+---
+import Layout from './Layout.astro';
+import CourseNav from './CourseNav.astro';
+import VideoPlayer from '../components/VideoPlayer.astro';
+import LangSwitch from '../components/LangSwitch.astro';
+import StepStrip from '../components/StepStrip.astro';
+import StepGuide from '../components/StepGuide.astro';
+import Lightbox from '../components/Lightbox.astro';
+import PrevNext from '../components/PrevNext.astro';
+import VideoLinks from '../components/VideoLinks.astro';
+import { config, manifest, homeOf, loc, numberSteps, neighbours, videosForLang, steps, videoSeo, appHref, type Video } from '../lib/site';
+import { t, siteLang } from '../i18n';
+
+interface Props {
+	video: Video;
+}
+
+const { video } = Astro.props;
+const L = video.lang ?? siteLang;
+const numbered = numberSteps(video);
+// Same list as the home page of this language, in section order: prev/next cross into the next section.
+const list = videosForLang(L);
+const { prev, next } = neighbours(list, video);
+const sectionLabel = (v: Video) => loc(manifest.categories[v.category]?.label, L);
+const nextLabel = next && next.category !== video.category ? `${t(L, 'nextSection')} · ${sectionLabel(next)}` : t(L, 'next');
+const prevLabel = prev && prev.category !== video.category ? sectionLabel(prev) : t(L, 'previous');
+const ctaHref = config.cta ? appHref(L, video) : undefined;
+---
+
+<Layout title={video.title} description={video.description} lang={L} seo={videoSeo(video)}>
+	<slot name="head" slot="head" />
+	<LangSwitch video={video} slot="nav" />
+
+	<div class="ac-wrap ac-video">
+		<div class="ac-video-main">
+			<nav class="ac-crumbs" aria-label="breadcrumb">
+				<ol>
+					<li><a href={homeOf(L)}>{t(L, 'home')}</a></li>
+					<li><a href={`${homeOf(L)}#${video.category}`}>{sectionLabel(video)}</a></li>
+					<li aria-current="page">{video.title}</li>
+				</ol>
+			</nav>
+
+			<VideoPlayer video={video} />
+
+			<div class="ac-video-head">
+				<p class="ac-meta">
+					<span class="ac-chip">{sectionLabel(video)}</span>
+					<span class="ac-muted">{video.duration}</span>
+					{video.premium && <span class="ac-badge ac-pro">PRO</span>}
+				</p>
+				<h1>{video.title}</h1>
+				{video.description && <p class="ac-lead">{video.description}</p>}
+				<VideoLinks video={video} />
+			</div>
+
+			{steps.strip && <StepStrip steps={numbered} lang={L} />}
+			<StepGuide steps={numbered} layout={steps.layout} lang={L} />
+			<PrevNext prev={prev} next={next} lang={L} prevLabel={prevLabel} nextLabel={nextLabel} />
+		</div>
+
+		<aside class="ac-aside">
+			<CourseNav videos={list} current={video} lang={L} />
+			{ctaHref && (
+				<section class="ac-cta">
+					<h2>{t(L, 'ctaTitle')}</h2>
+					<p>{t(L, 'ctaText')}</p>
+					<a class="ac-btn ac-btn-accent" href={ctaHref}>{t(L, 'ctaButton')}</a>
+				</section>
+			)}
+		</aside>
+	</div>
+
+	{(steps.strip || steps.layout === 'cards') && <Lightbox />}
+</Layout>

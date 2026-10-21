@@ -15,6 +15,7 @@ export class TutorialTimeline {
     lang;
     feature = '';
     variant = '';
+    links;
     musicOptions;
     startTime = 0;
     videoTrimMs = 0;
@@ -23,8 +24,9 @@ export class TutorialTimeline {
     fastForwards = [];
     openFastForward = null;
     videoPath = '';
-    constructor(testName, testFile = '', projectName = '', lang = 'fr', testTitle = '', feature = '', musicOptions = {}, title = '', variant = '') {
+    constructor(testName, testFile = '', projectName = '', lang = 'fr', testTitle = '', feature = '', musicOptions = {}, title = '', variant = '', links) {
         this.variant = variant;
+        this.links = links;
         this.testName = testName;
         this.testTitle = testTitle;
         this.title = title;
@@ -118,6 +120,8 @@ export class TutorialTimeline {
             lang: this.lang,
             feature: this.feature || undefined,
             variant: this.variant || undefined,
+            links: this.links && (this.links.app || this.links.docs) ? this.links : undefined,
+            recordedAt: new Date().toISOString(),
             totalDurationMs: fastForwardOutputMs(tapeDurationMs, fastForward),
             tapeDurationMs: fastForward.length ? tapeDurationMs : undefined,
             fastForward: fastForward.length ? fastForward : undefined,

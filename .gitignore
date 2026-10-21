@@ -13,3 +13,4 @@ static/audio/tutorial-voice/
 # repo's own demo gallery deployed by deploy-site.yml)
 tutorial-site-dist/
 !tests/fixtures/workspace/apps/host/tutorials/
+tutorial-site-classic/

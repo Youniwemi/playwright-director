@@ -1,16 +1,16 @@
 ---
 // One home page per extra language (/en/, /ar/ …); the default language lives at /.
-import TutorialsHome from '../../components/TutorialsHome.astro';
-import tutorials from '../../data/tutorials.json';
+import Home from '../../theme/Home.astro';
+import { recordedLangs } from '../../lib/site';
 import { siteLang } from '../../i18n';
 
 export function getStaticPaths() {
-	const langs = new Set<string>((tutorials as any).videos.map((v: any) => v.lang).filter(Boolean));
-	langs.delete(siteLang);
-	return [...langs].map((lang) => ({ params: { lang } }));
+	return recordedLangs()
+		.filter((lang) => lang !== siteLang)
+		.map((lang) => ({ params: { lang } }));
 }
 
 const { lang } = Astro.params;
 ---
 
-<TutorialsHome lang={lang} />
+<Home lang={lang} />

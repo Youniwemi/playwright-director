@@ -28,6 +28,7 @@ An AI agent can also write or adapt the test for a specific communication goal �
 - [Reviewing & Correcting Narration](#reviewing--correcting-narration)
 - [Claude Code Integration](#claude-code-integration)
 - [Tutorial Gallery Site](#tutorial-gallery-site)
+  - [Themes](#themes)
   - [In-app help widget](#in-app-help-widget)
   - [Deploying to GitHub Pages from CI](#deploying-to-github-pages-from-ci)
 - [How It Works](#how-it-works)
@@ -60,6 +61,9 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **Multi-language** — Full RTL support (Arabic), per-language video filenames, i18n-ready
 - **Playwright Reporter** — Auto-merges audio into video as each tutorial test completes
 - **Gallery site** — `build-site` turns your recordings into a static video gallery with step-by-step guides, ready for any static host
+- **Two site themes** — Académie (editorial: hero, search, sections, course sidebar) or Classic (card grid); design tokens, extra CSS or file overrides for your brand
+- **SEO built in** — VideoObject JSON-LD with chapters, `sitemap.xml` with hreflang, canonical and Open Graph tags
+- **App and docs links** — each video links to the matching screen of your app and page of your docs
 - **In-app help widget** — the published gallery serves a `widget.js`: one `data-tutorial` attribute opens any tutorial as an overlay inside your own app
 - **Zero runtime overhead** — All tutorial logic is no-op when `TUTORIAL_MODE` is not set
 
@@ -733,13 +737,14 @@ This package ships **two assets for Claude Code** that teach AI agents how to co
 
 ### Skill reference files
 
-The skill bundles two reference documents that Claude reads before tutorializing:
+The skill bundles three reference documents that Claude reads before tutorializing:
 
 | File | Content |
 |---|---|
 | `SKILL.md` | 4-phase process: understand the viewer → design the arc → implement with `playwright-director` → verify |
 | `references/storytelling.md` | Who is watching (role, expertise, emotional state), narration voice rules, pacing decisions, when to use context screens vs steps, multi-profile scene heuristics, directing attention (highlight vs camera zoom vs blur, secrets typed blurred) |
 | `references/api.md` | Complete `Tutorial` class API with timing model, critical rules (e.g., navigate before any tutorial call, never override `--reporter`), camera zoom options and rules, and a pre-commit checklist |
+| `references/site.md` | Gallery site configuration: every `tutorial-site.config.js` option, themes, sections and order, tokens → css → overrides, app/docs links, languages, CLI flags, output files |
 
 ### Setup
 
@@ -819,6 +824,9 @@ tutorial-site-dist/          # Static site output (configurable)
 ├── embed/                   # Widget data
 │   ├── {video-slug}.json    # One payload per tutorial: video, description, steps
 │   └── index.json           # All available slugs (discovery/debugging)
+├── sitemap.xml              # Full baseUrl only: every page with its hreflang alternates
+├── robots.txt               # Full baseUrl at the host root only
+├── links.json               # Docs URL → tutorials that link to it (show "watch the video" in your docs)
 └── videos/                  # Copied from tutorials/videos/
     ├── *.webm               # Video files
     └── *-step-*.webp        # Step screenshots (carousel on cards, guide on video pages)
@@ -835,11 +843,12 @@ still show their text.
 Each voiced step also shows its start time (`▶ 0:13`): clicking it seeks the
 video there, and the step that is playing is highlighted (`aria-current="step"`).
 Seeking needs a host that answers HTTP Range requests with `206` — Cloudflare
-Pages, Netlify, GitHub Pages and `playwright-director serve` do. A step
+Pages, Netlify and GitHub Pages do. `?t=<seconds>` in the page URL starts the
+video there. A step
 declared with an untranslated key (`tg.open`) is titled with the first
 sentence of its narration instead.
 
-![Video page with thumbnail strip and text guide](docs/images/video-page.png)
+![Académie video page: player, course sidebar, call-to-action, thumbnail strip and step guide](docs/images/video-page.png)
 
 Two settings control the guide (`tutorials` block of the config):
 
@@ -861,6 +870,41 @@ Two settings control the guide (`tutorials` block of the config):
 ![Full layout](docs/images/steps-full.png)
 
 </details>
+
+### Themes
+
+Two themes share the same pages and data. Pick one with `theme` in the config
+(or `build-site --theme=classic`):
+
+| `theme: 'academy'` (default) | `theme: 'classic'` |
+|---|---|
+| ![Académie home](docs/images/theme-academy.png) | ![Classic home](docs/images/theme-classic.png) |
+| Hero with search and section chips, a featured "start here" video, a side table of contents, numbered cards (thumbnail = quick view, title = page), a course sidebar and a "your turn" call-to-action on video pages | Card grid grouped by section, dark mode, a thumbnail carousel per card |
+
+Brand it with the lightest layer that does the job:
+
+1. **`tokens`** — colors, radius, shadow and fonts become `--pd-*` CSS variables
+   (`primary onPrimary accent bg surface text muted border pro radius shadow shadowHover fontBody fontDisplay`;
+   an unknown name fails the build). `googleFonts` loads the families you name (`false` = none).
+2. **`css`** — a stylesheet loaded after the theme.
+3. **`overrides`** — a folder copied over the site `src/` after the theme: replace any page,
+   component or theme file (`theme/Home.astro`, `components/VideoCard.astro`, …).
+
+To offer both looks, build twice and link the builds with `themeSwitcher`
+(the demo gallery does this: [Académie](https://youniwemi.github.io/playwright-director/gallery/) ·
+[Classic](https://youniwemi.github.io/playwright-director/gallery/classic/)).
+
+**App and docs links.** Declare where a tutorial belongs in the test — `new Tutorial(page, { links: { app: '/invoices/new', docs: '/invoices/' } })` —
+or per slug in `tutorials.links`. Paths are resolved on `appUrl` / `docsUrl` (`{lang}` is replaced by the
+tutorial language). The video page shows "Open in the app" / "Read the documentation", and the Académie
+call-to-action opens the app.
+
+**SEO.** With a full `baseUrl` (`https://…`), every page gets a canonical URL, hreflang alternates and
+Open Graph tags; video pages carry a schema.org `VideoObject` (chapters as `Clip`s, `uploadDate` from the
+recording). The build writes `sitemap.xml`, `robots.txt` (host root only) and `links.json`. A bare-path
+`baseUrl` skips the absolute URLs.
+
+The full option reference is [`skills/tutorialize/references/site.md`](skills/tutorialize/references/site.md).
 
 ### In-app help widget
 
@@ -978,11 +1022,21 @@ directory serving `widget.js` and `embed/`).
 ```js
 // tutorial-site.config.js
 export default {
-  // Branding
+  // Branding (see Themes above)
   title: "My App Tutorials",       // Site title (header + page titles)
   logo: "./assets/logo.svg",       // Path to logo image (optional)
-  primaryColor: "#6366f1",         // Primary color (CSS)
-  font: "system-ui, sans-serif",   // Font family (CSS)
+  theme: "academy",                // 'academy' (default) | 'classic'
+  tokens: { primary: "#0f766e", radius: "12px", fontBody: "Inter, sans-serif" },  // --pd-* variables
+  googleFonts: ["Inter:wght@400;600"],  // Optional: fonts to load (false = none; default: the theme's)
+  css: "./tutorials/site.css",     // Optional: extra stylesheet, after the theme
+  overrides: "./tutorials/site/",  // Optional: folder copied over the site src/
+  themeSwitcher: { Académie: "/help/", Classic: "/help/classic/" },  // Optional: links between builds
+  // primaryColor / font: pre-0.6 spellings of tokens.primary / tokens.fontBody, still read
+
+  // Links (optional)
+  appUrl: "https://app.myapp.com",          // Resolves links.app; header button + call-to-action
+  docsUrl: "https://docs.myapp.com/{lang}", // Resolves links.docs
+  cta: true,                                // Académie "your turn" panel (needs an app link)
 
   // Paths
   input: "tutorials/",             // Where videos + timelines live
@@ -1001,10 +1055,13 @@ export default {
 
   // Content overrides (optional)
   tutorials: {
-    categories: {
-      "getting-started": { icon: "⭐", label: "Getting Started" },
+    categories: {          // Sections in display order; `items` = slugs in reading order
+      "getting-started": { icon: "⭐", label: "Getting Started", blurb: "The first ten minutes", items: ["sign-up", "first-invoice"] },
       "advanced":        { icon: "🚀", label: "Advanced" },
     },
+    featured: "sign-up",              // Académie "start here" video (default: the first one)
+    premium: ["bank-reconciliation"], // PRO badge
+    links: { "first-invoice": { app: "/invoices/new", docs: "/invoices/" } },  // Over the test's `links`
     ui: {
       heroTitle: "Learn My App",
       heroSubtitle: "Step-by-step video tutorials",
@@ -1040,6 +1097,9 @@ playwright-director build-site --config=path/to.js   # Custom config path
 playwright-director build-site --base=/help/         # Deploy under a sub-path (overrides baseUrl)
 playwright-director build-site -y                    # Never prompt (CI); also automatic without a TTY
 playwright-director build-site --only=look,billing   # Only these tutorials (all languages/variants)
+playwright-director build-site --theme=classic       # Override the config theme
+playwright-director build-site --output=site-classic/  # Override the output folder
+playwright-director build-site --dev                 # Serve with live reload (astro dev) instead of building
 ```
 
 `--only` builds a site with just those tutorials — handy to check one page
@@ -1089,10 +1149,14 @@ steps:
   - run: npx playwright install --with-deps chromium
   - run: npm run test:e2e:video                    # TUTORIAL_MODE=true playwright test
   - run: npx playwright-director build-site -y
-  - run: |                                         # landing page + gallery
-      mkdir -p _site/gallery
+  - run: |                                         # same gallery, Classic theme (optional)
+      npx playwright-director build-site -y --theme=classic \
+        --base=/playwright-director/gallery/classic/ --output=tutorial-site-classic/
+  - run: |                                         # landing page + galleries
+      mkdir -p _site/gallery/classic
       cp -r landing/. _site/
       cp -r tutorial-site-dist/. _site/gallery/
+      cp -r tutorial-site-classic/. _site/gallery/classic/
   - uses: peaceiris/actions-gh-pages@v4
     with:
       github_token: ${{ secrets.GITHUB_TOKEN }}

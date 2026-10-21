@@ -1,0 +1,46 @@
+---
+// Document shell shared by every theme: <html lang dir>, <head> (SEO, fonts), and the stylesheet order
+// components.css → theme/theme.css → user.css (config tokens + `css` file, written by scaffold).
+import '../styles/components.css';
+import '../theme/theme.css';
+import '../styles/user.css';
+import Seo, { type SeoProps } from '../components/Seo.astro';
+import { config } from '../lib/site';
+import { siteLang, RTL_LANGS } from '../i18n';
+
+interface Props {
+	title: string;
+	description?: string;
+	/** Page language (a tutorial page uses its narration language) */
+	lang?: string;
+	seo?: SeoProps;
+}
+
+const { title, seo } = Astro.props;
+const description = Astro.props.description || config.title;
+const lang = Astro.props.lang || siteLang;
+const dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
+const fonts: string[] = config.googleFonts ?? [];
+---
+
+<!doctype html>
+<html lang={lang} dir={dir}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content={description} />
+		<title>{title} | {config.title}</title>
+		<Seo title={title} description={description} lang={lang} {...seo} />
+		{fonts.length > 0 && (
+			<>
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+				<link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${fonts.map((f) => `family=${f.replace(/ /g, '+')}`).join('&')}&display=swap`} />
+			</>
+		)}
+		<slot name="head" />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

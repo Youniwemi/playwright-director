@@ -61,6 +61,14 @@ export interface TutorialOptions {
      *  The variant `'mobile'` also switches to a compact overlay and, with 2+
      *  scenes, a permanent split stage (all scenes visible, ratios ignored). */
     variant?: string;
+    /** Where the gallery sends a viewer next: `app` = the screen this tutorial shows
+     *  (path on the site config `appUrl`), `docs` = its documentation page (path on `docsUrl`).
+     *  Full URLs are kept as is. Stored in the timeline; no effect on the recording. */
+    links?: TutorialLinks;
+}
+export interface TutorialLinks {
+    app?: string;
+    docs?: string;
 }
 export interface SceneOptions {
     /** Label shown on the scene's tab — keep it a person, not a URL */

@@ -1,0 +1,50 @@
+---
+// Full-size screenshot viewer for .step-frame / .step-thumb buttons, with the step's number, title and text.
+---
+
+<div class="lightbox" id="step-lightbox" hidden>
+	<figure class="lightbox-figure">
+		<img alt="" />
+		<figcaption class="lightbox-caption" hidden>
+			<span class="lightbox-num"></span>
+			<span class="lightbox-copy">
+				<strong class="lightbox-title"></strong>
+				<span class="lightbox-text"></span>
+			</span>
+		</figcaption>
+	</figure>
+</div>
+
+<script>
+	const lightbox = document.getElementById('step-lightbox');
+	if (lightbox) {
+		const img = lightbox.querySelector('img')!;
+		const caption = lightbox.querySelector<HTMLElement>('.lightbox-caption')!;
+		const num = lightbox.querySelector<HTMLElement>('.lightbox-num')!;
+		const title = lightbox.querySelector<HTMLElement>('.lightbox-title')!;
+		const text = lightbox.querySelector<HTMLElement>('.lightbox-text')!;
+
+		const open = (source: HTMLElement) => {
+			img.src = source.dataset.full || '';
+			num.textContent = source.dataset.num || '';
+			title.textContent = source.dataset.title || '';
+			text.textContent = source.dataset.text || '';
+			caption.hidden = !(source.dataset.title || source.dataset.text);
+			lightbox.hidden = false;
+			document.body.style.overflow = 'hidden';
+		};
+
+		document.querySelectorAll<HTMLElement>('.step-thumb, .step-frame').forEach((thumb) => {
+			thumb.addEventListener('click', () => open(thumb));
+		});
+
+		const close = () => {
+			lightbox.hidden = true;
+			document.body.style.overflow = '';
+		};
+		lightbox.addEventListener('click', close);
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !lightbox.hidden) close();
+		});
+	}
+</script>

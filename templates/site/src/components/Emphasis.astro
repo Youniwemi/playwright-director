@@ -1,0 +1,8 @@
+---
+// A config title with `*word*` emphasis marks: the marked words in <em>.
+import { emphasisParts } from '../lib/site';
+
+const { text } = Astro.props as { text: string };
+---
+
+{emphasisParts(text).map((part, i) => (i % 2 ? <em>{part}</em> : part))}

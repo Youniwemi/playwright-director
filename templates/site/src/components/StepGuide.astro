@@ -1,0 +1,115 @@
+---
+// Step-by-step guide in the configured layout (SiteConfig.tutorials.stepsLayout).
+// Each numbered step carries data-at, so VideoPlayer marks the playing one.
+import { t } from '../i18n';
+import { media, mmss, type NumberedStep } from '../lib/site';
+
+interface Props {
+	steps: NumberedStep[];
+	layout: 'text' | 'cards' | 'full' | 'none';
+	lang?: string;
+}
+
+const { steps: numbered, layout, lang: L } = Astro.props;
+---
+
+{layout === 'full' && numbered.length > 0 && (
+	<section class="steps-guide">
+		{numbered.map((s) => (
+			s.context ? (
+				<p class="step-context">{s.text}</p>
+			) : (
+				<div class="step-block" data-at={s.at}>
+					<div class="step-header">
+						<span class="step-number">{s.num}</span>
+						<div class="step-copy">
+							{s.title && <h2 class="step-title">{s.title}</h2>}
+							{s.text && <p class="step-text">{s.text}</p>}
+						</div>
+						{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
+					</div>
+					{s.image && (
+						<img
+							class="step-shot"
+							src={media(s.image)}
+							alt={s.title || t(L, 'step', { n: s.num! })}
+							loading={s.num === 1 ? 'eager' : 'lazy'}
+						/>
+					)}
+				</div>
+			)
+		))}
+	</section>
+)}
+
+{layout === 'cards' && numbered.length > 0 && (
+	<section class="steps-cards">
+		{numbered.map((s) => (
+			s.context ? (
+				<p class="step-context">{s.text}</p>
+			) : (
+				<div class="step-card" data-at={s.at}>
+					<span class="step-number">{s.num}</span>
+					<div class="step-copy">
+						{s.title && <h2 class="step-title">{s.title}</h2>}
+						{s.text && <p class="step-text">{s.text}</p>}
+					</div>
+					{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
+					{s.image && (
+						<button
+							class="step-thumb"
+							data-full={media(s.image)}
+							data-num={s.num}
+							data-title={s.title || ''}
+							data-text={s.text || ''}
+							aria-label={t(L, 'enlarge', { n: s.num! })}
+						>
+							<img src={media(s.image)} alt={s.title || t(L, 'step', { n: s.num! })} loading="lazy" />
+							<span class="step-zoom">⤢</span>
+						</button>
+					)}
+				</div>
+			)
+		))}
+	</section>
+)}
+
+{layout === 'text' && numbered.length > 0 && (
+	<section class="steps-text">
+		{numbered.map((s) => (
+			s.context ? (
+				<p class="step-context">{s.text}</p>
+			) : (
+				<div class:list={['step-row', { 'has-shot': !!s.image }]} data-at={s.at}>
+					<div class="step-row-top">
+						<button class="step-row-head" aria-expanded="false" disabled={!s.image}>
+							<span class="step-number">{s.num}</span>
+							<span class="step-copy">
+								{s.title && <span class="step-title">{s.title}</span>}
+								{s.text && <span class="step-text">{s.text}</span>}
+							</span>
+							{s.image && <span class="step-chevron">▾</span>}
+						</button>
+						{s.at !== undefined && <button class="step-time" data-at={s.at} aria-label={t(L, 'playFrom', { time: mmss(s.at) })}>▶ {mmss(s.at)}</button>}
+					</div>
+					{s.image && (
+						<div class="step-reveal">
+							<img src={media(s.image)} alt={s.title || t(L, 'step', { n: s.num! })} loading="lazy" />
+						</div>
+					)}
+				</div>
+			)
+		))}
+	</section>
+)}
+
+<script>
+	// Text layout: click a step to reveal its screenshot
+	document.querySelectorAll<HTMLElement>('.step-row.has-shot .step-row-head').forEach((head) => {
+		head.addEventListener('click', () => {
+			const row = head.closest('.step-row')!;
+			const open = row.classList.toggle('open');
+			head.setAttribute('aria-expanded', String(open));
+		});
+	});
+</script>

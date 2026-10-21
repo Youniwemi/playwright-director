@@ -1,0 +1,20 @@
+---
+// Links to the home page of every recorded language (hidden when there is only one).
+import { t, LANG_NAMES } from '../i18n';
+import { homeOf, recordedLangs } from '../lib/site';
+
+interface Props {
+	lang: string;
+}
+
+const { lang } = Astro.props;
+const langs = recordedLangs();
+---
+
+{langs.length > 1 && (
+	<nav class="variant-filter" aria-label={t(lang, 'language')}>
+		{langs.map((l) => (
+			<a class:list={['variant-btn', { active: l === lang }]} href={homeOf(l)} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>{LANG_NAMES[l] ?? l}</a>
+		))}
+	</nav>
+)}

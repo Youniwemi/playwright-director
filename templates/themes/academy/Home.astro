@@ -1,0 +1,139 @@
+---
+import Layout from './Layout.astro';
+import VideoModal from '../components/VideoModal.astro';
+import HomeLangs from '../components/HomeLangs.astro';
+import VariantFilter from '../components/VariantFilter.astro';
+import Emphasis from '../components/Emphasis.astro';
+import { config, manifest, media, videoHref, videosForLang, sections, posterOf, loc, homeSeo, plainText, sectionStats, appHref, type Video } from '../lib/site';
+import { normalize } from '../lib/filter';
+import { t, siteLang } from '../i18n';
+
+interface Props {
+	/** Page language — `/` is the site default, `/<lang>/` the others */
+	lang?: string;
+}
+
+const { ui } = manifest;
+const lang = Astro.props.lang ?? siteLang;
+const videos = videosForLang(lang);
+const heroTitle = loc(ui.heroTitle, lang);
+// The default subtitle is a UI string — translate it; a configured one stays as is.
+const subtitle = ui.heroSubtitle === t(siteLang, 'videoTutorials') ? t(lang, 'videoTutorials') : loc(ui.heroSubtitle, lang);
+const list = sections(videos);
+const longest = Math.max(1, Math.ceil(Math.max(0, ...videos.map((v) => v.durationSeconds || 0)) / 60));
+const featured = videos.find((v) => (v.slug ?? v.id) === manifest.featured) ?? videos[0];
+const featuredPoster = featured && posterOf(featured);
+const app = config.cta ? appHref(lang) : undefined;
+// Normalized at build time: the client only normalizes the query.
+const searchText = (v: Video) => normalize([v.title, v.description, ...(v.stepsDetail ?? []).flatMap((s) => [s.title, s.text])].filter(Boolean).join(' '));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Layout title={plainText(heroTitle)} description={subtitle} lang={lang} seo={homeSeo()}>
+	<slot name="head" slot="head" />
+	<HomeLangs lang={lang} slot="nav" />
+
+	<section class="ac-wrap ac-hero">
+		<div>
+			<p class="ac-eyebrow">{t(lang, 'heroEyebrow', { n: videos.length, m: longest })}</p>
+			<h1><Emphasis text={heroTitle} /></h1>
+			{subtitle && <p class="ac-lead">{subtitle}</p>}
+			<form class="ac-search" role="search" onsubmit="return false">
+				<label for="ac-search-input" class="ac-sr">{t(lang, 'search')}</label>
+				<input id="ac-search-input" type="search" placeholder={t(lang, 'search')} autocomplete="off" />
+			</form>
+			{list.length > 1 && (
+				<nav class="ac-chips" aria-label={t(lang, 'sections')}>
+					{list.map((s) => <a class="ac-chip" href={`#${s.id}`}>{loc(s.label, lang)}</a>)}
+				</nav>
+			)}
+		</div>
+		{featured && (
+			<a class="ac-featured" href={videoHref(featured)}>
+				{featuredPoster && <img src={media(featuredPoster)} alt="" loading="eager" />}
+				<span class="ac-featured-play" aria-hidden="true">▶</span>
+				<span class="ac-featured-body">
+					<span class="ac-kicker">{t(lang, 'startHere')}</span>
+					<span class="ac-featured-title">{featured.title} · {featured.duration}</span>
+				</span>
+			</a>
+		)}
+	</section>
+
+	<div class="ac-wrap ac-home">
+		<nav class="ac-toc" aria-label={t(lang, 'sections')}>
+			<ul>
+				{list.map((s) => (
+					<li><a href={`#${s.id}`}>{loc(s.label, lang)} <span class="ac-count">({s.videos.length})</span></a></li>
+				))}
+			</ul>
+		</nav>
+
+		<div class="ac-sections">
+			<VariantFilter videos={videos} lang={lang} />
+			<p class="ac-empty" role="status" data-template={t(lang, 'noResults', { q: '{q}' })} hidden></p>
+			{list.map((section) => (
+				<section class="category ac-section" id={section.id} aria-labelledby={`h-${section.id}`}>
+					<header class="ac-section-head">
+						<div>
+							<h2 id={`h-${section.id}`}>{loc(section.label, lang)}</h2>
+							{section.blurb && <p class="ac-muted">{loc(section.blurb, lang)}</p>}
+						</div>
+						<span class="ac-muted">{sectionStats(lang, section.videos)}</span>
+					</header>
+					<div class="ac-grid">
+						{section.videos.map((video, j) => {
+							const poster = posterOf(video);
+							return (
+							<a
+								class="video-card ac-card ac-reveal"
+								href={videoHref(video)}
+								data-href={videoHref(video)}
+								data-video-url={media(video.file)}
+								data-video-id={video.id}
+								data-variant={video.variant ?? ''}
+								data-search={searchText(video)}
+								lang={video.lang}
+							>
+								<span class="ac-thumb" data-quickview>
+									{poster ? <img src={media(poster)} alt="" loading="lazy" /> : <span class="ac-thumb-empty"></span>}
+									<span class="ac-badge ac-duration">{video.duration}</span>
+									{video.premium && <span class="ac-badge ac-pro">PRO</span>}
+								</span>
+								<span class="ac-card-body">
+									<span class="ac-card-num" aria-hidden="true">{pad(j + 1)}</span>
+									<span class="video-title">{video.title}</span>
+								</span>
+							</a>
+							);
+						})}
+					</div>
+				</section>
+			))}
+
+			{app && (
+				<section class="ac-cta ac-cta-wide">
+					<h2>{t(lang, 'ctaTitle')}</h2>
+					<p>{t(lang, 'ctaText')}</p>
+					<a class="ac-btn ac-btn-accent" href={app}>{t(lang, 'ctaButton')}</a>
+				</section>
+			)}
+		</div>
+	</div>
+
+	<VideoModal lang={lang} />
+</Layout>
+
+<script>
+	import { setFilter } from '../lib/filter';
+
+	const input = document.getElementById('ac-search-input') as HTMLInputElement | null;
+	const empty = document.querySelector<HTMLElement>('.ac-empty');
+	input?.addEventListener('input', () => setFilter({ query: input.value }));
+	document.addEventListener('pd:filter', (e) => {
+		const { visible, query } = (e as CustomEvent).detail;
+		if (!empty) return;
+		empty.hidden = visible > 0;
+		empty.textContent = (empty.dataset.template ?? '').replace('{q}', query);
+	});
+</script>

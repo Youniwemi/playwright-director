@@ -41,6 +41,7 @@ Or use a fixture that wraps this (the consuming project typically provides a `tu
 | `mouseSteps` | `number` | `25` | Cursor animation smoothness |
 | `customStyles` | `string` | built-in | CSS for overlay |
 | `overlayPosition` | `'TL' \| 'TR' \| 'BL' \| 'BR'` | `'TR'` | Overlay corner position |
+| `links` | `{ app?, docs? }` | — | Gallery buttons + docs cross-links: paths on the site's `appUrl` / `docsUrl`, or full URLs. No effect on the recording (`site.md` §5) |
 | `variant` | `string` | `env TUTORIAL_VARIANT` | Suffixes `testName` (`<testName>-<variant>`) so a second recording never overwrites the first. `'mobile'` also compacts the overlay and pins the multi-scene split (see below) |
 
 ## 2. Core Methods

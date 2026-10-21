@@ -1,0 +1,48 @@
+---
+import Shell from '../layouts/Shell.astro';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import type { SeoProps } from '../components/Seo.astro';
+import { config, base, homeOf, appHref } from '../lib/site';
+import { t, siteLang } from '../i18n';
+
+interface Props {
+	title: string;
+	description?: string;
+	lang?: string;
+	seo?: SeoProps;
+}
+
+const { title, description, seo } = Astro.props;
+const lang = Astro.props.lang || siteLang;
+---
+
+<Shell title={title} description={description} lang={lang} seo={seo}>
+	<slot name="head" slot="head" />
+	<header class="ac-header">
+		<div class="ac-wrap">
+			<div class="ac-header-row" style="view-transition-name: ac-header">
+				<a href={homeOf(lang)} class="ac-logo">
+					{config.logo && <img src={`${base}${config.logo}`} alt="" class="ac-logo-img" />}
+					<span>{config.title}</span>
+				</a>
+				<div class="ac-header-end">
+					<slot name="nav" />
+					<ThemeSwitcher lang={lang} />
+					{appHref(lang) && (
+						<a class="ac-btn ac-btn-primary ac-header-app" href={appHref(lang)}>{t(lang, 'openApp')}</a>
+					)}
+				</div>
+			</div>
+		</div>
+	</header>
+	<main class="ac-main">
+		<slot />
+	</main>
+	<footer class="ac-footer">
+		<div class="ac-wrap">
+			<span>© {new Date().getFullYear()} {config.title}</span>
+			<span aria-hidden="true">·</span>
+			<span>{t(lang, 'builtWith')}</span>
+		</div>
+	</footer>
+</Shell>

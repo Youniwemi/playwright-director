@@ -7,11 +7,13 @@ description: Transform a Playwright E2E test into a narrated tutorial video. Loa
 
 Turn a Playwright test into a tutorial that **teaches**, not just demonstrates.
 
-Two reference files support this skill:
+Three reference files support this skill:
 - [`references/storytelling.md`](references/storytelling.md) — Persona analysis, emotional arc, narration voice, pacing decisions
 - [`references/api.md`](references/api.md) — `playwright-director` API, timing model, technical rules, checklist
+- [`references/site.md`](references/site.md) — Gallery site (`build-site`): config, themes, sections, tokens/css/overrides, app + docs links, languages, SEO
 
-**Read both before tutorializing.** Storytelling comes first — it drives every API decision.
+**Read the first two before tutorializing.** Storytelling comes first — it drives every API decision.
+Read `site.md` when you touch `tutorial-site.config.js`, a site override, or the test's `links`.
 
 ## Process
 
@@ -60,3 +62,6 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Each step's first sentence is its chapter title (gallery + in-app widget,
   click = seek); for other locales, re-record with `TUTORIAL_LANG=xx` and let
   the app follow `tutorial.lang` (`api.md` §1).
+- Set `links: { app, docs }` when the tutorial shows an app screen or has a
+  docs page, and add the slug to a section's `items` in the site config
+  (`site.md` §3, §5).

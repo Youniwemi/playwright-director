@@ -41,17 +41,18 @@
 		en: {
 			close: 'Close', tutorial: 'Tutorial', loading: 'Loading…', unavailable: 'Tutorial unavailable',
 			steps: 'Steps', step: 'Step {n}', playFrom: 'Play from {time}', screenshot: 'Screenshot',
-			openFull: 'Open full tutorial', duration: 'Duration'
+			openFull: 'Open full tutorial', duration: 'Duration', openInApp: 'Open in the app', readDocs: 'Read the documentation'
 		},
 		fr: {
 			close: 'Fermer', tutorial: 'Tutoriel', loading: 'Chargement…', unavailable: 'Tutoriel indisponible',
 			steps: 'Étapes', step: 'Étape {n}', playFrom: 'Lire à partir de {time}', screenshot: 'Capture d’écran',
-			openFull: 'Ouvrir le tutoriel complet', duration: 'Durée'
+			openFull: 'Ouvrir le tutoriel complet', duration: 'Durée', openInApp: 'Ouvrir dans l’application',
+			readDocs: 'Lire la documentation'
 		},
 		ar: {
 			close: 'إغلاق', tutorial: 'درس', loading: 'جارٍ التحميل…', unavailable: 'الدرس غير متاح',
 			steps: 'الخطوات', step: 'الخطوة {n}', playFrom: 'تشغيل من {time}', screenshot: 'لقطة الشاشة',
-			openFull: 'فتح الدرس كاملاً', duration: 'المدة'
+			openFull: 'فتح الدرس كاملاً', duration: 'المدة', openInApp: 'فتح في التطبيق', readDocs: 'قراءة التوثيق'
 		}
 	};
 	var RTL_LANGS = ['ar', 'he', 'fa', 'ur'];
@@ -94,7 +95,7 @@
 
 	var CSS = [
 		// `all: initial` isolates the widget; font-family is re-inherited so it uses the app's font.
-		':host { all: initial; font-family: inherit; --pd-accent: var(--playwright-director-accent, #6366f1); --pd-surface: #fff;',
+		':host { all: initial; font-family: inherit; --pd-accent: var(--playwright-director-accent, #4f46e5); --pd-surface: #fff;',
 		'  --pd-text: #0f172a; --pd-muted: #64748b; --pd-border: #e2e8f0; --pd-radius: 12px;',
 		'  --pd-focus-ring: 0 0 0 3px color-mix(in srgb, var(--pd-accent) 45%, transparent); }',
 		'* { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -144,7 +145,7 @@
 		'.shot img { width: 100%; display: block; border-radius: calc(var(--pd-radius) / 2); border: 1px solid var(--pd-border); }',
 		'.context { color: var(--pd-muted); font-style: italic; font-size: 0.88rem;',
 		'  border-inline-start: 3px solid var(--pd-accent); padding-inline-start: 0.75rem; }',
-		'.foot { padding: 0.5rem 1.25rem; border-top: 1px solid var(--pd-border); text-align: end; }',
+		'.foot { padding: 0.5rem 1.25rem; border-top: 1px solid var(--pd-border); display: flex; flex-wrap: wrap; justify-content: flex-end; column-gap: 1.25rem; }',
 		'.foot a { display: inline-flex; align-items: center; min-height: 44px; color: var(--pd-accent);',
 		'  font-size: 0.9rem; font-weight: 600; text-decoration: none; border-radius: 4px; }',
 		'.foot a:hover { text-decoration: underline; }',
@@ -362,12 +363,16 @@
 		dialog.appendChild(body);
 
 		var foot = el('footer', 'foot');
-		var link = document.createElement('a');
-		link.href = data.page;
-		link.target = '_blank';
-		link.rel = 'noopener';
-		link.textContent = tr(lang, 'openFull') + ' ↗';
-		foot.appendChild(link);
+		var links = data.links || {};
+		[[links.app, 'openInApp'], [links.docs, 'readDocs'], [data.page, 'openFull']].forEach(function (pair) {
+			if (!pair[0]) return;
+			var link = document.createElement('a');
+			link.href = pair[0];
+			link.target = '_blank';
+			link.rel = 'noopener';
+			link.textContent = tr(lang, pair[1]) + ' ↗';
+			foot.appendChild(link);
+		});
 		dialog.appendChild(foot);
 	}
 

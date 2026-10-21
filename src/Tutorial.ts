@@ -10,7 +10,8 @@ import type {
 	OverlayPosition,
 	SceneOptions,
 	SceneFocus,
-	FocusOptions
+	FocusOptions,
+	TutorialLinks
 } from './types.js';
 import { renderStage } from './overlay-html.js';
 import { TutorialVoice } from './voice.js';
@@ -103,8 +104,8 @@ export class Tutorial {
 	private page: Page;
 	// Scene and variant options are kept in their own fields below, not in this bag.
 	private options: Required<
-		Omit<TutorialOptions, 'testTitle' | 'feature' | 'translate' | 'scenes' | 'focus' | 'sceneTransition' | 'variant'>
-	> & { testTitle?: string; feature?: string };
+		Omit<TutorialOptions, 'testTitle' | 'feature' | 'translate' | 'scenes' | 'focus' | 'sceneTransition' | 'variant' | 'links'>
+	> & { testTitle?: string; feature?: string; links?: TutorialLinks };
 	private initialized = false;
 	private testName: string;
 	private translateFn: (key: string) => string;
@@ -217,7 +218,8 @@ export class Tutorial {
 				voiceVolume: this.options.voiceVolume
 			},
 			this.options.title,
-			this.variant ?? ''
+			this.variant ?? '',
+			options.links
 		);
 
 		this.scenes = options.scenes ?? {};

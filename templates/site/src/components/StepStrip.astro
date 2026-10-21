@@ -1,0 +1,33 @@
+---
+// Horizontal thumbnail strip; a thumbnail opens its screenshot in the Lightbox.
+import { t } from '../i18n';
+import { media, type NumberedStep } from '../lib/site';
+
+interface Props {
+	steps: NumberedStep[];
+	lang?: string;
+}
+
+const { steps, lang: L } = Astro.props;
+const shots = steps.filter((s) => s.image);
+---
+
+{shots.length > 0 && (
+	<div class="steps-section">
+		<div class="step-strip">
+			{shots.map((s) => (
+				<button
+					class="step-frame"
+					data-full={media(s.image!)}
+					data-num={s.num}
+					data-title={s.title || ''}
+					data-text={s.text || ''}
+					aria-label={`${t(L, 'step', { n: s.num! })}${s.title ? `: ${s.title}` : ''}`}
+				>
+					<img src={media(s.image!)} alt={s.title || t(L, 'step', { n: s.num! })} loading={s.num === 1 ? 'eager' : 'lazy'} />
+					<span class="step-num">{s.num}</span>
+				</button>
+			))}
+		</div>
+	</div>
+)}

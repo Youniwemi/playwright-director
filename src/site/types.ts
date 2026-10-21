@@ -1,10 +1,46 @@
 import type { UiStrings } from './strings.js';
+import type { Tokens } from './tokens.js';
+import type { TutorialLinks } from '../types.js';
+
+export type { TutorialLinks };
+
+/** A string, or one per language (`{ fr: '…', en: '…' }`) */
+export type Localized = string | Record<string, string>;
+
+export interface SiteCategory {
+	icon?: string;
+	label: Localized;
+	/** One line under the section title */
+	blurb?: Localized;
+	/** Tutorial slugs of this section, in display order — wins over the timeline `feature` */
+	items?: string[];
+}
 
 export interface SiteConfig {
 	title: string;
 	logo?: string;
-	primaryColor: string;
-	font: string;
+	/** Same as `tokens.primary` */
+	primaryColor?: string;
+	/** Same as `tokens.fontBody` */
+	font?: string;
+	/** Site theme: 'academy' (default) or 'classic' */
+	theme?: 'academy' | 'classic';
+	/** Design tokens over the theme defaults, e.g. `{ primary: '#0b5d47', radius: '12px' }` */
+	tokens?: Tokens;
+	/** Google Fonts families (`'Manrope:wght@400;600'`); default: the theme's; `false` = none */
+	googleFonts?: string[] | false;
+	/** Extra stylesheet, loaded after the theme */
+	css?: string;
+	/** Folder copied over the site's `src/` — replaces any component, theme or page file */
+	overrides?: string;
+	/** Links between builds of this gallery in other themes: `{ 'Academy': '/help/', 'Classic': '/help/classic/' }` */
+	themeSwitcher?: Record<string, string>;
+	/** App origin: the tutorial `links.app` paths are resolved against it, and the call-to-action opens it */
+	appUrl?: string;
+	/** Docs origin for `links.docs` paths; `{lang}` is replaced by the tutorial language */
+	docsUrl?: string;
+	/** Académie "try it yourself" panel on video pages (default true when there is an app link) */
+	cta?: boolean;
 	input: string;
 	output: string;
 	/** Timeline JSON dir (default `<input>/output`) — match TUTORIAL_OUTPUT_DIR if you override it */
@@ -21,8 +57,15 @@ export interface SiteConfig {
 	 *  (site chrome + widget), e.g. `{ fr: { allTutorials: 'Toute l’aide' }, es: { … } }` */
 	strings?: Record<string, Partial<UiStrings>>;
 	tutorials?: {
-		categories?: Record<string, { icon: string; label: string }>;
-		ui?: { heroTitle?: string; heroSubtitle?: string };
+		/** Sections in display order */
+		categories?: Record<string, SiteCategory>;
+		ui?: { heroTitle?: Localized; heroSubtitle?: Localized };
+		/** Slug of the "start here" tutorial (Académie hero) */
+		featured?: string;
+		/** Slugs shown with a PRO badge */
+		premium?: string[];
+		/** Per-slug links, over the ones declared in the test: `{ invoice: { app: '/invoices/new', docs: '/invoices/' } }` */
+		links?: Record<string, TutorialLinks>;
 		/** Video page step guide layout:
 		 *  - 'text':  text-only cards, click to reveal the screenshot (default)
 		 *  - 'cards': numbered text cards with a small screenshot, click to enlarge
@@ -76,8 +119,12 @@ export interface VideoManifestEntry {
 	feature?: string;
 	/** Recording variant (e.g. 'mobile'); absent = regular/desktop */
 	variant?: string;
+	/** Oldest recording of this slug (any language/variant), YYYY-MM-DD */
 	uploadDate: string;
+	/** Newest recording of this slug, YYYY-MM-DD */
 	dateModified?: string;
+	/** Absolute app / docs URLs (test `links` resolved on `appUrl` / `docsUrl`, config overrides) */
+	links?: TutorialLinks;
 	steps: number;
 	/** Intro narration (leading context steps), shown under the video title */
 	description?: string;
@@ -86,7 +133,10 @@ export interface VideoManifestEntry {
 }
 
 export interface VideoManifest {
-	categories: Record<string, { icon: string; label: string }>;
+	/** Sections in display order */
+	categories: Record<string, { icon?: string; label: Localized; blurb?: Localized }>;
+	/** Slug of the "start here" tutorial */
+	featured?: string;
 	videos: VideoManifestEntry[];
-	ui: { heroTitle: string; heroSubtitle: string };
+	ui: { heroTitle: Localized; heroSubtitle: Localized };
 }

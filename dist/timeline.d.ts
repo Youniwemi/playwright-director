@@ -1,4 +1,5 @@
 import { type FastForwardSegment } from './fast-forward.js';
+import type { TutorialLinks } from './types.js';
 export interface TimelineStep {
     step: number;
     title: string;
@@ -45,6 +46,10 @@ export interface TimelineData {
      *  Lets the reporter pick the right timeline when the same test was recorded
      *  in several variants, and the site filter videos by variant. */
     variant?: string;
+    /** App / docs paths for the gallery (Tutorial option `links`) */
+    links?: TutorialLinks;
+    /** When the timeline was saved (ISO 8601) — the gallery's uploadDate / dateModified */
+    recordedAt?: string;
 }
 export interface TimelineMusicOptions {
     musicFile?: string;
@@ -63,6 +68,7 @@ export declare class TutorialTimeline {
     private lang;
     private feature;
     private variant;
+    private links?;
     private musicOptions;
     private startTime;
     private videoTrimMs;
@@ -71,7 +77,7 @@ export declare class TutorialTimeline {
     private fastForwards;
     private openFastForward;
     private videoPath;
-    constructor(testName: string, testFile?: string, projectName?: string, lang?: string, testTitle?: string, feature?: string, musicOptions?: TimelineMusicOptions, title?: string, variant?: string);
+    constructor(testName: string, testFile?: string, projectName?: string, lang?: string, testTitle?: string, feature?: string, musicOptions?: TimelineMusicOptions, title?: string, variant?: string, links?: TutorialLinks);
     /**
      * Mark the start of the tutorial (second 0 for video)
      */

@@ -1,0 +1,22 @@
+---
+// Links between builds of the same gallery in different themes (config `themeSwitcher`: label → URL).
+// The entry pointing at this build's base path is the current one.
+import { config, base } from '../lib/site';
+import { t } from '../i18n';
+
+interface Props {
+	lang?: string;
+}
+
+const entries = Object.entries((config.themeSwitcher ?? {}) as Record<string, string>);
+const pathOf = (href: string) => new URL(href, 'http://site').pathname.replace(/\/?$/, '/');
+const here = `${base}/`;
+---
+
+{entries.length > 1 && (
+	<nav class="theme-switcher" aria-label={t(Astro.props.lang, 'theme')}>
+		{entries.map(([label, href]) => (
+			<a href={href} aria-current={pathOf(href) === here ? 'page' : undefined}>{label}</a>
+		))}
+	</nav>
+)}

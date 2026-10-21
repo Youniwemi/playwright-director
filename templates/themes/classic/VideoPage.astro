@@ -1,0 +1,47 @@
+---
+import Layout from './Layout.astro';
+import VideoPlayer from '../components/VideoPlayer.astro';
+import LangSwitch from '../components/LangSwitch.astro';
+import StepStrip from '../components/StepStrip.astro';
+import StepGuide from '../components/StepGuide.astro';
+import Lightbox from '../components/Lightbox.astro';
+import PrevNext from '../components/PrevNext.astro';
+import VideoLinks from '../components/VideoLinks.astro';
+import { homeOf, numberSteps, neighbours, sameLang, steps, videoSeo, type Video } from '../lib/site';
+import { t } from '../i18n';
+
+interface Props {
+	video: Video;
+}
+
+const { video } = Astro.props;
+const L = video.lang;
+const numbered = numberSteps(video);
+// Prev/next stay in this page's language; LangSwitch lists the same tutorial in the other languages.
+const { prev, next } = neighbours(sameLang(video), video);
+---
+
+<Layout title={video.title} description={video.description} lang={L} seo={videoSeo(video)}>
+	<slot name="head" slot="head" />
+	<div class="video-page">
+		<a href={homeOf(L)} class="back-link"><span class="back-arrow" aria-hidden="true">←</span> {t(L, 'allTutorials')}</a>
+
+		<LangSwitch video={video} />
+		<VideoPlayer video={video} />
+
+		<div class="video-page-info">
+			<h1 class="video-page-title">{video.title}</h1>
+			{video.description && <p class="video-page-desc">{video.description}</p>}
+			<div class="video-page-meta">
+				<span class="video-duration">&#x1F553; {video.duration}</span>
+			</div>
+			<VideoLinks video={video} />
+		</div>
+
+		{steps.strip && <StepStrip steps={numbered} lang={L} />}
+		<StepGuide steps={numbered} layout={steps.layout} lang={L} />
+		<PrevNext prev={prev} next={next} lang={L} />
+	</div>
+
+	{(steps.strip || steps.layout === 'cards') && <Lightbox />}
+</Layout>
