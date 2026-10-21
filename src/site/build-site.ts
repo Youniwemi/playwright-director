@@ -57,6 +57,15 @@ function ask(question: string): Promise<string> {
 export interface BuildSiteOptions {
 	/** Overrides config.baseUrl, e.g. "/help/" for a sub-path deployment */
 	base?: string;
+	/** Never prompt (CI): a missing config is created with the defaults and used */
+	yes?: boolean;
+	/** Only these tutorials (slugs or ids) — all their languages and variants */
+	only?: string[];
+}
+
+/** `look` matches look, look.en, look-mobile.ar…; an exact id matches itself. */
+export function matchesOnly(id: string, only: string[]): boolean {
+	return only.some((s) => id === s || id.startsWith(`${s}.`) || id.startsWith(`${s}-`));
 }
 
 export async function buildSite(configPath?: string, options: BuildSiteOptions = {}) {
@@ -76,7 +85,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 		writeFileSync(resolvedConfigPath, configContent);
 		console.log(`  Created ${resolvedConfigPath}`);
 
-		const answer = await ask('  Continue with defaults? [Y/n] ');
+		const answer = options.yes || !process.stdin.isTTY ? 'y' : await ask('  Continue with defaults? [Y/n] ');
 		if (answer && answer !== 'y' && answer !== 'yes') {
 			console.log('  Edit the config file, then re-run build-site.');
 			return;
@@ -91,7 +100,9 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 	config.videos = resolve(config.videos ?? join(config.input, 'videos'));
 
 	console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
-	const tutorials = scanTutorials(config.input, config.timelines, config.videos);
+	const tutorials = scanTutorials(config.input, config.timelines, config.videos).filter(
+		(t) => !options.only?.length || matchesOnly(t.timeline.testName, options.only)
+	);
 
 	if (tutorials.length === 0) {
 		console.error(

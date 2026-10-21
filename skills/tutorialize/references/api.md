@@ -329,6 +329,14 @@ equivalent. Apps with their own player use the headless API:
 URLs and chapter times (`steps[].at`, seconds). Schema:
 `schemas/embed-v1.schema.json`.
 
+Widget: a native modal `<dialog>` (focus trap, Esc, focus returned), chapters
+that seek (arrows/Home/End), fr/en/ar strings picked from `data-tutorial-lang`
+or `<html lang>`. Theme it from the app with `--pd-accent`, `--pd-surface`,
+`--pd-text`, `--pd-muted`, `--pd-border`, `--pd-radius`, `--pd-font`,
+`--pd-focus-ring` on `.playwright-director-widget`. The build writes `_headers`
+(CORS + cache) for Cloudflare Pages / Netlify; `--base=/help/` deploys under a
+sub-path, `-y` never prompts, `--only=<slug>` builds just that tutorial.
+
 ### Reviewing & correcting narration
 
 The transcript is the review surface: edit the narration texts in
@@ -341,7 +349,8 @@ lines in order (a key used twice corrects each occurrence in turn;
 boundary and both halves replaced. Texts sourced from an i18n catalog, or a
 first sentence that is the verbatim step key, are never rewritten — they are
 reported with their key for a manual fix in the translations. Re-run with
-`TUTORIAL_MODE=true` afterwards: only changed TTS clips are regenerated
+`TUTORIAL_MODE=true` afterwards — `npx playwright test -g "<test title>"`
+re-records just that tutorial; only changed TTS clips are regenerated
 (content-hash caching). `npx tutorial-transcript` (no subcommand) just
 regenerates the transcripts from the timeline JSON.
 

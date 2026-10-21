@@ -49,6 +49,10 @@ function ask(question) {
         });
     });
 }
+/** `look` matches look, look.en, look-mobile.ar…; an exact id matches itself. */
+export function matchesOnly(id, only) {
+    return only.some((s) => id === s || id.startsWith(`${s}.`) || id.startsWith(`${s}-`));
+}
 export async function buildSite(configPath, options = {}) {
     const resolvedConfigPath = resolve(configPath || join(process.cwd(), 'tutorial-site.config.js'));
     let config;
@@ -64,7 +68,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 `;
         writeFileSync(resolvedConfigPath, configContent);
         console.log(`  Created ${resolvedConfigPath}`);
-        const answer = await ask('  Continue with defaults? [Y/n] ');
+        const answer = options.yes || !process.stdin.isTTY ? 'y' : await ask('  Continue with defaults? [Y/n] ');
         if (answer && answer !== 'y' && answer !== 'yes') {
             console.log('  Edit the config file, then re-run build-site.');
             return;
@@ -78,7 +82,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
     config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
     config.videos = resolve(config.videos ?? join(config.input, 'videos'));
     console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
-    const tutorials = scanTutorials(config.input, config.timelines, config.videos);
+    const tutorials = scanTutorials(config.input, config.timelines, config.videos).filter((t) => !options.only?.length || matchesOnly(t.timeline.testName, options.only));
     if (tutorials.length === 0) {
         console.error(`  No tutorials found: need .webm files in ${config.videos} (timelines in ${config.timelines}). Set \`videos\` / \`timelines\` in the config if they live elsewhere.`);
         process.exit(1);

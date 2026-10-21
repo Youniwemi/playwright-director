@@ -689,11 +689,19 @@ npx tutorial-transcript
 # 2. Edit tutorials/transcripts/{test-name}.md — fix the narration texts
 
 # 3. Apply: rewrites the corrected texts in your test file
-npx tutorial-transcript apply
+npx tutorial-transcript apply tutorials/transcripts/{test-name}.md
 
-# 4. Re-run: only the changed TTS clips are regenerated (content-hash caching)
-TUTORIAL_MODE=true npx playwright test
+# 4. Re-record only that tutorial (-g matches the test title); only the
+#    changed TTS clips are regenerated (content-hash caching)
+TUTORIAL_MODE=true npx playwright test -g "Customize the look"
+
+# 5. Preview just that page (a site with only this tutorial)
+npx playwright-director build-site -y --only={test-name}
 ```
+
+Example — the transcript line `Cliquez sur Enregistrer.` corrected to
+`Cliquez sur « Enregistrer » pour valider.` becomes, after `apply`, the same
+change in the `tutorial.step(…)` string of the spec file.
 
 `apply` pairs each transcript entry with its timeline step (by the `**key:**`
 lines, in order — a key used twice corrects each occurrence in turn; the
@@ -1030,7 +1038,12 @@ npx serve tutorial-site-dist
 playwright-director build-site                      # Uses ./tutorial-site.config.js
 playwright-director build-site --config=path/to.js   # Custom config path
 playwright-director build-site --base=/help/         # Deploy under a sub-path (overrides baseUrl)
+playwright-director build-site -y                    # Never prompt (CI); also automatic without a TTY
+playwright-director build-site --only=look,billing   # Only these tutorials (all languages/variants)
 ```
+
+`--only` builds a site with just those tutorials — handy to check one page
+quickly. Deploy a full build.
 
 ### Deploying to Cloudflare Pages
 
