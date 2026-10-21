@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "split-screen-demo",
+  "title": "Split screen demo",
+  "description": "Sara ouvre son espace comptable",
+  "duration": "0:22",
+  "durationSeconds": 22.1,
+  "slug": "split-screen-demo",
+  "lang": "fr",
+  "langs": [
+    "fr"
+  ],
+  "accent": "#4f46e5",
+  "video": "videos/split-screen-demo.webm",
+  "poster": "videos/split-screen-demo-poster.webp",
+  "page": "split-screen-demo/",
+  "steps": [
+    {
+      "num": 1,
+      "at": 0.01,
+      "title": "Sara ouvre son espace comptable",
+      "key": "Sara ouvre son espace comptable",
+      "text": "Sara ouvre son espace comptable",
+      "image": "videos/split-screen-demo-step-1.webp"
+    },
+    {
+      "num": 2,
+      "at": 4.73,
+      "title": "Vue partagée — focus sur le client",
+      "key": "Vue partagée — focus sur le client",
+      "text": "Vue partagée — focus sur le client",
+      "image": "videos/split-screen-demo-step-2.webp"
+    },
+    {
+      "num": 3,
+      "at": 9.83,
+      "title": "Les deux écrans côte à côte",
+      "key": "Les deux écrans côte à côte",
+      "text": "Les deux écrans côte à côte",
+      "image": "videos/split-screen-demo-step-3.webp"
+    },
+    {
+      "num": 4,
+      "at": 12.71,
+      "title": "Focus sur la comptable",
+      "key": "Focus sur la comptable",
+      "text": "Focus sur la comptable",
+      "image": "videos/split-screen-demo-step-4.webp"
+    },
+    {
+      "num": 5,
+      "at": 15.38,
+      "title": "Le client reprend la main",
+      "key": "Le client reprend la main",
+      "text": "Le client reprend la main",
+      "image": "videos/split-screen-demo-step-5.webp"
+    }
+  ]
+}

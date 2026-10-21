@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://youniwemi.github.io/playwright-director/gallery/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://youniwemi.github.io/playwright-director/gallery/fr/"/>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/fr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://youniwemi.github.io/playwright-director/gallery/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://youniwemi.github.io/playwright-director/gallery/fr/"/>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/two-profiles-one-video/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/split-screen-demo/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/zoom-demo/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/fast-forward-demo/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/type-blurred-demo/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/overlay-tl/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/overlay-tr/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/overlay-bl/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/overlay-br/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/overlay-position-override/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://youniwemi.github.io/playwright-director/gallery/mobile-split-demo/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+</urlset>

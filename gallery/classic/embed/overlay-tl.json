@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "overlay-tl",
+  "title": "Overlay TL",
+  "description": "First step",
+  "duration": "0:09",
+  "durationSeconds": 8.9,
+  "slug": "overlay-tl",
+  "lang": "en",
+  "langs": [
+    "en"
+  ],
+  "accent": "#4f46e5",
+  "video": "videos/overlay-tl.webm",
+  "poster": "videos/overlay-tl-poster.webp",
+  "page": "overlay-tl/",
+  "links": {
+    "docs": "https://github.com/Youniwemi/playwright-director/#styling"
+  },
+  "steps": [
+    {
+      "num": 1,
+      "at": 0.01,
+      "title": "First step",
+      "key": "First step",
+      "text": "First step",
+      "image": "videos/overlay-tl-step-1.webp"
+    },
+    {
+      "num": 2,
+      "at": 2.3,
+      "title": "Second step",
+      "key": "Second step",
+      "text": "Second step",
+      "image": "videos/overlay-tl-step-2.webp"
+    }
+  ]
+}

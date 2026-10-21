@@ -3,25 +3,80 @@
   "defaultLang": "en",
   "tutorials": [
     {
-      "id": "fast-forward-demo",
-      "slug": "fast-forward-demo",
-      "title": "Skipping the waits",
-      "duration": "0:24",
-      "durationSeconds": 24,
+      "id": "two-profiles-one-video",
+      "slug": "two-profiles-one-video",
+      "title": "Two profiles, one video",
+      "duration": "0:23",
+      "durationSeconds": 22.7,
       "lang": "en",
       "langs": [
         "en"
       ]
     },
     {
-      "id": "mobile-split-demo",
-      "slug": "mobile-split-demo",
-      "title": "Mobile split demo",
-      "duration": "0:17",
-      "durationSeconds": 16.9,
+      "id": "split-screen-demo",
+      "slug": "split-screen-demo",
+      "title": "Split screen demo",
+      "duration": "0:22",
+      "durationSeconds": 22.1,
       "lang": "fr",
       "langs": [
         "fr"
+      ]
+    },
+    {
+      "id": "zoom-demo",
+      "slug": "zoom-demo",
+      "title": "Zooming on what matters",
+      "duration": "0:44",
+      "durationSeconds": 44.4,
+      "lang": "en",
+      "langs": [
+        "en"
+      ]
+    },
+    {
+      "id": "fast-forward-demo",
+      "slug": "fast-forward-demo",
+      "title": "Skipping the waits",
+      "duration": "0:24",
+      "durationSeconds": 23.9,
+      "lang": "en",
+      "langs": [
+        "en"
+      ]
+    },
+    {
+      "id": "type-blurred-demo",
+      "slug": "type-blurred-demo",
+      "title": "Typing a secret without leaking it",
+      "duration": "0:15",
+      "durationSeconds": 15,
+      "lang": "en",
+      "langs": [
+        "en"
+      ]
+    },
+    {
+      "id": "overlay-tl",
+      "slug": "overlay-tl",
+      "title": "Overlay TL",
+      "duration": "0:09",
+      "durationSeconds": 8.9,
+      "lang": "en",
+      "langs": [
+        "en"
+      ]
+    },
+    {
+      "id": "overlay-tr",
+      "slug": "overlay-tr",
+      "title": "Overlay TR",
+      "duration": "0:09",
+      "durationSeconds": 8.9,
+      "lang": "en",
+      "langs": [
+        "en"
       ]
     },
     {
@@ -58,69 +113,14 @@
       ]
     },
     {
-      "id": "overlay-tl",
-      "slug": "overlay-tl",
-      "title": "Overlay TL",
-      "duration": "0:09",
-      "durationSeconds": 8.9,
-      "lang": "en",
-      "langs": [
-        "en"
-      ]
-    },
-    {
-      "id": "overlay-tr",
-      "slug": "overlay-tr",
-      "title": "Overlay TR",
-      "duration": "0:09",
-      "durationSeconds": 8.9,
-      "lang": "en",
-      "langs": [
-        "en"
-      ]
-    },
-    {
-      "id": "split-screen-demo",
-      "slug": "split-screen-demo",
-      "title": "Split screen demo",
-      "duration": "0:23",
-      "durationSeconds": 22.5,
+      "id": "mobile-split-demo",
+      "slug": "mobile-split-demo",
+      "title": "Mobile split demo",
+      "duration": "0:17",
+      "durationSeconds": 16.5,
       "lang": "fr",
       "langs": [
         "fr"
-      ]
-    },
-    {
-      "id": "two-profiles-one-video",
-      "slug": "two-profiles-one-video",
-      "title": "Two profiles, one video",
-      "duration": "0:23",
-      "durationSeconds": 23.1,
-      "lang": "en",
-      "langs": [
-        "en"
-      ]
-    },
-    {
-      "id": "type-blurred-demo",
-      "slug": "type-blurred-demo",
-      "title": "Typing a secret without leaking it",
-      "duration": "0:15",
-      "durationSeconds": 15.2,
-      "lang": "en",
-      "langs": [
-        "en"
-      ]
-    },
-    {
-      "id": "zoom-demo",
-      "slug": "zoom-demo",
-      "title": "Zooming on what matters",
-      "duration": "0:45",
-      "durationSeconds": 45.3,
-      "lang": "en",
-      "langs": [
-        "en"
       ]
     }
   ]

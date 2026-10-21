@@ -1,0 +1,15 @@
+/playwright-director/gallery/classic/embed/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+/playwright-director/gallery/classic/client.js
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+/playwright-director/gallery/classic/widget.js
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+/playwright-director/gallery/classic/videos/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800

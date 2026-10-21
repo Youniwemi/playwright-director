@@ -4,20 +4,23 @@
   "title": "Skipping the waits",
   "description": "Skip the boring part. Long waits are fast-forwarded in the final video, like an old VHS tape.",
   "duration": "0:24",
-  "durationSeconds": 24,
+  "durationSeconds": 23.9,
   "slug": "fast-forward-demo",
   "lang": "en",
   "langs": [
     "en"
   ],
-  "accent": "#6366f1",
+  "accent": "oklch(42% 0.09 165)",
   "video": "videos/fast-forward-demo.webm",
   "poster": "videos/fast-forward-demo-poster.webp",
   "page": "fast-forward-demo/",
+  "links": {
+    "docs": "https://github.com/Youniwemi/playwright-director/#fast-forwarding-long-waits"
+  },
   "steps": [
     {
       "num": 1,
-      "at": 7.7,
+      "at": 7.69,
       "title": "Generate the quarterly report",
       "key": "Generate the quarterly report",
       "text": "Generate the quarterly report",
@@ -25,7 +28,7 @@
     },
     {
       "num": 2,
-      "at": 12.42,
+      "at": 12.36,
       "title": "Export it as a PDF",
       "key": "Export it as a PDF",
       "text": "Export it as a PDF",
@@ -33,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 16.52,
+      "at": 16.42,
       "title": "The PDF is ready",
       "key": "The PDF is ready",
       "text": "The PDF is ready",

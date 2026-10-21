@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "id": "overlay-br",
   "title": "Overlay BR",
+  "description": "First step",
   "duration": "0:09",
   "durationSeconds": 8.9,
   "slug": "overlay-br",
@@ -9,7 +10,7 @@
   "langs": [
     "en"
   ],
-  "accent": "#6366f1",
+  "accent": "oklch(42% 0.09 165)",
   "video": "videos/overlay-br.webm",
   "poster": "videos/overlay-br-poster.webp",
   "page": "overlay-br/",
@@ -24,7 +25,7 @@
     },
     {
       "num": 2,
-      "at": 2.34,
+      "at": 2.31,
       "title": "Second step",
       "key": "Second step",
       "text": "Second step",

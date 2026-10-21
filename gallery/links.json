@@ -1,0 +1,57 @@
+{
+  "https://github.com/Youniwemi/playwright-director/#multiple-user-profiles": [
+    {
+      "slug": "two-profiles-one-video",
+      "lang": "en",
+      "title": "Two profiles, one video",
+      "url": "https://youniwemi.github.io/playwright-director/gallery/two-profiles-one-video/",
+      "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/two-profiles-one-video-poster.webp",
+      "duration": "0:23",
+      "durationSeconds": 22.7
+    }
+  ],
+  "https://github.com/Youniwemi/playwright-director/#zooming-on-an-element": [
+    {
+      "slug": "zoom-demo",
+      "lang": "en",
+      "title": "Zooming on what matters",
+      "url": "https://youniwemi.github.io/playwright-director/gallery/zoom-demo/",
+      "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/zoom-demo-poster.webp",
+      "duration": "0:44",
+      "durationSeconds": 44.4
+    }
+  ],
+  "https://github.com/Youniwemi/playwright-director/#fast-forwarding-long-waits": [
+    {
+      "slug": "fast-forward-demo",
+      "lang": "en",
+      "title": "Skipping the waits",
+      "url": "https://youniwemi.github.io/playwright-director/gallery/fast-forward-demo/",
+      "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/fast-forward-demo-poster.webp",
+      "duration": "0:24",
+      "durationSeconds": 23.9
+    }
+  ],
+  "https://github.com/Youniwemi/playwright-director/#styling": [
+    {
+      "slug": "overlay-tl",
+      "lang": "en",
+      "title": "Overlay TL",
+      "url": "https://youniwemi.github.io/playwright-director/gallery/overlay-tl/",
+      "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/overlay-tl-poster.webp",
+      "duration": "0:09",
+      "durationSeconds": 8.9
+    }
+  ],
+  "https://github.com/Youniwemi/playwright-director/#variants--record-the-same-tutorial-for-mobile": [
+    {
+      "slug": "mobile-split-demo",
+      "lang": "fr",
+      "title": "Mobile split demo",
+      "url": "https://youniwemi.github.io/playwright-director/gallery/mobile-split-demo/",
+      "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/mobile-split-demo-poster.webp",
+      "duration": "0:17",
+      "durationSeconds": 16.5
+    }
+  ]
+}

@@ -4,16 +4,19 @@
   "title": "Two profiles, one video",
   "description": "Two people, two sessions, one screen.",
   "duration": "0:23",
-  "durationSeconds": 23.1,
+  "durationSeconds": 22.7,
   "slug": "two-profiles-one-video",
   "lang": "en",
   "langs": [
     "en"
   ],
-  "accent": "#6366f1",
+  "accent": "oklch(42% 0.09 165)",
   "video": "videos/two-profiles-one-video.webm",
   "poster": "videos/two-profiles-one-video-poster.webp",
   "page": "two-profiles-one-video/",
+  "links": {
+    "docs": "https://github.com/Youniwemi/playwright-director/#multiple-user-profiles"
+  },
   "steps": [
     {
       "num": 1,
@@ -25,7 +28,7 @@
     },
     {
       "num": 2,
-      "at": 9.57,
+      "at": 9.38,
       "title": "ACME signs in to the client portal",
       "key": "ACME signs in to the client portal",
       "text": "ACME signs in to the client portal",
@@ -33,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 15.36,
+      "at": 14.99,
       "title": "Both profiles, signed in at once",
       "key": "Both profiles, signed in at once",
       "text": "Both profiles, signed in at once",

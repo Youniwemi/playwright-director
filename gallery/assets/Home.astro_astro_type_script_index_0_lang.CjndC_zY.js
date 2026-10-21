@@ -1,0 +1,1 @@
+import{s as i}from"./filter.BAoCqRAf.js";const t=document.getElementById("ac-search-input"),e=document.querySelector(".ac-empty");t?.addEventListener("input",()=>i({query:t.value}));document.addEventListener("pd:filter",n=>{const{visible:r,query:d}=n.detail;e&&(e.hidden=r>0,e.textContent=(e.dataset.template??"").replace("{q}",d))});

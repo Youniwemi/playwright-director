@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "overlay-bl",
+  "title": "Overlay BL",
+  "description": "First step",
+  "duration": "0:09",
+  "durationSeconds": 8.9,
+  "slug": "overlay-bl",
+  "lang": "en",
+  "langs": [
+    "en"
+  ],
+  "accent": "#4f46e5",
+  "video": "videos/overlay-bl.webm",
+  "poster": "videos/overlay-bl-poster.webp",
+  "page": "overlay-bl/",
+  "steps": [
+    {
+      "num": 1,
+      "at": 0.01,
+      "title": "First step",
+      "key": "First step",
+      "text": "First step",
+      "image": "videos/overlay-bl-step-1.webp"
+    },
+    {
+      "num": 2,
+      "at": 2.31,
+      "title": "Second step",
+      "key": "Second step",
+      "text": "Second step",
+      "image": "videos/overlay-bl-step-2.webp"
+    }
+  ]
+}
