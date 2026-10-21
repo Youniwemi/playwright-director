@@ -56,6 +56,9 @@ Follow all rules from `api.md`:
   on distinct origins, each tab switch is acknowledged in the narration, and
   split ratios (`focus(['a','b'], { ratio: [30, 70] })`) are used to keep the
   acting pane readable
+- Multi-language: the app UI follows `tutorial.lang` (set by `TUTORIAL_LANG`),
+  never a hard-coded locale; each step's first sentence becomes its chapter
+  title in the gallery and widget, so it must read well alone
 
 ### 5. Show and explain
 - Present the diff or full transformed code
