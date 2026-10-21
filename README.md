@@ -161,10 +161,17 @@ Videos are saved to `tutorials/videos/`, timelines to `tutorials/output/`.
 Tutorial runs create files in your project. Add these to `.gitignore`:
 
 ```gitignore
-# playwright-director generated files
+# playwright-director generated files (the voice cache is tutorials/.cache/voice)
 tutorials/
-static/audio/tutorial-voice/
 ```
+
+The narration clips are cached in `tutorials/.cache/voice/` (`TUTORIAL_VOICE_DIR`
+changes it). They stay out of your app's `static/` or `public/` folder, so they
+never ship in its production build: during the recording Playwright serves
+them to the page itself. Upgrading from 0.4: clips found in the old
+`static/audio/tutorial-voice/` are copied into the new cache the first time
+they are needed, so nothing is re-synthesized; delete the old folder after a
+run.
 
 ### 5. Converting an existing test
 
@@ -197,7 +204,7 @@ const tutorial = new Tutorial(page, options);
 |---|---|---|---|
 | `title` | `string` | *required* | Tutorial title shown in overlay |
 | `translate` | `(key: string) => string` | `k => k` | Translation function — pass your i18n `t()` |
-| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Base URL for serving audio files |
+| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Origin the narration audio plays from (Playwright serves the clips; any page origin works) |
 | `lang` | `string` | `'en'` | Language for UI text and TTS (e.g. `'en'`, `'fr'`, `'ar'`) |
 | `testName` | `string` | auto | Output filename slug |
 | `testFile` | `string` | `''` | Test file path for metadata |
@@ -414,8 +421,38 @@ await tutorial.complete();
   or `DENY` (Google, Bing, many SaaS apps) **cannot** be used as scenes. For
   your own app, relax `frame-ancestors` in tutorial mode only.
 - `stage()` navigates the parent page to `audioBaseUrl` before injecting the
-  stage, so narration audio loads same-origin. Point `audioBaseUrl` at the app
-  serving `static/audio/tutorial-voice/`.
+  stage, so narration audio loads same-origin (Playwright answers the voice
+  URLs from the cache; the app does not need to serve them).
+
+## Languages — one spec, one recording per language
+
+Run the same spec once per language with `TUTORIAL_LANG`. It overrides the
+`lang` option (narration + TTS voice: macOS Thomas / Samantha / Majed, Edge
+Henri / Guy / Hamed, or your `TUTORIAL_TTS_CMD` with `{lang}`) and suffixes
+every output with `.<lang>`. Drive the app UI and your texts from
+`tutorial.lang`:
+
+```typescript
+const tutorial = new Tutorial(page, { title: t('look.title'), testName: 'look', lang: 'fr', translate: t });
+await page.goto(`/properties/1/look?lang=${tutorial.lang}`);  // app UI in the recorded language
+```
+
+```bash
+TUTORIAL_MODE=true npx playwright test tutorial                    # → look.webm (default, lang option)
+TUTORIAL_MODE=true TUTORIAL_LANG=en npx playwright test tutorial   # → look.en.webm
+TUTORIAL_MODE=true TUTORIAL_LANG=ar npx playwright test tutorial   # → look.ar.webm
+```
+
+The gallery groups the recordings by slug (`look`). It gets one home page per
+language — `/` for the site's default `lang`, `/en/`, `/ar/`… for the others,
+linked to each other — each video page links to the same tutorial in the other
+languages, and Arabic/Hebrew/Persian/Urdu pages render right-to-left. The site
+chrome (buttons, labels) is translated in English, French and Arabic; see
+`strings` in the site configuration to change a text or add a language.
+Embed data: `embed/<slug>.<lang>.json` per language, `embed/<slug>.json` =
+the default language (or the only one recorded), and `index.json` lists each
+slug once with its `langs`. `load(slug, { lang })` falls back to the default
+language when that language was not recorded.
 
 ## Variants — record the same tutorial for mobile
 
@@ -521,7 +558,7 @@ import { buildMergeCommand } from 'playwright-director';
 Uses the built-in `say` command. Voices per language:
 - French: Thomas
 - English: Samantha
-- Arabic: Maged
+- Arabic: Majed
 
 ### Edge TTS
 
@@ -548,7 +585,7 @@ npx playwright-director regen-voices                    # synthesize the missing
 npx playwright-director regen-voices --workers=4        # parallel TTS (default 2)
 npx playwright-director regen-voices --force            # after a voice change: redo everything
 npx playwright-director regen-voices --lang=fr          # one language only
-rm -rf static/audio/tutorial-voice && npx playwright-director regen-voices   # full rebuild
+rm -rf tutorials/.cache/voice && npx playwright-director regen-voices   # full rebuild
 ```
 
 Narration texts are collected from the artifacts that record them verbatim:
@@ -563,6 +600,8 @@ run picks the clips up from cache.
 |---|---|---|
 | `TUTORIAL_MODE` | `false` | Enable tutorial video generation |
 | `TUTORIAL_VARIANT` | none | Recording variant — suffixes outputs; `mobile` also compacts the overlay and pins the split |
+| `TUTORIAL_VOICE_DIR` | `tutorials/.cache/voice` | Voice clip cache (read by recording, merge and `regen-voices`) |
+| `TUTORIAL_LANG` | none | Recording language — overrides `lang`, suffixes outputs `.<lang>` (one run per language) |
 | `TUTORIAL_VOICE` | `true` | Enable/disable voice narration |
 | `TUTORIAL_VOICE_NAME` | auto | TTS voice name override |
 | `TUTORIAL_TTS_CMD` | `say` (macOS) | Custom TTS command |
@@ -650,11 +689,19 @@ npx tutorial-transcript
 # 2. Edit tutorials/transcripts/{test-name}.md — fix the narration texts
 
 # 3. Apply: rewrites the corrected texts in your test file
-npx tutorial-transcript apply
+npx tutorial-transcript apply tutorials/transcripts/{test-name}.md
 
-# 4. Re-run: only the changed TTS clips are regenerated (content-hash caching)
-TUTORIAL_MODE=true npx playwright test
+# 4. Re-record only that tutorial (-g matches the test title); only the
+#    changed TTS clips are regenerated (content-hash caching)
+TUTORIAL_MODE=true npx playwright test -g "Customize the look"
+
+# 5. Preview just that page (a site with only this tutorial)
+npx playwright-director build-site -y --only={test-name}
 ```
+
+Example — the transcript line `Cliquez sur Enregistrer.` corrected to
+`Cliquez sur « Enregistrer » pour valider.` becomes, after `apply`, the same
+change in the `tutorial.step(…)` string of the spec file.
 
 `apply` pairs each transcript entry with its timeline step (by the `**key:**`
 lines, in order — a key used twice corrects each occurrence in turn; the
@@ -759,6 +806,8 @@ On the first run, a `tutorial-site.config.js` file is created with sensible defa
 
 The command scans your `tutorials/` directory for videos, screenshots, and timeline metadata, then builds a static site ready to deploy (e.g., to Cloudflare Pages, Netlify, or any static host).
 
+Astro, which renders the site, is playwright-director's own dependency: your project does not need it, and the build works in npm, pnpm and bun workspaces (including bun's isolated linker).
+
 ### What gets generated
 
 ```
@@ -766,6 +815,7 @@ tutorial-site-dist/          # Static site output (configurable)
 ├── index.html               # Gallery home — videos grouped by category
 ├── {video-slug}/index.html  # Dedicated page per video: player + step-by-step guide
 ├── widget.js                # Embeddable in-app help widget (see below)
+├── client.js                # Headless data API (ESM) — widget.js builds on it
 ├── embed/                   # Widget data
 │   ├── {video-slug}.json    # One payload per tutorial: video, description, steps
 │   └── index.json           # All available slugs (discovery/debugging)
@@ -781,6 +831,13 @@ description, and a **step-by-step guide** built from the timeline: every step's
 narration text paired with its screenshot. Context narrations recorded
 mid-flow appear as callouts between steps, and steps recorded without voice
 still show their text.
+
+Each voiced step also shows its start time (`▶ 0:13`): clicking it seeks the
+video there, and the step that is playing is highlighted (`aria-current="step"`).
+Seeking needs a host that answers HTTP Range requests with `206` — Cloudflare
+Pages, Netlify, GitHub Pages and `playwright-director serve` do. A step
+declared with an untranslated key (`tg.open`) is titled with the first
+sentence of its narration instead.
 
 ![Video page with thumbnail strip and text guide](docs/images/video-page.png)
 
@@ -818,9 +875,10 @@ element with `data-tutorial="<video-slug>"`:
 <button data-tutorial="create-account">📘 How does this work?</button>
 ```
 
-Clicking the element opens an overlay right inside your app — the tutorial
-video, its intro narration, and the full step-by-step guide (click a step to
-reveal its screenshot), with a link to the full tutorial page on the gallery:
+Clicking the element opens a modal dialog right inside your app — the tutorial
+video, its intro narration and its chapters (click a chapter to jump to it in
+the video; the playing one is highlighted), with a link to the full tutorial
+page on the gallery:
 
 ![In-app widget opened over a host application](docs/images/widget.png)
 
@@ -833,19 +891,87 @@ Notes:
 - **Slugs** are the video ids — the file names in the gallery's `videos/`
   directory (a tutorial's `name`, plus `-<variant>` for variant recordings).
   `GET <site>/embed/index.json` lists them all.
-- **Programmatic API**: `window.PlaywrightDirector.open('create-account')` and
-  `window.PlaywrightDirector.close()` — e.g. to launch a tutorial from an onboarding
-  checklist instead of a button.
-- **Theming**: the gallery's `primaryColor` is the default accent; override it
-  from the host page with `.playwright-director-widget { --playwright-director-accent: #16a34a; }`.
-- **Cross-origin**: the widget fetches `embed/<slug>.json` from the gallery
-  host, so the gallery must send `Access-Control-Allow-Origin` for your app's
-  origin. GitHub Pages sends `*` out of the box; on Netlify or Cloudflare
-  Pages add a headers rule for `/embed/*` (e.g. a `_headers` file with
-  `Access-Control-Allow-Origin: *`). Video and screenshots are plain media
-  elements and need no CORS.
-- **RTL** tutorials (`lang: 'ar'`, …) render the whole panel right-to-left;
-  individual texts use `dir="auto"` either way.
+- **Programmatic API**: `window.PlaywrightDirector.open('create-account', { lang: 'fr' })`
+  and `window.PlaywrightDirector.close()` — e.g. to launch a tutorial from an
+  onboarding checklist instead of a button. `load()` returns the data with no
+  UI (see the next section).
+- **Language**: `open()`'s `lang`, else the trigger's `data-tutorial-lang`,
+  else your page's `<html lang>`. It picks the tutorial language (falling back
+  to the default one) and the widget texts — English, French and Arabic are
+  built in; add one from your page with
+  `PlaywrightDirector.strings.es = { close: 'Cerrar', steps: 'Pasos', … }`.
+  Arabic, Hebrew, Persian and Urdu render right-to-left.
+- **Accessibility**: a native modal `<dialog>` — the page behind is inert, Esc
+  or a click on the backdrop closes it, focus goes to the labelled close
+  button and returns to the trigger afterwards. Chapters are a list of
+  buttons (`aria-current="step"` on the playing one; ↑/↓, Home/End move
+  between them, Enter seeks); every target is at least 44 px. The e2e suite
+  runs axe (WCAG 2.1 AA) on the open dialog in French and Arabic.
+- **Theming**: set CSS custom properties on the widget host from your app's
+  stylesheet — your rules win over the defaults:
+
+  ```css
+  .playwright-director-widget {
+    --pd-accent: #16a34a;        /* default: the gallery's primaryColor */
+    --pd-surface: #ffffff;       /* dialog background */
+    --pd-text: #0f172a;
+    --pd-muted: #64748b;         /* secondary text */
+    --pd-border: #e2e8f0;
+    --pd-radius: 12px;
+    --pd-font: "Inter", sans-serif;  /* default: your app's font */
+    --pd-focus-ring: 0 0 0 3px rgb(22 163 74 / 45%);  /* a box-shadow */
+  }
+  ```
+
+  The pre-0.5 `--playwright-director-accent` still works.
+- **Cross-origin**: the widget loads `client.js` and `embed/<slug>.json` from
+  the gallery host, so the gallery must send `Access-Control-Allow-Origin` for
+  your app's origin. GitHub Pages sends `*` out of the box; for Cloudflare
+  Pages and Netlify, `build-site` writes a `_headers` file (see
+  [Deploying to Cloudflare Pages](#deploying-to-cloudflare-pages)).
+
+### Headless data API — bring your own player
+
+Apps with their own player or dialog read the same data with no UI.
+
+**Script tag** (with `widget.js` loaded):
+
+```js
+const t = await window.PlaywrightDirector.load('create-account', { lang: 'fr' });
+```
+
+**Bundled ESM** (no script tag):
+
+```js
+import { load, loadIndex, currentStep } from 'playwright-director/client';
+
+const t = await load('create-account', { baseUrl: 'https://tutorials.myapp.com/', lang: 'fr' });
+video.src = t.video;                       // absolute URL
+for (const s of t.steps) if (s.at !== undefined) addChapter(s.at, s.title);
+video.ontimeupdate = () => highlight(currentStep(t.steps, video.currentTime));
+```
+
+`load()` resolves to the payload of `embed/<slug>.json` with **every URL made
+absolute** (`video`, `poster`, `page`, `steps[].image`) plus `baseUrl`. With
+`lang`, it tries `embed/<slug>.<lang>.json` first and falls back to the default
+language. It rejects with a message that names the URL and the reason
+(unknown slug → HTTP 404 and the index URL; network/CORS failure → the missing
+`Access-Control-Allow-Origin` header).
+
+The payloads are versioned: [`schemas/embed-v1.schema.json`](schemas/embed-v1.schema.json)
+(also importable as `playwright-director/schemas/embed-v1.schema.json`).
+In the raw files, all paths are **relative to the site base URL** (the
+directory serving `widget.js` and `embed/`).
+
+| `embed/<slug>.json` field | Meaning |
+|---|---|
+| `schemaVersion` | `1` — only gains optional fields; a breaking change bumps it |
+| `id`, `title`, `description?`, `lang`, `variant?` | Identity and intro narration |
+| `duration` / `durationSeconds` | `"m:ss"` display string / number |
+| `video`, `poster?`, `page` | Video, poster image, full gallery page |
+| `steps[]` | `{ num?, at?, title?, key?, text?, image?, context? }` — `at` = start in seconds (chapters), `title` = human heading, `key` = the i18n key, `context: true` = unnumbered narration |
+
+`embed/index.json` is `{ schemaVersion, tutorials: [{ id, title, duration, durationSeconds, lang, variant? }] }`.
 
 ### Configuration
 
@@ -860,11 +986,18 @@ export default {
 
   // Paths
   input: "tutorials/",             // Where videos + timelines live
-  output: "tutorial-site-dist/",   // Where the static site is built
+  output: "tutorial-site-dist/",   // Where the static site is built (may sit inside input)
+  timelines: "e2e/output/",        // Optional: timeline JSON dir (default <input>/output — match TUTORIAL_OUTPUT_DIR)
+  videos: "e2e/videos/",           // Optional: videos + screenshots dir (default <input>/videos)
 
   // Site
-  baseUrl: "https://tutorials.myapp.com",  // For SEO (optional)
-  lang: "fr",                              // Site language
+  baseUrl: "https://tutorials.myapp.com",  // Full URL, or just a path ("/help/") for a sub-path deployment
+  cors: "*",                               // _headers Access-Control-Allow-Origin: "*", one origin, or false (no file)
+  lang: "fr",                              // Default language (served at /, others at /<lang>/)
+  strings: {                               // Optional: site UI texts, merged over the built-in en/fr/ar
+    fr: { allTutorials: "Toute l’aide" },
+    es: { allTutorials: "Todos los tutoriales", close: "Cerrar" },  // a new language starts from English
+  },
 
   // Content overrides (optional)
   tutorials: {
@@ -884,9 +1017,9 @@ export default {
 
 ### How videos are discovered
 
-The scanner looks for `.webm` files in `<input>/videos/`. For each video:
+The scanner looks for `.webm` files in `<input>/videos/` (or `videos`). For each video:
 
-- If a matching `_timeline.json` exists in `<input>/output/`, its metadata is used (title from narration steps, duration, category from `@feature:*` tag)
+- If a matching `_timeline.json` exists in `<input>/output/` (or `timelines`), its metadata is used (title from narration steps, duration, category from `@feature:*` tag)
 - Otherwise, a human-readable title is derived from the filename and duration is left blank
 
 Step screenshots (`{video}-step-{n}.{png,webp}`) are auto-detected and displayed as a carousel on each video card.
@@ -904,7 +1037,34 @@ npx serve tutorial-site-dist
 ```bash
 playwright-director build-site                      # Uses ./tutorial-site.config.js
 playwright-director build-site --config=path/to.js   # Custom config path
+playwright-director build-site --base=/help/         # Deploy under a sub-path (overrides baseUrl)
+playwright-director build-site -y                    # Never prompt (CI); also automatic without a TTY
+playwright-director build-site --only=look,billing   # Only these tutorials (all languages/variants)
 ```
+
+`--only` builds a site with just those tutorials — handy to check one page
+quickly. Deploy a full build.
+
+### Deploying to Cloudflare Pages
+
+Publish the output directory as is. It contains a `_headers` file (also read
+by Netlify) so that an app on another origin can load the tutorials:
+
+```
+/embed/*      Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/client.js    Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/widget.js    Access-Control-Allow-Origin: *   Cache-Control: public, max-age=300
+/videos/*     Access-Control-Allow-Origin: *   Cache-Control: public, max-age=604800
+```
+
+Set `cors` in the config to one origin (`"https://app.example.com"`) to
+restrict it, or `false` to write no file. With a sub-path (`--base=/help/`)
+the rules are prefixed with it. Videos keep their name when re-recorded, so
+their cache is one week, not "immutable".
+
+Seeking a video (chapters, the player's timeline) needs a host that answers
+HTTP Range requests with `206 Partial Content`. Cloudflare Pages, Netlify and
+GitHub Pages do; some simple static servers (`python -m http.server`) do not.
 
 ### Deploying to GitHub Pages from CI
 

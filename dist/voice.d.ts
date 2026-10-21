@@ -26,6 +26,9 @@ export declare class TutorialVoice {
     private preloadedAudio;
     constructor(page: Page, options: VoiceOptions);
     switchPage(page: Page): void;
+    private routedPages;
+    /** The app server no longer serves the clips: Playwright answers the voice URLs from the cache. */
+    private ensureVoiceRoute;
     /**
      * Pre-generate a single audio file (non-blocking).
      * Returns a promise that resolves when preload is complete.

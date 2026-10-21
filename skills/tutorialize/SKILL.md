@@ -57,3 +57,6 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Narration texts also become the gallery site's step-by-step guide
   (`npx playwright-director build-site`) — even `skipVoice` steps show their
   text there, so write every step text to read well on the page too.
+- Each step's first sentence is its chapter title (gallery + in-app widget,
+  click = seek); for other locales, re-record with `TUTORIAL_LANG=xx` and let
+  the app follow `tutorial.lang` (`api.md` §1).

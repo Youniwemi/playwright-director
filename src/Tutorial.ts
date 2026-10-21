@@ -137,8 +137,12 @@ export class Tutorial {
 		this.page = page;
 		// Env read here, not at module load, so tests can stub it per-instance.
 		this.variant = options.variant ?? (process.env.TUTORIAL_VARIANT || undefined);
+		// TUTORIAL_LANG records one spec per language: it wins over the option and suffixes outputs `.<lang>`.
+		const envLang = process.env.TUTORIAL_LANG || undefined;
 		const baseName = options.testName ?? `tutorial_${Date.now()}`;
-		this.testName = this.variant && options.testName ? `${baseName}-${this.variant}` : baseName;
+		this.testName = options.testName
+			? `${baseName}${this.variant ? `-${this.variant}` : ''}${envLang ? `.${envLang}` : ''}`
+			: baseName;
 		this.translateFn = options.translate ?? ((k: string) => k);
 
 		const audioBaseUrl = options.audioBaseUrl ?? DEFAULT_AUDIO_BASE_URL;
@@ -151,7 +155,7 @@ export class Tutorial {
 			testName: this.testName,
 			testTitle: options.testTitle,
 			feature: options.feature,
-			lang: options.lang ?? 'en',
+			lang: envLang ?? options.lang ?? 'en',
 			audioBaseUrl,
 			stepDelay: options.stepDelay ?? 500,
 			highlightDuration: options.highlightDuration ?? 800,
@@ -334,6 +338,11 @@ export class Tutorial {
 
 	static get isEnabled(): boolean {
 		return TUTORIAL_MODE;
+	}
+
+	/** Narration language (TUTORIAL_LANG, else the `lang` option) — drive the app UI with it, e.g. `?lang=${tutorial.lang}`. */
+	get lang(): string {
+		return this.options.lang;
 	}
 
 	private translate(key: string): string {

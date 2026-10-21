@@ -25,9 +25,9 @@ Or use a fixture that wraps this (the consuming project typically provides a `tu
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `title` | `string` | *required* | Overlay title |
-| `lang` | `string` | `'en'` | Language for TTS and UI |
+| `lang` | `string` | `'en'` (`env TUTORIAL_LANG` wins) | Narration + TTS language. `TUTORIAL_LANG=xx` records one spec per language: outputs get `.<lang>`; read `tutorial.lang` to drive the app UI (`?lang=`) |
 | `translate` | `(key: string) => string` | identity | i18n function — pass your `t()` |
-| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Base URL for audio files |
+| `audioBaseUrl` | `string` | `'http://localhost:5173'` | Origin the narration plays from — Playwright serves the clips from `tutorials/.cache/voice` (`TUTORIAL_VOICE_DIR`) |
 | `testTitle` | `string` | auto | Raw test title (for reporter matching) |
 | `testFile` | `string` | `''` | Test file path (metadata) |
 | `projectName` | `string` | `''` | Playwright project name |
@@ -317,12 +317,25 @@ tutorials/
 ```
 
 `npx playwright-director build-site` turns this directory into a static gallery
-site. Besides the pages, the build emits `widget.js` + `embed/<slug>.json`
+site (no astro needed in the project; `timelines` / `videos` in the site config
+point elsewhere when `TUTORIAL_OUTPUT_DIR` is overridden). Besides the pages, the build emits `widget.js` + `embed/<slug>.json`
 payloads so any app can embed a tutorial in-app: load
 `<script src="<site>/widget.js" defer>` and add a `data-tutorial="<slug>"`
 attribute to any element (slug = video id, i.e. the tutorial `name` plus
 `-<variant>` if any). `window.PlaywrightDirector.open(slug)` is the programmatic
-equivalent.
+equivalent. Apps with their own player use the headless API:
+`PlaywrightDirector.load(slug, { lang })` or, bundled,
+`import { load } from 'playwright-director/client'` — the payload with absolute
+URLs and chapter times (`steps[].at`, seconds). Schema:
+`schemas/embed-v1.schema.json`.
+
+Widget: a native modal `<dialog>` (focus trap, Esc, focus returned), chapters
+that seek (arrows/Home/End), fr/en/ar strings picked from `data-tutorial-lang`
+or `<html lang>`. Theme it from the app with `--pd-accent`, `--pd-surface`,
+`--pd-text`, `--pd-muted`, `--pd-border`, `--pd-radius`, `--pd-font`,
+`--pd-focus-ring` on `.playwright-director-widget`. The build writes `_headers`
+(CORS + cache) for Cloudflare Pages / Netlify; `--base=/help/` deploys under a
+sub-path, `-y` never prompts, `--only=<slug>` builds just that tutorial.
 
 ### Reviewing & correcting narration
 
@@ -336,7 +349,8 @@ lines in order (a key used twice corrects each occurrence in turn;
 boundary and both halves replaced. Texts sourced from an i18n catalog, or a
 first sentence that is the verbatim step key, are never rewritten — they are
 reported with their key for a manual fix in the translations. Re-run with
-`TUTORIAL_MODE=true` afterwards: only changed TTS clips are regenerated
+`TUTORIAL_MODE=true` afterwards — `npx playwright test -g "<test title>"`
+re-records just that tutorial; only changed TTS clips are regenerated
 (content-hash caching). `npx tutorial-transcript` (no subcommand) just
 regenerates the transcripts from the timeline JSON.
 

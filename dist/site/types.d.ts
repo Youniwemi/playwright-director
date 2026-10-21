@@ -1,3 +1,4 @@
+import type { UiStrings } from './strings.js';
 export interface SiteConfig {
     title: string;
     logo?: string;
@@ -5,9 +6,19 @@ export interface SiteConfig {
     font: string;
     input: string;
     output: string;
+    /** Timeline JSON dir (default `<input>/output`) — match TUTORIAL_OUTPUT_DIR if you override it */
+    timelines?: string;
+    /** Videos + step screenshots dir (default `<input>/videos`) */
+    videos?: string;
+    /** Full public URL ("https://docs.example.com/help/") or a path ("/help/") — the base path prefixes every link */
     baseUrl: string;
-    /** Single lang or comma-separated list, e.g. "fr,en,ar" */
+    /** Access-Control-Allow-Origin written to the `_headers` file (Cloudflare Pages / Netlify): '*' (default), one origin, or false for no file */
+    cors?: string | false;
+    /** Single lang or comma-separated list, e.g. "fr,en,ar" — the first one is the default */
     lang: string;
+    /** UI string overrides per language, merged over the built-in en/fr/ar
+     *  (site chrome + widget), e.g. `{ fr: { allTutorials: 'Toute l’aide' }, es: { … } }` */
+    strings?: Record<string, Partial<UiStrings>>;
     tutorials?: {
         categories?: Record<string, {
             icon: string;
@@ -34,7 +45,12 @@ export interface SiteConfig {
 export interface ManifestStep {
     /** Timeline step number; absent for mid-flow context narrations */
     n?: number;
+    /** Start time in the final video, seconds; absent for screenshot-only steps */
+    at?: number;
+    /** Human heading — the narration's first sentence when the step was never translated */
     title?: string;
+    /** i18n key the step was declared with */
+    key?: string;
     /** Narration text spoken during this step */
     text?: string;
     /** Screenshot filename relative to videos/ */
@@ -47,9 +63,19 @@ export interface VideoManifestEntry {
     category: string;
     title: string;
     duration: string;
+    /** Final video length in seconds (0 when unknown) */
+    durationSeconds: number;
+    /** Narration language, from the timeline */
+    lang?: string;
+    /** id without its `.<lang>` suffix (TUTORIAL_LANG recordings) — groups one tutorial's languages */
+    slug?: string;
+    /** Every language this slug was recorded in, sorted */
+    langs?: string[];
     premium: boolean;
     /** Filename relative to videos/ */
     file: string;
+    /** `<id>-poster.*` filename relative to videos/, when recorded */
+    poster?: string;
     feature?: string;
     /** Recording variant (e.g. 'mobile'); absent = regular/desktop */
     variant?: string;

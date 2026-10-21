@@ -36,6 +36,8 @@ Commands:
 Options:
   -y, --yes              Answer yes to everything (for scripted updates)
   --config=<path>        Path to tutorial-site.config.js (build-site only)
+  --base=<path>          build-site: deploy under a sub-path, e.g. --base=/help/ (overrides baseUrl)
+  --only=<slug,...>      build-site: only these tutorials (all their languages and variants)
   --lang=<lang>          regen-voices: only this language
   --workers=<n>          regen-voices: parallel TTS syntheses (default 2)
   --force                regen-voices: re-synthesize cached clips too (voice change)
@@ -135,10 +137,9 @@ if (!command || command === 'init') {
     });
 }
 else if (command === 'build-site') {
-    const configFlag = process.argv.find((a) => a.startsWith('--config='));
-    const configPath = configFlag ? configFlag.split('=')[1] : undefined;
+    const flag = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
     import('./site/build-site.js')
-        .then(({ buildSite }) => buildSite(configPath))
+        .then(({ buildSite }) => buildSite(flag('config'), { base: flag('base'), yes: AUTO_YES, only: flag('only')?.split(',').filter(Boolean) }))
         .catch((err) => {
         console.error(err);
         process.exit(1);
@@ -153,9 +154,8 @@ else if (command === 'regen-voices') {
         // no .env — environment variables alone drive the TTS
     }
     const flag = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
-    const audioDir = join(process.cwd(), 'static', 'audio', 'tutorial-voice');
-    import('./voice-prerender.js')
-        .then(({ regenVoices }) => regenVoices(audioDir, {
+    Promise.all([import('./voice-prerender.js'), import('./voice-dir.js')])
+        .then(([{ regenVoices }, { voiceCacheDir }]) => regenVoices(voiceCacheDir(), {
         lang: flag('lang'),
         workers: flag('workers') ? parseInt(flag('workers'), 10) : undefined,
         force: process.argv.includes('--force')

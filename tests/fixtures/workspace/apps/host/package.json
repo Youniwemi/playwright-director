@@ -1,0 +1,6 @@
+{
+  "name": "host",
+  "private": true,
+  "type": "module",
+  "devDependencies": { "playwright-director": "file:TARBALL" }
+}

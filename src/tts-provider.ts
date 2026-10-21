@@ -53,7 +53,7 @@ export class CommandTTSProvider implements TTSProvider {
 	private static VOICES: Record<string, string> = {
 		fr: 'Thomas',
 		en: 'Samantha',
-		ar: 'Maged'
+		ar: 'Majed'
 	};
 
 	private static LANG_NAMES: Record<string, string> = {

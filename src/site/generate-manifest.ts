@@ -1,5 +1,6 @@
 import type { ManifestStep, SiteConfig, VideoManifest, VideoManifestEntry } from './types.js';
 import type { ScannedTutorial } from './scan-tutorials.js';
+import { mergeStrings, uiString } from './strings.js';
 
 const DEFAULT_CATEGORY_ICONS: Record<string, string> = {
 	'getting-started': '⭐',
@@ -31,9 +32,10 @@ export function buildStepsDetail(t: ScannedTutorial): { description?: string; st
 	let seenStep = false;
 
 	for (const s of t.timeline.steps) {
+		const at = Math.round(s.startMs / 10) / 100;
 		if (s.step === 0 && s.title === 'Context') {
 			if (!s.text) continue;
-			if (seenStep) stepsDetail.push({ text: s.text, context: true });
+			if (seenStep) stepsDetail.push({ at, text: s.text, context: true });
 			else leadingContext.push(s.text);
 			continue;
 		}
@@ -41,7 +43,16 @@ export function buildStepsDetail(t: ScannedTutorial): { description?: string; st
 		seenStep = true;
 		const image = shotByN.get(s.step);
 		if (image !== undefined) usedShots.add(s.step);
-		stepsDetail.push({ n: s.step, title: s.title, ...(s.text ? { text: s.text } : {}), ...(image ? { image } : {}) });
+		// An untranslated step (identity translate) has its key as title — show the narration's first sentence instead.
+		const title = s.key && s.title === s.key && s.text ? s.text.split('. ')[0].replace(/\.$/, '') : s.title;
+		stepsDetail.push({
+			n: s.step,
+			at,
+			title,
+			...(s.key ? { key: s.key } : {}),
+			...(s.text ? { text: s.text } : {}),
+			...(image ? { image } : {})
+		});
 	}
 
 	for (const shot of t.stepScreenshots) {
@@ -89,8 +100,11 @@ export function generateManifest(tutorials: ScannedTutorial[], config: SiteConfi
 			// fall back to the Playwright test title, then the slug.
 			title: t.timeline.title || t.timeline.testTitle || humanize(t.timeline.testName),
 			duration: durationSec > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : '',
+			durationSeconds: Math.round(t.timeline.totalDurationMs / 100) / 10,
+			lang: t.timeline.lang,
 			premium: false,
 			file: t.videoFile,
+			...(t.poster ? { poster: t.poster } : {}),
 			feature: t.timeline.feature,
 			variant: t.timeline.variant,
 			uploadDate: new Date().toISOString().slice(0, 10),
@@ -100,12 +114,23 @@ export function generateManifest(tutorials: ScannedTutorial[], config: SiteConfi
 		};
 	});
 
+	// Group the languages of one tutorial: `look`, `look.en`, `look.ar` share the slug `look`.
+	const langsBySlug = new Map<string, Set<string>>();
+	for (const v of videos) {
+		const lang = v.lang ?? '';
+		v.slug = lang && v.id.endsWith(`.${lang}`) ? v.id.slice(0, -lang.length - 1) : v.id;
+		if (lang) (langsBySlug.get(v.slug) ?? langsBySlug.set(v.slug, new Set()).get(v.slug)!).add(lang);
+	}
+	for (const v of videos) v.langs = [...(langsBySlug.get(v.slug!) ?? [])].sort();
+
 	return {
 		categories,
 		videos,
 		ui: {
 			heroTitle: config.tutorials?.ui?.heroTitle || config.title,
-			heroSubtitle: config.tutorials?.ui?.heroSubtitle || 'Video tutorials'
+			heroSubtitle:
+				config.tutorials?.ui?.heroSubtitle ||
+				uiString(mergeStrings(config.strings), (config.lang || 'en').split(',')[0].trim(), 'videoTutorials')
 		}
 	};
 }

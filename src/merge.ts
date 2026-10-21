@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { buildFastForwardFilter, type FastForwardSegment } from './fast-forward.js';
+import { voiceCacheDir } from './voice-dir.js';
 
 export interface MergeOptions {
 	audioDir: string;
@@ -11,8 +12,7 @@ export interface MergeOptions {
 	checkFileExists?: (path: string) => boolean;
 }
 
-const DEFAULT_OPTIONS: MergeOptions = {
-	audioDir: 'static/audio/tutorial-voice',
+const DEFAULT_OPTIONS: Omit<MergeOptions, 'audioDir'> = {
 	musicFile: 'static/audio/tutorial-background.mp3',
 	musicVolume: 0.15,
 	voiceVolume: 2.5
@@ -39,7 +39,7 @@ export function buildMergeCommand(
 	outputPath: string,
 	options: Partial<MergeOptions> = {}
 ): { command: string; inputs: string[]; filter: string } {
-	const opts = { ...DEFAULT_OPTIONS, ...options };
+	const opts = { ...DEFAULT_OPTIONS, audioDir: voiceCacheDir(), ...options };
 	const fileExists = opts.checkFileExists ?? existsSync;
 	const videoDuration = (timeline.totalDurationMs / 1000).toFixed(3);
 	const inputs: string[] = [videoPath];

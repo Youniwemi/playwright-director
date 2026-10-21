@@ -1,6 +1,6 @@
 {
   "name": "playwright-director",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "AI-assisted Playwright tool that turns executable tests into directed video guides — demos, tutorials, and documentation that never lag behind the product.",
   "repository": {
     "type": "git",
@@ -27,7 +27,12 @@
       "types": "./dist/site/types.d.ts",
       "default": "./dist/site/types.js"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./src/styles.css",
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./schemas/*": "./schemas/*"
   },
   "bin": {
     "playwright-director": "./dist/init.js",
@@ -37,6 +42,7 @@
     "dist",
     "src/styles.css",
     "skills",
+    "schemas",
     "templates",
     "README.md"
   ],
@@ -78,6 +84,7 @@
     }
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.52.0",
     "@types/node": "^26.2.0",
     "@types/sharp": "^0.31.1",

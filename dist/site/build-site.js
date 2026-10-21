@@ -1,7 +1,8 @@
-import { existsSync, writeFileSync, cpSync, rmSync } from 'fs';
+import { existsSync, writeFileSync, cpSync, rmSync, mkdirSync, symlinkSync, readFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { pathToFileURL, fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 import { createInterface } from 'readline';
 import { scanTutorials } from './scan-tutorials.js';
 import { generateManifest } from './generate-manifest.js';
@@ -17,6 +18,28 @@ const DEFAULT_CONFIG = {
     baseUrl: '/',
     lang: 'fr'
 };
+/**
+ * Astro is playwright-director's dependency, not the consuming app's: resolve
+ * it from here and link it into the scaffold's node_modules, so `astro/config`
+ * and the compiled components' `astro/*` imports resolve from the build dir
+ * under any linker (bun isolated, pnpm, npm workspaces). Returns the CLI path.
+ */
+export function linkAstro(buildDir) {
+    let pkgPath;
+    try {
+        pkgPath = createRequire(import.meta.url).resolve('astro/package.json');
+    }
+    catch {
+        throw new Error('[build-site] astro is not installed next to playwright-director — reinstall playwright-director.');
+    }
+    const astroDir = dirname(pkgPath);
+    const link = join(buildDir, 'node_modules', 'astro');
+    mkdirSync(dirname(link), { recursive: true });
+    rmSync(link, { recursive: true, force: true });
+    symlinkSync(astroDir, link, 'junction');
+    const { bin } = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    return join(astroDir, typeof bin === 'string' ? bin : bin.astro);
+}
 function ask(question) {
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     return new Promise((res) => {
@@ -26,7 +49,11 @@ function ask(question) {
         });
     });
 }
-export async function buildSite(configPath) {
+/** `look` matches look, look.en, look-mobile.ar…; an exact id matches itself. */
+export function matchesOnly(id, only) {
+    return only.some((s) => id === s || id.startsWith(`${s}.`) || id.startsWith(`${s}-`));
+}
+export async function buildSite(configPath, options = {}) {
     const resolvedConfigPath = resolve(configPath || join(process.cwd(), 'tutorial-site.config.js'));
     let config;
     if (existsSync(resolvedConfigPath)) {
@@ -41,19 +68,23 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 `;
         writeFileSync(resolvedConfigPath, configContent);
         console.log(`  Created ${resolvedConfigPath}`);
-        const answer = await ask('  Continue with defaults? [Y/n] ');
+        const answer = options.yes || !process.stdin.isTTY ? 'y' : await ask('  Continue with defaults? [Y/n] ');
         if (answer && answer !== 'y' && answer !== 'yes') {
             console.log('  Edit the config file, then re-run build-site.');
             return;
         }
         config = { ...DEFAULT_CONFIG };
     }
+    if (options.base)
+        config.baseUrl = options.base;
     config.input = resolve(config.input);
     config.output = resolve(config.output);
-    console.log(`\n  Scanning ${config.input} for tutorials...`);
-    const tutorials = scanTutorials(config.input);
+    config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
+    config.videos = resolve(config.videos ?? join(config.input, 'videos'));
+    console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
+    const tutorials = scanTutorials(config.input, config.timelines, config.videos).filter((t) => !options.only?.length || matchesOnly(t.timeline.testName, options.only));
     if (tutorials.length === 0) {
-        console.error('  No tutorials found. Make sure you have _timeline.json files in the output/ subdirectory and .webm files in the videos/ subdirectory.');
+        console.error(`  No tutorials found: need .webm files in ${config.videos} (timelines in ${config.timelines}). Set \`videos\` / \`timelines\` in the config if they live elsewhere.`);
         process.exit(1);
     }
     console.log(`  Found ${tutorials.length} tutorial(s).`);
@@ -64,7 +95,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
     scaffold(config, manifest, tempDir);
     console.log('  Building static site...');
     try {
-        execSync('npx astro build', {
+        execFileSync(process.execPath, [linkAstro(tempDir), 'build'], {
             cwd: tempDir,
             stdio: 'inherit',
             env: { ...process.env, NODE_ENV: 'production' }
