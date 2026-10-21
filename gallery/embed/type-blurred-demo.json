@@ -1,28 +1,40 @@
 {
+  "schemaVersion": 1,
   "id": "type-blurred-demo",
   "title": "Typing a secret without leaking it",
   "duration": "0:15",
+  "durationSeconds": 15.2,
+  "slug": "type-blurred-demo",
   "lang": "en",
+  "langs": [
+    "en"
+  ],
   "accent": "#6366f1",
   "video": "videos/type-blurred-demo.webm",
-  "poster": "videos/type-blurred-demo-step-1.webp",
+  "poster": "videos/type-blurred-demo-poster.webp",
   "page": "type-blurred-demo/",
   "steps": [
     {
       "num": 1,
+      "at": 0.01,
       "title": "The email is typed normally — it stays readable",
+      "key": "The email is typed normally — it stays readable",
       "text": "The email is typed normally — it stays readable",
       "image": "videos/type-blurred-demo-step-1.webp"
     },
     {
       "num": 2,
+      "at": 4.02,
       "title": "The password is typed blurred — unreadable on screen",
+      "key": "The password is typed blurred — unreadable on screen",
       "text": "The password is typed blurred — unreadable on screen",
       "image": "videos/type-blurred-demo-step-2.webp"
     },
     {
       "num": 3,
+      "at": 8.27,
       "title": "Submit",
+      "key": "Submit",
       "text": "Submit",
       "image": "videos/type-blurred-demo-step-3.webp"
     }

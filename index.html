@@ -220,14 +220,20 @@ footer{border-top:1px solid var(--border);margin-top:20px;padding:34px 0;
         <p>Record desktop and mobile variants of the same tutorial, side-by-side multi-scene
            layouts included.</p></div>
       <div class="feat"><span class="ico">🌍</span><h3>Multi-language</h3>
-        <p>Per-language voices and filenames, full RTL support — one test, many locales.</p></div>
+        <p>Record each locale with <code>TUTORIAL_LANG</code> — one test, many locales. The gallery
+           gets a home page per language, translated chrome and full RTL.</p></div>
       <div class="feat"><span class="ico">📝</span><h3>Transcripts</h3>
         <p>Markdown transcripts generated from the timeline; edit them and write corrections
            back into your tests.</p></div>
       <div class="feat"><span class="ico">🖼️</span><h3>Gallery site &amp; in-app widget</h3>
         <p><code>build-site</code> turns your recordings into a static video gallery with
            step-by-step guides — and serves a <code>widget.js</code> that embeds any tutorial
-           right inside your app.</p></div>
+           right inside your app: an accessible dialog with chapters that seek, themed with
+           your own <code>--pd-*</code> CSS variables.</p></div>
+      <div class="feat"><span class="ico">🧩</span><h3>Headless data API</h3>
+        <p>Your own player? <code>load('slug', { lang })</code> returns a versioned JSON payload —
+           video, poster, chapters with timestamps. Ready for Cloudflare Pages
+           (<code>_headers</code> generated).</p></div>
       <div class="feat"><span class="ico">⚡</span><h3>Zero overhead</h3>
         <p>Without <code>TUTORIAL_MODE</code> everything is a no-op — your test suite runs
            exactly as before.</p></div>

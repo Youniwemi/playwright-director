@@ -1,22 +1,32 @@
 {
+  "schemaVersion": 1,
   "id": "overlay-tr",
   "title": "Overlay TR",
   "duration": "0:09",
+  "durationSeconds": 8.9,
+  "slug": "overlay-tr",
   "lang": "en",
+  "langs": [
+    "en"
+  ],
   "accent": "#6366f1",
   "video": "videos/overlay-tr.webm",
-  "poster": "videos/overlay-tr-step-1.webp",
+  "poster": "videos/overlay-tr-poster.webp",
   "page": "overlay-tr/",
   "steps": [
     {
       "num": 1,
+      "at": 0.01,
       "title": "First step",
+      "key": "First step",
       "text": "First step",
       "image": "videos/overlay-tr-step-1.webp"
     },
     {
       "num": 2,
+      "at": 2.35,
       "title": "Second step",
+      "key": "Second step",
       "text": "Second step",
       "image": "videos/overlay-tr-step-2.webp"
     }
