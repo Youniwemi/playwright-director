@@ -1,0 +1,46 @@
+---
+import Shell from '../layouts/Shell.astro';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import type { SeoProps } from '../components/Seo.astro';
+import { config, base } from '../lib/site';
+import { t, siteLang } from '../i18n';
+
+interface Props {
+	title: string;
+	description?: string;
+	lang?: string;
+	seo?: SeoProps;
+}
+
+const { title, description, seo } = Astro.props;
+const lang = Astro.props.lang || siteLang;
+---
+
+<Shell title={title} description={description} lang={lang} seo={seo}>
+	<slot name="head" slot="head" />
+	<header>
+		<div class="header-content">
+			<a href={`${base}/`} class="logo">
+				{
+					config.logo ? (
+						<img src={`${base}${config.logo}`} alt={config.title} class="logo-img" />
+					) : (
+						<span class="logo-icon">🎬</span>
+					)
+				}
+				<span class="logo-text">{config.title}</span>
+			</a>
+			<ThemeSwitcher lang={lang} />
+		</div>
+	</header>
+	<main>
+		<slot />
+	</main>
+	<footer>
+		<div class="footer-content">
+			<span>© {new Date().getFullYear()} {config.title}</span>
+			<span>·</span>
+			<span>{t(lang, 'builtWith')}</span>
+		</div>
+	</footer>
+</Shell>

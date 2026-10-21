@@ -1,0 +1,19 @@
+---
+// "Open in the app" / "Read the documentation" buttons of a video page (manifest `links`, already absolute).
+import { t } from '../i18n';
+import type { Video } from '../lib/site';
+
+interface Props {
+	video: Video;
+}
+
+const { video } = Astro.props;
+const { app, docs } = (video.links ?? {}) as { app?: string; docs?: string };
+---
+
+{(app || docs) && (
+	<div class="video-links">
+		{app && <a class="video-link video-link-app" href={app}>{t(video.lang, 'openInApp')} <span aria-hidden="true">↗</span></a>}
+		{docs && <a class="video-link video-link-docs" href={docs}>{t(video.lang, 'readDocs')} <span aria-hidden="true">↗</span></a>}
+	</div>
+)}

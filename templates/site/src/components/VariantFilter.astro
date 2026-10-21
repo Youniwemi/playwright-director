@@ -1,0 +1,36 @@
+---
+// Desktop / mobile / … filter — only shown when at least one video was recorded in a variant.
+// Hides non-matching `[data-variant]` cards and the `.category` sections left empty.
+import { t } from '../i18n';
+import type { Video } from '../lib/site';
+
+interface Props {
+	videos: Video[];
+	lang: string;
+}
+
+const { videos, lang } = Astro.props;
+const variants: string[] = [...new Set(videos.map((v) => v.variant ?? ''))];
+const label = (v: string) => (v === '' ? t(lang, 'desktop') : v.charAt(0).toUpperCase() + v.slice(1));
+---
+
+{variants.some((v) => v !== '') && (
+	<nav class="variant-filter" aria-label={t(lang, 'filterVariant')}>
+		<button class="variant-btn active" data-variant="all">{t(lang, 'all')}</button>
+		{variants.sort().map((v) => (
+			<button class="variant-btn" data-variant={v}>{label(v)}</button>
+		))}
+	</nav>
+)}
+
+<script>
+	import { setFilter } from '../lib/filter';
+
+	const bar = document.querySelector('button[data-variant]')?.closest('.variant-filter');
+	bar?.addEventListener('click', (e) => {
+		const btn = (e.target as HTMLElement).closest<HTMLElement>('.variant-btn');
+		if (!btn) return;
+		bar.querySelectorAll('.variant-btn').forEach((b) => b.classList.toggle('active', b === btn));
+		setFilter({ variant: btn.dataset.variant! });
+	});
+</script>

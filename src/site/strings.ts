@@ -25,6 +25,25 @@ export interface UiStrings {
 	tutorial: string;
 	duration: string;
 	screenshot: string;
+	theme: string;
+	openInApp: string;
+	readDocs: string;
+	search: string;
+	noResults: string;
+	startHere: string;
+	heroEyebrow: string;
+	heroEyebrow_one: string;
+	sectionStats: string;
+	/** Plural form for n = 1 — the site's t() picks `<key>_<Intl.PluralRules category>` when present */
+	sectionStats_one: string;
+	sections: string;
+	nextSection: string;
+	ctaTitle: string;
+	ctaText: string;
+	ctaButton: string;
+	openApp: string;
+	home: string;
+	courseContent: string;
 }
 
 export const STRINGS: Record<string, UiStrings> = {
@@ -51,7 +70,25 @@ export const STRINGS: Record<string, UiStrings> = {
 		openFull: 'Open full tutorial',
 		tutorial: 'Tutorial',
 		duration: 'Duration',
-		screenshot: 'Screenshot'
+		screenshot: 'Screenshot',
+		theme: 'Theme',
+		openInApp: 'Open in the app',
+		readDocs: 'Read the documentation',
+		search: 'Search tutorials',
+		noResults: 'No tutorial matches “{q}”.',
+		startHere: 'Start here',
+		heroEyebrow: '{n} tutorials · under {m} min each',
+		heroEyebrow_one: '1 tutorial · under {m} min',
+		sectionStats: '{n} videos · ~{m} min',
+		sectionStats_one: '1 video · ~{m} min',
+		sections: 'Sections',
+		nextSection: 'Next section',
+		ctaTitle: 'Your turn',
+		ctaText: 'Open the app and repeat these steps in a few minutes.',
+		ctaButton: 'Try it now',
+		openApp: 'Open the app',
+		home: 'Home',
+		courseContent: 'Course content'
 	},
 	fr: {
 		allTutorials: 'Tous les tutoriels',
@@ -76,7 +113,25 @@ export const STRINGS: Record<string, UiStrings> = {
 		openFull: 'Ouvrir le tutoriel complet',
 		tutorial: 'Tutoriel',
 		duration: 'Durée',
-		screenshot: 'Capture d’écran'
+		screenshot: 'Capture d’écran',
+		theme: 'Thème',
+		openInApp: 'Ouvrir dans l’application',
+		readDocs: 'Lire la documentation',
+		search: 'Rechercher un tutoriel',
+		noResults: 'Aucun tutoriel ne correspond à « {q} ».',
+		startHere: 'Commencez ici',
+		heroEyebrow: '{n} tutoriels · moins de {m} min chacun',
+		heroEyebrow_one: '1 tutoriel · moins de {m} min',
+		sectionStats: '{n} vidéos · ~{m} min',
+		sectionStats_one: '1 vidéo · ~{m} min',
+		sections: 'Sections',
+		nextSection: 'Section suivante',
+		ctaTitle: 'À vous de jouer',
+		ctaText: 'Ouvrez l’application et refaites ces étapes en quelques minutes.',
+		ctaButton: 'Essayer maintenant',
+		openApp: 'Ouvrir l’application',
+		home: 'Accueil',
+		courseContent: 'Contenu du parcours'
 	},
 	ar: {
 		allTutorials: 'كل الدروس',
@@ -101,7 +156,25 @@ export const STRINGS: Record<string, UiStrings> = {
 		openFull: 'فتح الدرس كاملاً',
 		tutorial: 'درس',
 		duration: 'المدة',
-		screenshot: 'لقطة الشاشة'
+		screenshot: 'لقطة الشاشة',
+		theme: 'السمة',
+		openInApp: 'فتح في التطبيق',
+		readDocs: 'قراءة التوثيق',
+		search: 'ابحث في الدروس',
+		noResults: 'لا يوجد درس يطابق «{q}».',
+		startHere: 'ابدأ من هنا',
+		heroEyebrow: '{n} درسًا · أقل من {m} دقائق لكل درس',
+		heroEyebrow_one: 'درس واحد · أقل من {m} دقائق',
+		sectionStats: '{n} فيديو · ~{m} د',
+		sectionStats_one: 'فيديو واحد · ~{m} د',
+		sections: 'الأقسام',
+		nextSection: 'القسم التالي',
+		ctaTitle: 'دورك الآن',
+		ctaText: 'افتح التطبيق وكرر هذه الخطوات في بضع دقائق.',
+		ctaButton: 'جرّب الآن',
+		openApp: 'فتح التطبيق',
+		home: 'الرئيسية',
+		courseContent: 'محتوى المسار'
 	}
 };
 

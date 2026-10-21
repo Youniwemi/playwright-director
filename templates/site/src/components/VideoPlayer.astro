@@ -1,0 +1,43 @@
+---
+// The tutorial video. Chapters anywhere on the page ([data-at] steps + .step-time buttons) seek it,
+// the playing step gets aria-current="step", and `?t=<seconds>` starts playback there.
+import { media, posterOf, type Video } from '../lib/site';
+
+interface Props {
+	video: Video;
+}
+
+const { video } = Astro.props;
+const poster = posterOf(video);
+---
+
+<div class="video-player-wrap">
+	<video controls class="video-player" id="tutorial-video" poster={poster ? media(poster) : undefined}>
+		<source src={media(video.file)} type="video/webm" />
+	</video>
+</div>
+
+<script>
+	// Seeking needs a host that answers HTTP Range requests.
+	const player = document.getElementById('tutorial-video') as HTMLVideoElement | null;
+	if (player) {
+		const chapters = [...document.querySelectorAll<HTMLElement>('[data-at].step-block, [data-at].step-card, [data-at].step-row')];
+		document.querySelectorAll<HTMLElement>('.step-time').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				player.currentTime = Number(btn.dataset.at);
+				player.play().catch(() => {});
+				player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			});
+		});
+		let current: HTMLElement | undefined;
+		player.addEventListener('timeupdate', () => {
+			const now = chapters.filter((c) => Number(c.dataset.at) <= player.currentTime + 0.25).pop();
+			if (now === current) return;
+			current?.removeAttribute('aria-current');
+			now?.setAttribute('aria-current', 'step');
+			current = now;
+		});
+		const start = Number(new URLSearchParams(location.search).get('t'));
+		if (start > 0) player.currentTime = start;
+	}
+</script>

@@ -1,171 +1,84 @@
 ---
-// Video modal component - handles inline video playback with prev/next navigation
-import { t, siteLang } from '../i18n';
+// Quick-view player for home cards (`.video-card[data-video-url]`): native modal <dialog>
+// (page inert, Esc closes, focus returns to the card), ←/→ and buttons walk the visible
+// cards of the same section, the title bar links to the full tutorial page.
+// Only a click inside the card's `[data-quickview]` zone opens it (Classic: the whole card; Académie: the
+// thumbnail — the text follows the link). A card link keeps working with a modifier key and without JS.
+import { t } from '../i18n';
+
+interface Props {
+	lang?: string;
+}
+
+const { lang: L } = Astro.props;
 ---
 
-<div id="video-modal" class="video-modal" style="display: none;">
-	<button class="video-modal-close" aria-label={t(siteLang, 'close')}>×</button>
+<dialog id="video-modal" class="video-modal" aria-labelledby="video-title">
+	<button class="video-modal-close" aria-label={t(L, 'close')}>×</button>
 	<div class="video-container">
-		<button class="video-nav video-nav-prev" aria-label={t(siteLang, 'previous')} style="display: none;">‹</button>
-		<video controls id="modal-video">
-			<source src="" type="video/webm" />
-		</video>
-		<button class="video-nav video-nav-next" aria-label={t(siteLang, 'next')} style="display: none;">›</button>
+		<button class="video-nav video-nav-prev" aria-label={t(L, 'previous')}>‹</button>
+		<video controls id="modal-video"></video>
+		<button class="video-nav video-nav-next" aria-label={t(L, 'next')}>›</button>
 	</div>
 	<div class="video-title-bar">
-		<span id="video-title"></span>
+		<a id="video-title" href=""></a>
 		<span id="video-counter"></span>
 	</div>
-</div>
-
-<style>
-	.video-container {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		max-width: 100%;
-	}
-
-	.video-nav {
-		background: rgba(255, 255, 255, 0.9);
-		border: none;
-		width: 50px;
-		height: 50px;
-		border-radius: 50%;
-		font-size: 2rem;
-		cursor: pointer;
-		transition: all 0.2s;
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		line-height: 1;
-	}
-
-	.video-nav:hover {
-		background: white;
-		transform: scale(1.1);
-	}
-
-	.video-nav:disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
-		transform: none;
-	}
-
-	.video-title-bar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		max-width: 900px;
-		margin-top: 1rem;
-		padding: 0 60px;
-		color: white;
-		font-size: 0.9rem;
-	}
-
-	#video-title {
-		font-weight: 500;
-	}
-
-	#video-counter {
-		opacity: 0.7;
-	}
-</style>
+</dialog>
 
 <script>
-	document.addEventListener('DOMContentLoaded', () => {
-		const modal = document.getElementById('video-modal') as HTMLDivElement;
-		const video = document.getElementById('modal-video') as HTMLVideoElement;
-		const closeBtn = modal?.querySelector('.video-modal-close');
-		const prevBtn = modal?.querySelector('.video-nav-prev') as HTMLButtonElement;
-		const nextBtn = modal?.querySelector('.video-nav-next') as HTMLButtonElement;
-		const videoSource = video?.querySelector('source');
-		const titleEl = document.getElementById('video-title');
-		const counterEl = document.getElementById('video-counter');
+	const modal = document.getElementById('video-modal') as HTMLDialogElement | null;
+	if (modal) {
+		const video = modal.querySelector('video')!;
+		const prevBtn = modal.querySelector<HTMLButtonElement>('.video-nav-prev')!;
+		const nextBtn = modal.querySelector<HTMLButtonElement>('.video-nav-next')!;
+		const titleEl = modal.querySelector<HTMLAnchorElement>('#video-title')!;
+		const counterEl = modal.querySelector<HTMLElement>('#video-counter')!;
+		let list: HTMLElement[] = [];
+		let index = 0;
 
-		// Collect all video cards
-		const cards = Array.from(document.querySelectorAll('.video-card'));
-		let currentIndex = 0;
-
-		const playVideo = (index: number) => {
-			if (index < 0 || index >= cards.length) return;
-
-			currentIndex = index;
-			const card = cards[index];
-			const videoUrl = card.getAttribute('data-video-url');
-			const title = card.querySelector('.video-title')?.textContent || '';
-
-			if (videoUrl && videoSource && video) {
-				videoSource.src = videoUrl;
-				video.load();
-				video.play();
-
-				// Update title and counter
-				if (titleEl) titleEl.textContent = title;
-				if (counterEl) counterEl.textContent = `${index + 1} / ${cards.length}`;
-
-				// Update nav buttons
-				if (prevBtn) {
-					prevBtn.style.display = 'flex';
-					prevBtn.disabled = index === 0;
-				}
-				if (nextBtn) {
-					nextBtn.style.display = 'flex';
-					nextBtn.disabled = index === cards.length - 1;
-				}
-			}
+		const play = (i: number) => {
+			if (i < 0 || i >= list.length) return;
+			index = i;
+			const card = list[i];
+			video.src = card.dataset.videoUrl!;
+			video.play().catch(() => {});
+			titleEl.textContent = card.querySelector('.video-title')?.textContent?.trim() || '';
+			titleEl.href = card.dataset.href || card.querySelector<HTMLAnchorElement>('a[href]')?.href || '';
+			counterEl.textContent = `${i + 1} / ${list.length}`;
+			prevBtn.disabled = i === 0;
+			nextBtn.disabled = i === list.length - 1;
 		};
 
-		// Open modal on card click
-		cards.forEach((card, index) => {
-			card.addEventListener('click', () => {
-				if (modal) {
-					modal.style.display = 'flex';
-					playVideo(index);
-				}
-			});
+		document.addEventListener('click', (e) => {
+			// Card controls that must not open the dialog stop propagation themselves
+			const card = (e.target as HTMLElement).closest('[data-quickview]')?.closest<HTMLElement>('.video-card[data-video-url]');
+			if (!card || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+			e.preventDefault();
+			const scope = card.closest('.category') ?? document;
+			list = [...scope.querySelectorAll<HTMLElement>('.video-card[data-video-url]')].filter((c) => !c.closest('[hidden]'));
+			modal.showModal();
+			play(list.indexOf(card));
 		});
 
-		// Navigation
-		prevBtn?.addEventListener('click', (e) => {
-			e.stopPropagation();
-			playVideo(currentIndex - 1);
+		// Size the box to the picture (desktop, mobile-variant and portrait recordings differ)
+		video.addEventListener('loadedmetadata', () => {
+			if (video.videoHeight) modal.style.setProperty('--pd-video-ratio', String(video.videoWidth / video.videoHeight));
 		});
-
-		nextBtn?.addEventListener('click', (e) => {
-			e.stopPropagation();
-			playVideo(currentIndex + 1);
+		prevBtn.addEventListener('click', () => play(index - 1));
+		nextBtn.addEventListener('click', () => play(index + 1));
+		video.addEventListener('ended', () => play(index + 1));
+		modal.querySelector('.video-modal-close')!.addEventListener('click', () => modal.close());
+		// The dialog fills the screen: a click on it (not on its content) is a backdrop click
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) modal.close();
 		});
-
-		// Auto-advance on video end
-		video?.addEventListener('ended', () => {
-			if (currentIndex < cards.length - 1) {
-				playVideo(currentIndex + 1);
-			}
+		modal.addEventListener('keydown', (e) => {
+			if ((e.target as HTMLElement).tagName === 'VIDEO') return;
+			const rtl = document.dir === 'rtl';
+			if (e.key === 'ArrowLeft') play(index + (rtl ? 1 : -1));
+			if (e.key === 'ArrowRight') play(index + (rtl ? -1 : 1));
 		});
-
-		// Close modal
-		const closeModal = () => {
-			if (modal && video) {
-				modal.style.display = 'none';
-				video.pause();
-			}
-		};
-
-		closeBtn?.addEventListener('click', closeModal);
-		modal?.addEventListener('click', (e) => {
-			if (e.target === modal) closeModal();
-		});
-
-		// Keyboard navigation
-		document.addEventListener('keydown', (e) => {
-			if (modal?.style.display !== 'flex') return;
-
-			if (e.key === 'Escape') closeModal();
-			if (e.key === 'ArrowLeft') playVideo(currentIndex - 1);
-			if (e.key === 'ArrowRight') playVideo(currentIndex + 1);
-		});
-	});
+		modal.addEventListener('close', () => video.pause());
+	}
 </script>

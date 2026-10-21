@@ -8,6 +8,12 @@ export declare function linkAstro(buildDir: string): string;
 export interface BuildSiteOptions {
     /** Overrides config.baseUrl, e.g. "/help/" for a sub-path deployment */
     base?: string;
+    /** Overrides config.theme */
+    theme?: string;
+    /** Overrides config.output */
+    output?: string;
+    /** Run `astro dev` on the scaffold (kept in <output>/.astro-build) instead of building */
+    dev?: boolean;
     /** Never prompt (CI): a missing config is created with the defaults and used */
     yes?: boolean;
     /** Only these tutorials (slugs or ids) — all their languages and variants */

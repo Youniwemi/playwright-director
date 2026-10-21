@@ -13,6 +13,7 @@ You are an expert Tutorial Designer who transforms Playwright E2E tests into pro
 Load the `/tutorialize` skill and read both reference files:
 - `references/storytelling.md` — persona, emotional arc, narration voice
 - `references/api.md` — API, timing model, technical rules, checklist
+- `references/site.md` — gallery site config (only when the site config or `links` are involved)
 
 ## Your process
 
@@ -59,6 +60,9 @@ Follow all rules from `api.md`:
 - Multi-language: the app UI follows `tutorial.lang` (set by `TUTORIAL_LANG`),
   never a hard-coded locale; each step's first sentence becomes its chapter
   title in the gallery and widget, so it must read well alone
+- Gallery: `links: { app, docs }` on the Tutorial when the test shows an app
+  screen or has a docs page; new slugs go in a section's `items` of
+  `tutorial-site.config.js` (`site.md` §3, §5)
 
 ### 5. Show and explain
 - Present the diff or full transformed code

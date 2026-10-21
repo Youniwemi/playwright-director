@@ -6,5 +6,11 @@ import type { SiteConfig, VideoManifest } from './types.js';
  * Returns '' when `cors` is false.
  */
 export declare function buildHeadersFile(basePath: string, cors: string | false): string;
+export declare const THEMES: readonly ["academy", "classic"];
+export type Theme = (typeof THEMES)[number];
+/**
+ * Copy order — later wins: shared base (templates/site) → theme (templates/themes/<theme> → src/theme/)
+ * → config `overrides` (over src/) → generated files (data, user.css, public/*).
+ */
 export declare function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: string): string;
 //# sourceMappingURL=scaffold.d.ts.map

@@ -1,0 +1,56 @@
+---
+// Playlist sidebar: every section as an accordion of thumbnail rows; the current section open with the
+// current video marked, so a reader moves between sections without going back to the home page.
+import { videoHref, sections, loc, media, posterOf, sectionStats, type Video } from '../lib/site';
+import { t } from '../i18n';
+
+interface Props {
+	videos: Video[];
+	current: Video;
+	lang: string;
+}
+
+const { videos, current, lang } = Astro.props;
+---
+
+<nav class="ac-course" aria-label={t(lang, 'courseContent')}>
+	{sections(videos).map((section) => {
+		const here = section.id === current.category;
+		const at = section.videos.findIndex((v) => v.id === current.id) + 1;
+		return (
+			<details open={here}>
+				<summary>
+					<span class="ac-course-label">{loc(section.label, lang)}</span>
+					<span class="ac-muted">
+						{here ? `· ${at}/${section.videos.length}` : sectionStats(lang, section.videos)}
+					</span>
+				</summary>
+				<ol>
+					{section.videos.map((v) => {
+						const poster = posterOf(v);
+						return (
+						<li>
+							<a href={videoHref(v)} aria-current={v.id === current.id ? 'page' : undefined}>
+								{poster ? <img src={media(poster)} alt="" loading="lazy" /> : <span class="ac-course-thumb"></span>}
+								<span class="ac-course-text">
+									<span class="ac-course-title">{v.title}</span>
+									<span class="ac-muted">{v.duration}</span>
+								</span>
+							</a>
+						</li>
+						);
+					})}
+				</ol>
+			</details>
+		);
+	})}
+</nav>
+
+<script>
+	// Bring the current video into view inside the scrolling sidebar (desktop) without moving the page.
+	const nav = document.querySelector<HTMLElement>('.ac-course');
+	const current = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+	if (nav && current && nav.scrollHeight > nav.clientHeight) {
+		nav.scrollTop = current.offsetTop - nav.clientHeight / 3; // .ac-course is positioned: offsetTop is relative to it
+	}
+</script>

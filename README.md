@@ -733,13 +733,14 @@ This package ships **two assets for Claude Code** that teach AI agents how to co
 
 ### Skill reference files
 
-The skill bundles two reference documents that Claude reads before tutorializing:
+The skill bundles three reference documents that Claude reads before tutorializing:
 
 | File | Content |
 |---|---|
 | `SKILL.md` | 4-phase process: understand the viewer → design the arc → implement with `playwright-director` → verify |
 | `references/storytelling.md` | Who is watching (role, expertise, emotional state), narration voice rules, pacing decisions, when to use context screens vs steps, multi-profile scene heuristics, directing attention (highlight vs camera zoom vs blur, secrets typed blurred) |
 | `references/api.md` | Complete `Tutorial` class API with timing model, critical rules (e.g., navigate before any tutorial call, never override `--reporter`), camera zoom options and rules, and a pre-commit checklist |
+| `references/site.md` | Gallery site configuration: every `tutorial-site.config.js` option, themes, sections and order, tokens → css → overrides, app/docs links, languages, CLI flags, output files |
 
 ### Setup
 

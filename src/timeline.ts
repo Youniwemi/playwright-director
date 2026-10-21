@@ -3,6 +3,7 @@ import { join } from 'path';
 import { buildMergeCommand } from './merge.js';
 import { buildTranscriptMarkdown } from './transcript.js';
 import { fastForwardOutputMs, type FastForwardSegment } from './fast-forward.js';
+import type { TutorialLinks } from './types.js';
 
 export interface TimelineStep {
 	step: number;
@@ -51,6 +52,10 @@ export interface TimelineData {
 	 *  Lets the reporter pick the right timeline when the same test was recorded
 	 *  in several variants, and the site filter videos by variant. */
 	variant?: string;
+	/** App / docs paths for the gallery (Tutorial option `links`) */
+	links?: TutorialLinks;
+	/** When the timeline was saved (ISO 8601) — the gallery's uploadDate / dateModified */
+	recordedAt?: string;
 }
 
 export interface TimelineMusicOptions {
@@ -71,6 +76,7 @@ export class TutorialTimeline {
 	private lang: string;
 	private feature: string = '';
 	private variant: string = '';
+	private links?: TutorialLinks;
 	private musicOptions: TimelineMusicOptions;
 	private startTime: number = 0;
 	private videoTrimMs: number = 0;
@@ -89,9 +95,11 @@ export class TutorialTimeline {
 		feature: string = '',
 		musicOptions: TimelineMusicOptions = {},
 		title: string = '',
-		variant: string = ''
+		variant: string = '',
+		links?: TutorialLinks
 	) {
 		this.variant = variant;
+		this.links = links;
 		this.testName = testName;
 		this.testTitle = testTitle;
 		this.title = title;
@@ -190,6 +198,8 @@ export class TutorialTimeline {
 			lang: this.lang,
 			feature: this.feature || undefined,
 			variant: this.variant || undefined,
+			links: this.links && (this.links.app || this.links.docs) ? this.links : undefined,
+			recordedAt: new Date().toISOString(),
 			totalDurationMs: fastForwardOutputMs(tapeDurationMs, fastForward),
 			tapeDurationMs: fastForward.length ? tapeDurationMs : undefined,
 			fastForward: fastForward.length ? fastForward : undefined,

@@ -41,6 +41,11 @@ export interface EmbedTutorial {
     poster?: string;
     /** Base-relative path of the full tutorial page ("<id>/") */
     page: string;
+    /** Absolute URLs: the app screen this tutorial shows, its documentation page */
+    links?: {
+        app?: string;
+        docs?: string;
+    };
     steps: EmbedStep[];
 }
 export interface EmbedIndexEntry {
@@ -59,6 +64,10 @@ export interface EmbedIndex {
     defaultLang?: string;
     tutorials: EmbedIndexEntry[];
 }
+/** config.lang may be a comma-separated list — the first entry is the site default */
+export declare const siteLang: (config: Pick<SiteConfig, "lang">) => string;
+/** Poster: the recorded one, else the first step screenshot (the site template has its own copy in lib/site.ts) */
+export declare const posterOf: (video: VideoManifestEntry) => string | undefined;
 export declare function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig): EmbedTutorial;
 /** All the JSON files players consume: one payload per tutorial plus an
  *  index (slug discovery). Paths are relative to the site root — scaffold

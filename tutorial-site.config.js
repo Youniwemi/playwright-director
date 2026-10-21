@@ -6,8 +6,6 @@
  */
 export default {
 	title: 'playwright-director — Demo Gallery',
-	primaryColor: '#6366f1',
-	font: 'system-ui, -apple-system, sans-serif',
 	input: 'tutorials/',
 	output: 'tutorial-site-dist/',
 	// Full URL including the /gallery/ path: Astro derives site + base from it,
@@ -15,8 +13,32 @@ export default {
 	baseUrl: 'https://youniwemi.github.io/playwright-director/gallery/',
 	lang: 'en',
 	tutorials: {
+		featured: 'two-profiles-one-video',
+		// Sections in display order; `items` lists e2e testNames in reading order
+		categories: {
+			start: {
+				label: 'Getting started',
+				blurb: 'One test, one narrated video: sessions, scenes and split screens.',
+				items: ['two-profiles-one-video', 'split-screen-demo']
+			},
+			camera: {
+				label: 'Camera and pacing',
+				blurb: 'Zoom on what matters, speed through the waits, hide what is secret.',
+				items: ['zoom-demo', 'fast-forward-demo', 'type-blurred-demo']
+			},
+			overlays: {
+				label: 'Step overlays',
+				blurb: 'Place the step banner in any corner, per video or per step.',
+				items: ['overlay-tl', 'overlay-tr', 'overlay-bl', 'overlay-br', 'overlay-position-override']
+			},
+			mobile: {
+				label: 'Mobile',
+				blurb: 'Phone-sized recordings with pinned split scenes.',
+				items: ['mobile-split-demo']
+			}
+		},
 		ui: {
-			heroTitle: 'playwright-director in action',
+			heroTitle: 'playwright-director *in action*',
 			heroSubtitle:
 				'Every video below was generated in CI from the Playwright e2e tests of this repository — no screen recording, no editing.'
 		}

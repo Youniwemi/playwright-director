@@ -1,0 +1,42 @@
+---
+// <head> tags for search engines and link previews. Absolute URLs (canonical, hreflang, og:*)
+// need a full `baseUrl`; with a path-only baseUrl only the relative-safe tags are written.
+import { config } from '../lib/site';
+import { siteLang } from '../i18n';
+
+export interface SeoProps {
+	/** Base-path-included paths, e.g. `/help/look/` */
+	alternates?: { lang: string; href: string }[];
+	/** Path of the preview image */
+	image?: string;
+	/** Path of the video file (og:video) */
+	video?: string;
+	type?: 'website' | 'video.other';
+	jsonLd?: Record<string, unknown>;
+}
+
+interface Props extends SeoProps {
+	title: string;
+	description: string;
+	lang: string;
+}
+
+const { title, description, lang, alternates = [], image, video, type = 'website', jsonLd } = Astro.props;
+const origin = config.siteUrl ? new URL(config.siteUrl).origin : undefined;
+const abs = (path?: string) => (origin && path ? new URL(path, origin).href : undefined);
+const canonical = abs(Astro.url.pathname);
+---
+
+{canonical && <link rel="canonical" href={canonical} />}
+{origin && alternates.length > 1 && alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={abs(a.href)} />)}
+{origin && alternates.length > 1 && <link rel="alternate" hreflang="x-default" href={abs(alternates.find((a) => a.lang === siteLang)?.href ?? alternates[0].href)} />}
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:site_name" content={config.title} />
+<meta property="og:locale" content={lang} />
+{canonical && <meta property="og:url" content={canonical} />}
+{abs(image) && <meta property="og:image" content={abs(image)} />}
+{abs(video) && <meta property="og:video" content={abs(video)} />}
+<meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />}

@@ -1,10 +1,12 @@
-import { readdirSync, readFileSync, existsSync } from 'fs';
+import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 import type { TimelineData } from '../timeline.js';
 
 export interface ScannedTutorial {
 	timeline: TimelineData;
 	videoFile: string;
+	/** ISO date of the recording */
+	recordedAt: string;
 	/** Screenshot filenames with their step number, sorted by step number */
 	stepScreenshots: { n: number; file: string }[];
 	/** `<name>-poster.*` filename, when the recording wrote one */
@@ -64,6 +66,8 @@ export function scanTutorials(
 		results.push({
 			timeline: syntheticTimeline,
 			videoFile: videoFileName,
+			// Timelines before 0.6 have no recordedAt: the video file's mtime is the closest date.
+			recordedAt: syntheticTimeline.recordedAt ?? statSync(join(videosDir, videoFileName)).mtime.toISOString(),
 			stepScreenshots: steps.sort((a, b) => a.n - b.n),
 			poster: allVideoDirFiles.find((f) => posterPattern.test(f))
 		});

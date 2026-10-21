@@ -1,4 +1,5 @@
 import type { SiteConfig, VideoManifest, VideoManifestEntry } from './types.js';
+import { THEME_PRIMARY } from './tokens.js';
 
 /** Bumped on any breaking change to the embed payloads; additions keep it. */
 export const EMBED_SCHEMA_VERSION = 1;
@@ -44,6 +45,8 @@ export interface EmbedTutorial {
 	poster?: string;
 	/** Base-relative path of the full tutorial page ("<id>/") */
 	page: string;
+	/** Absolute URLs: the app screen this tutorial shows, its documentation page */
+	links?: { app?: string; docs?: string };
 	steps: EmbedStep[];
 }
 
@@ -66,7 +69,10 @@ export interface EmbedIndex {
 }
 
 /** config.lang may be a comma-separated list — the first entry is the site default */
-const siteLang = (config: SiteConfig) => (config.lang || 'en').split(',')[0].trim();
+export const siteLang = (config: Pick<SiteConfig, 'lang'>) => (config.lang || 'en').split(',')[0].trim();
+
+/** Poster: the recorded one, else the first step screenshot (the site template has its own copy in lib/site.ts) */
+export const posterOf = (video: VideoManifestEntry) => video.poster ?? video.stepsDetail?.find((s) => s.image)?.image;
 
 export function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig): EmbedTutorial {
 	let counter = 0;
@@ -80,7 +86,7 @@ export function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig
 		...(s.context ? { context: true } : {})
 	}));
 
-	const poster = video.poster ?? (video.stepsDetail ?? []).find((s) => s.image)?.image;
+	const poster = posterOf(video);
 
 	return {
 		schemaVersion: EMBED_SCHEMA_VERSION,
@@ -93,10 +99,11 @@ export function buildEmbedTutorial(video: VideoManifestEntry, config: SiteConfig
 		...(video.slug ? { slug: video.slug } : {}),
 		lang: video.lang || siteLang(config),
 		...(video.langs?.length ? { langs: video.langs } : {}),
-		accent: config.primaryColor || '#6366f1',
+		accent: config.tokens?.primary || config.primaryColor || THEME_PRIMARY[config.theme ?? 'academy'],
 		video: `videos/${video.file}`,
 		...(poster ? { poster: `videos/${poster}` } : {}),
 		page: `${video.id}/`,
+		...(video.links ? { links: video.links } : {}),
 		steps
 	};
 }

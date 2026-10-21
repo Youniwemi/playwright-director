@@ -1,0 +1,40 @@
+---
+// Previous / next tutorial links; `nextLabel` announces a section change ("Next section: …").
+import { t } from '../i18n';
+import { videoHref, type Video } from '../lib/site';
+
+interface Props {
+	prev: Video | null;
+	next: Video | null;
+	lang?: string;
+	prevLabel?: string;
+	nextLabel?: string;
+}
+
+const { prev, next, lang: L, prevLabel, nextLabel } = Astro.props;
+---
+
+<nav class="video-nav-row" aria-label={t(L, 'navigation')}>
+	<div class="nav-prev">
+		{prev && (
+			<a href={videoHref(prev)} class="nav-link nav-link-prev">
+				<span class="nav-arrow" aria-hidden="true">‹</span>
+				<span class="nav-text">
+					{prevLabel && <span class="nav-label">{prevLabel}</span>}
+					<span class="nav-title">{prev.title}</span>
+				</span>
+			</a>
+		)}
+	</div>
+	<div class="nav-next">
+		{next && (
+			<a href={videoHref(next)} class="nav-link nav-link-next">
+				<span class="nav-text">
+					{nextLabel && <span class="nav-label">{nextLabel}</span>}
+					<span class="nav-title">{next.title}</span>
+				</span>
+				<span class="nav-arrow" aria-hidden="true">›</span>
+			</a>
+		)}
+	</div>
+</nav>

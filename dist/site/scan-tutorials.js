@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, existsSync } from 'fs';
+import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 /** Timelines default to `<input>/output`, videos to `<input>/videos`. */
 export function scanTutorials(inputDir, outputDir = join(inputDir, 'output'), videosDir = join(inputDir, 'videos')) {
@@ -44,6 +44,8 @@ export function scanTutorials(inputDir, outputDir = join(inputDir, 'output'), vi
         results.push({
             timeline: syntheticTimeline,
             videoFile: videoFileName,
+            // Timelines before 0.6 have no recordedAt: the video file's mtime is the closest date.
+            recordedAt: syntheticTimeline.recordedAt ?? statSync(join(videosDir, videoFileName)).mtime.toISOString(),
             stepScreenshots: steps.sort((a, b) => a.n - b.n),
             poster: allVideoDirFiles.find((f) => posterPattern.test(f))
         });

@@ -18,7 +18,7 @@ const { id, title, duration, videoUrl, steps = [], href, variant, lang } = Astro
 const rtl = RTL_LANGS.includes(lang ?? '');
 ---
 
-<div class="video-card" data-video-url={videoUrl} data-video-id={id} data-variant={variant ?? ''} data-lang={lang ?? ''} lang={lang} dir={rtl ? 'rtl' : undefined}>
+<div class="video-card" data-quickview data-video-url={videoUrl} data-video-id={id} data-variant={variant ?? ''} data-lang={lang ?? ''} lang={lang} dir={rtl ? 'rtl' : undefined}>
 	<div class="video-thumbnail">
 		{steps.length > 0 ? (
 			<div class="step-carousel">
@@ -58,108 +58,6 @@ const rtl = RTL_LANGS.includes(lang ?? '');
 		</div>
 	</div>
 </div>
-
-<style>
-	.video-variant {
-		font-size: 0.75rem;
-		color: var(--color-text-muted, #666);
-		border: 1px solid var(--color-border, #ddd);
-		border-radius: 999px;
-		padding: 0.1rem 0.5rem;
-		text-transform: capitalize;
-	}
-
-	.card-page-link {
-		margin-left: auto;
-		font-size: 0.9rem;
-		color: var(--color-text-muted);
-		text-decoration: none;
-		transition: color 0.2s;
-		flex-shrink: 0;
-	}
-
-	.card-page-link:hover {
-		color: var(--color-primary);
-	}
-
-	.placeholder-thumb {
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	}
-
-	.step-carousel {
-		position: absolute;
-		inset: 0;
-	}
-
-	.step-img {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		opacity: 0;
-		transition: opacity 0.3s;
-	}
-
-	.step-img.active {
-		opacity: 1;
-	}
-
-	.step-prev,
-	.step-next {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		background: rgba(0, 0, 0, 0.5);
-		color: white;
-		border: none;
-		width: 28px;
-		height: 28px;
-		border-radius: 50%;
-		font-size: 1.2rem;
-		line-height: 1;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		opacity: 0;
-		transition: opacity 0.2s;
-		z-index: 2;
-	}
-
-	.step-prev { left: 6px; }
-	.step-next { right: 6px; }
-
-	.video-card:hover .step-prev,
-	.video-card:hover .step-next {
-		opacity: 1;
-	}
-
-	.step-dots {
-		position: absolute;
-		bottom: 6px;
-		left: 50%;
-		transform: translateX(-50%);
-		display: flex;
-		gap: 4px;
-		z-index: 2;
-	}
-
-	.step-dot {
-		width: 5px;
-		height: 5px;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.4);
-		cursor: pointer;
-		transition: background 0.2s;
-	}
-
-	.step-dot.active {
-		background: white;
-	}
-</style>
 
 <script>
 	document.querySelectorAll<HTMLElement>('.step-carousel').forEach(carousel => {

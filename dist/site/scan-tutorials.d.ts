@@ -2,6 +2,8 @@ import type { TimelineData } from '../timeline.js';
 export interface ScannedTutorial {
     timeline: TimelineData;
     videoFile: string;
+    /** ISO date of the recording */
+    recordedAt: string;
     /** Screenshot filenames with their step number, sorted by step number */
     stepScreenshots: {
         n: number;

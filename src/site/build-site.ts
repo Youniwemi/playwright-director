@@ -14,8 +14,6 @@ const __dirname = dirname(__filename);
 
 const DEFAULT_CONFIG: SiteConfig = {
 	title: 'Tutorials',
-	primaryColor: '#6366f1',
-	font: 'system-ui, -apple-system, sans-serif',
 	input: 'tutorials/',
 	output: 'tutorial-site-dist/',
 	baseUrl: '/',
@@ -57,6 +55,12 @@ function ask(question: string): Promise<string> {
 export interface BuildSiteOptions {
 	/** Overrides config.baseUrl, e.g. "/help/" for a sub-path deployment */
 	base?: string;
+	/** Overrides config.theme */
+	theme?: string;
+	/** Overrides config.output */
+	output?: string;
+	/** Run `astro dev` on the scaffold (kept in <output>/.astro-build) instead of building */
+	dev?: boolean;
 	/** Never prompt (CI): a missing config is created with the defaults and used */
 	yes?: boolean;
 	/** Only these tutorials (slugs or ids) — all their languages and variants */
@@ -94,8 +98,12 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 	}
 
 	if (options.base) config.baseUrl = options.base;
+	if (options.theme) config.theme = options.theme as SiteConfig['theme'];
+	if (options.output) config.output = options.output;
 	config.input = resolve(config.input);
 	config.output = resolve(config.output);
+	if (config.css) config.css = resolve(config.css);
+	if (config.overrides) config.overrides = resolve(config.overrides);
 	config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
 	config.videos = resolve(config.videos ?? join(config.input, 'videos'));
 
@@ -121,6 +129,12 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 	const tempDir = join(config.output, '.astro-build');
 	console.log('  Scaffolding Astro project...');
 	scaffold(config, manifest, tempDir);
+
+	if (options.dev) {
+		console.log('  Starting the dev server (Ctrl+C to stop)...');
+		execFileSync(process.execPath, [linkAstro(tempDir), 'dev'], { cwd: tempDir, stdio: 'inherit' });
+		return;
+	}
 
 	console.log('  Building static site...');
 	try {

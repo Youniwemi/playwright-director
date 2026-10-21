@@ -25,6 +25,25 @@ export interface UiStrings {
     tutorial: string;
     duration: string;
     screenshot: string;
+    theme: string;
+    openInApp: string;
+    readDocs: string;
+    search: string;
+    noResults: string;
+    startHere: string;
+    heroEyebrow: string;
+    heroEyebrow_one: string;
+    sectionStats: string;
+    /** Plural form for n = 1 — the site's t() picks `<key>_<Intl.PluralRules category>` when present */
+    sectionStats_one: string;
+    sections: string;
+    nextSection: string;
+    ctaTitle: string;
+    ctaText: string;
+    ctaButton: string;
+    openApp: string;
+    home: string;
+    courseContent: string;
 }
 export declare const STRINGS: Record<string, UiStrings>;
 /** Built-in dictionaries merged with the config overrides; unknown languages start from English. */

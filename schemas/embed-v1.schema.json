@@ -24,6 +24,11 @@
         "video": { "type": "string", "description": "Base-relative video path. Serve with HTTP Range (206) so seeking works." },
         "poster": { "type": "string", "description": "Base-relative poster image" },
         "page": { "type": "string", "description": "Base-relative path of the full tutorial page" },
+        "links": {
+          "type": "object",
+          "description": "Absolute URLs: the app screen this tutorial shows, and its documentation page",
+          "properties": { "app": { "type": "string" }, "docs": { "type": "string" } }
+        },
         "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } }
       }
     },

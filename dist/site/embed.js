@@ -1,7 +1,10 @@
+import { THEME_PRIMARY } from './tokens.js';
 /** Bumped on any breaking change to the embed payloads; additions keep it. */
 export const EMBED_SCHEMA_VERSION = 1;
 /** config.lang may be a comma-separated list — the first entry is the site default */
-const siteLang = (config) => (config.lang || 'en').split(',')[0].trim();
+export const siteLang = (config) => (config.lang || 'en').split(',')[0].trim();
+/** Poster: the recorded one, else the first step screenshot (the site template has its own copy in lib/site.ts) */
+export const posterOf = (video) => video.poster ?? video.stepsDetail?.find((s) => s.image)?.image;
 export function buildEmbedTutorial(video, config) {
     let counter = 0;
     const steps = (video.stepsDetail ?? []).map((s) => ({
@@ -13,7 +16,7 @@ export function buildEmbedTutorial(video, config) {
         ...(s.image ? { image: `videos/${s.image}` } : {}),
         ...(s.context ? { context: true } : {})
     }));
-    const poster = video.poster ?? (video.stepsDetail ?? []).find((s) => s.image)?.image;
+    const poster = posterOf(video);
     return {
         schemaVersion: EMBED_SCHEMA_VERSION,
         id: video.id,
@@ -25,10 +28,11 @@ export function buildEmbedTutorial(video, config) {
         ...(video.slug ? { slug: video.slug } : {}),
         lang: video.lang || siteLang(config),
         ...(video.langs?.length ? { langs: video.langs } : {}),
-        accent: config.primaryColor || '#6366f1',
+        accent: config.tokens?.primary || config.primaryColor || THEME_PRIMARY[config.theme ?? 'academy'],
         video: `videos/${video.file}`,
         ...(poster ? { poster: `videos/${poster}` } : {}),
         page: `${video.id}/`,
+        ...(video.links ? { links: video.links } : {}),
         steps
     };
 }

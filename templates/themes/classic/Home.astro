@@ -1,0 +1,58 @@
+---
+import Layout from './Layout.astro';
+import VideoCard from '../components/VideoCard.astro';
+import VideoModal from '../components/VideoModal.astro';
+import HomeLangs from '../components/HomeLangs.astro';
+import VariantFilter from '../components/VariantFilter.astro';
+import Emphasis from '../components/Emphasis.astro';
+import { manifest, media, videoHref, videosForLang, sections, numberSteps, loc, homeSeo, plainText } from '../lib/site';
+import { t, siteLang } from '../i18n';
+
+interface Props {
+	/** Page language — `/` is the site default, `/<lang>/` the others */
+	lang?: string;
+}
+
+const { ui } = manifest;
+const lang = Astro.props.lang ?? siteLang;
+const videos = videosForLang(lang);
+const heroTitle = loc(ui.heroTitle, lang);
+// The default subtitle is a UI string — translate it; a configured one stays as is.
+const subtitle = ui.heroSubtitle === t(siteLang, 'videoTutorials') ? t(lang, 'videoTutorials') : loc(ui.heroSubtitle, lang);
+---
+
+<Layout title={plainText(heroTitle)} description={subtitle} lang={lang} seo={homeSeo()}>
+	<slot name="head" slot="head" />
+	<section class="hero">
+		<h1><Emphasis text={heroTitle} /></h1>
+		<p>{subtitle}</p>
+	</section>
+
+	<HomeLangs lang={lang} />
+	<VariantFilter videos={videos} lang={lang} />
+
+	{sections(videos).map((section) => (
+		<section class="category" id={section.id}>
+			<div class="category-header">
+				<span class="category-icon">{section.icon}</span>
+				<h2>{loc(section.label, lang)}</h2>
+			</div>
+			<div class="video-grid">
+				{section.videos.map((video) => (
+					<VideoCard
+						id={video.id}
+						title={video.title}
+						duration={video.duration}
+						videoUrl={media(video.file)}
+						steps={numberSteps(video).filter((s) => s.image).map((s) => media(s.image!))}
+						href={videoHref(video)}
+						variant={video.variant}
+						lang={video.lang}
+					/>
+				))}
+			</div>
+		</section>
+	))}
+
+	<VideoModal lang={lang} />
+</Layout>
