@@ -1,0 +1,57 @@
+# Changelog
+
+## 0.5.0
+
+### Added
+
+1. **Monorepo / bun workspace** — `build-site` resolves astro from
+   playwright-director itself; the consuming app needs no `astro` dependency.
+   Proven with bun, pnpm and npm on `tests/fixtures/workspace`
+   (`PD_WORKSPACE_TEST=1 npm test`). Site config `timelines` / `videos` point
+   at non-default output dirs.
+2. **Headless data API** — `import { load, loadIndex } from 'playwright-director/client'`
+   or `PlaywrightDirector.load()` from `widget.js`. Payloads carry
+   `schemaVersion: 1`; JSON Schema in `schemas/embed-v1.schema.json`. Clear
+   errors for 404 (lists the index URL) and CORS/network failures.
+3. **Per-language tutorials** — `TUTORIAL_LANG=xx` records a spec per language
+   (outputs suffixed `.<lang>`). Gallery groups languages by slug, writes
+   `embed/<slug>.<lang>.json` (+ `embed/<slug>.json` = default language).
+4. **i18n** — site chrome in en/fr/ar (override with `strings` in the config),
+   one home page per language (`/`, `/en/`, `/ar/`), RTL pages; widget strings
+   in en/fr/ar, chosen from `data-tutorial-lang` or `<html lang>`.
+5. **Theming** — the widget reads `--pd-accent`, `--pd-surface`, `--pd-text`,
+   `--pd-muted`, `--pd-border`, `--pd-radius`, `--pd-font`, `--pd-focus-ring`
+   defined by the app.
+6. **Accessible widget** — native modal `<dialog>` (focus trap, Esc, focus
+   return), chapter list with `aria-current`, arrow/Home/End keys, 44px
+   targets. `e2e/widget.spec.ts` runs axe on fr and ar.
+7. **Chapters** — every step has `at` (seconds), `key`, a human `title`;
+   tutorials have `durationSeconds` and a recorded `poster`. Clicking a step
+   on the site or in the widget seeks the video.
+8. **Deploy** — `_headers` (CORS + cache) generated for Cloudflare Pages /
+   Netlify (`cors: false` disables it); `baseUrl` may be a bare path;
+   `build-site --base=/help/`.
+9. **Voice cache** — clips live in `tutorials/.cache/voice`
+   (`TUTORIAL_VOICE_DIR`), served to the page with `page.route`; nothing is
+   written to `static/` anymore. Clips from the old `static/audio/tutorial-voice/`
+   are adopted once.
+10. **CLI** — `build-site -y` (never prompts; automatic without a TTY),
+    `build-site --only=<slug,...>`. README documents re-recording one tutorial
+    (`npx playwright test -g`) and the `tutorial-transcript apply` round-trip.
+    macOS Arabic voice is now `Majed`.
+
+### Deferred
+
+- **Site theming beyond `primaryColor` / `font`** — `--pd-*` variables cover
+  the widget, which is what apps embed; no demand yet for a full site theme.
+- **`serve` command with Range support** — any static server does it
+  (`npx http-server <output>`); not worth a new command and dependency.
+
+### Migration
+
+- Remove `astro` from your app's devDependencies.
+- Delete `static/audio/tutorial-voice/` once a run has adopted the clips;
+  add `tutorials/.cache/` to `.gitignore`.
+- Drop any hand-written `_headers`: the build writes one.
+- Embed payload steps now have `at`, `key` and a human `title`; read
+  `schemaVersion` before relying on fields.
