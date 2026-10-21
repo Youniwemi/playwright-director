@@ -5,8 +5,8 @@
 	display: none !important;
 }
 
-[dir='rtl'] .back-arrow,
-[dir='rtl'] .nav-arrow {
+/* ← is not bidi-mirrored; the ‹ › of .nav-arrow already are (flipping them too would undo it) */
+[dir='rtl'] .back-arrow {
 	display: inline-block;
 	transform: scaleX(-1);
 }

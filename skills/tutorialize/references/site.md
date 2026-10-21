@@ -84,6 +84,7 @@ Use the lightest layer that does the job:
 1. **`tokens`** — colors, radius, shadow, fonts:
    `primary onPrimary accent bg surface text muted border pro radius shadow shadowHover fontBody fontDisplay`
    → `--pd-*` variables, written as `html:root { … }` so they beat the theme defaults.
+   Keep `primary` at 4.5:1 or more against `onPrimary` and `surface` (WCAG AA — the e2e suite runs axe).
 2. **`css`** — any rule, loaded last. Target the stable classes (`.video-card`, `.ac-card`,
    `.step-row`, `.video-modal`, …) or set `--pd-*` variables.
 3. **`overrides`** — a folder mirroring the site `src/`: `overrides/theme/Home.astro` replaces the
@@ -130,6 +131,7 @@ npx playwright-director build-site --base=/help/       # override baseUrl's path
 npx playwright-director build-site --output=dist/help/ # override output
 npx playwright-director build-site --only=onboarding   # only these slugs (all languages/variants)
 npx playwright-director build-site -y                  # never prompt (CI; automatic without a TTY)
+npx playwright-director build-site --dev               # astro dev with live reload, no build
 ```
 
 Two themes from one config: build twice with `--theme` + `--base` + `--output`, and set

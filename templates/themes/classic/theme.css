@@ -1,8 +1,9 @@
 /* Classic theme — light/dark gallery. Token defaults (--pd-*) + page chrome. */
 :root {
-	--pd-primary: #6366f1;
+	/* indigo-600: #6366f1 was 4.46:1 with white, under WCAG AA */
+	--pd-primary: #4f46e5;
 	--pd-on-primary: #fff;
-	--pd-accent: #6366f1;
+	--pd-accent: #4f46e5;
 	--pd-bg: #f8fafc;
 	--pd-surface: #ffffff;
 	--pd-text: #1e293b;

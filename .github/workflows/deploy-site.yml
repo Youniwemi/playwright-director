@@ -51,11 +51,16 @@ jobs:
       - name: Build gallery
         run: node dist/init.js build-site -y
 
+      # Same gallery in the Classic theme; `themeSwitcher` in the config links the two builds
+      - name: Build gallery (Classic theme)
+        run: node dist/init.js build-site -y --theme=classic --base=/playwright-director/gallery/classic/ --output=tutorial-site-classic/
+
       - name: Assemble site (landing + gallery)
         run: |
-          mkdir -p _site/gallery
+          mkdir -p _site/gallery/classic
           cp -r landing/. _site/
           cp -r tutorial-site-dist/. _site/gallery/
+          cp -r tutorial-site-classic/. _site/gallery/classic/
           touch _site/.nojekyll
 
       - uses: peaceiris/actions-gh-pages@v4

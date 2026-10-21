@@ -480,7 +480,7 @@ a {
 }
 
 .ac-count {
-	opacity: 0.6;
+	color: var(--pd-muted);
 }
 
 .ac-sections {
@@ -793,8 +793,9 @@ a {
 	top: 1.1rem;
 	width: 0.5rem;
 	height: 0.5rem;
-	border-inline-end: 1.5px solid var(--pd-muted);
-	border-block-end: 1.5px solid var(--pd-muted);
+	/* physical sides: a down/up chevron must not mirror in RTL */
+	border-right: 1.5px solid var(--pd-muted);
+	border-bottom: 1.5px solid var(--pd-muted);
 	rotate: 45deg;
 	transition: rotate 0.4s var(--ac-ease);
 }

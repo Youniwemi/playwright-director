@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.6.0
+
+### Added
+
+1. **Académie theme** (new default) — hero with search and section chips, a
+   featured "start here" video, side table of contents, numbered cards
+   (thumbnail = quick view, title = page), video page with a course sidebar
+   and a "your turn" call-to-action. The quick-view dialog takes the video's
+   aspect ratio.
+2. **Theme system** — `theme: 'academy' | 'classic'` (`build-site --theme`),
+   built from shared components. Customize with `tokens` (`--pd-*`), `css`,
+   `overrides` (folder copied over the site `src/`) and `googleFonts`.
+   `themeSwitcher` links builds of the same gallery.
+3. **Sections** — `categories.<id>.items` sets the reading order, `blurb`,
+   `featured`, `premium` (PRO badge); computed stats ("3 videos · ~4 min").
+4. **App and docs links** — test option `links: { app, docs }` or config
+   `tutorials.links`, resolved on `appUrl` / `docsUrl` (`{lang}` replaced).
+5. **SEO** (full `baseUrl`) — VideoObject JSON-LD with chapter `Clip`s,
+   canonical, hreflang, Open Graph; `sitemap.xml`, `robots.txt`, `links.json`.
+6. **CLI** — `build-site --output=<dir>` and `--dev` (astro dev, live reload).
+7. **Demo** — the GitHub Pages gallery is built in both themes, with docs links.
+8. **Tests** — `e2e/site.spec.ts`: both themes, fr + ar, no overflow at
+   375 / 1280 px, search, chapter seek and `?t=`, axe.
+
+### Fixed
+
+- RTL: prev/next arrows were mirrored twice (`‹ ›` are already
+  bidi-mirrored); the course sidebar chevron pointed sideways.
+- Contrast (WCAG AA): Classic primary `#6366f1` → `#4f46e5` (4.46:1 → 6.3:1 on
+  white; also the widget fallback accent); Académie section counts.
+
+### Migration
+
+- The default look changes to Académie. Set `theme: 'classic'` to keep the
+  previous one. `primaryColor` / `font` still work (= `tokens.primary` /
+  `tokens.fontBody`).
+- Classic's default primary is now `#4f46e5`: set `tokens.primary` to keep
+  the old color.
+
 ## 0.5.0
 
 ### Added

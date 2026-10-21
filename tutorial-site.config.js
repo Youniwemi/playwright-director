@@ -12,8 +12,22 @@ export default {
 	// so every asset link works under the GitHub Pages sub-path.
 	baseUrl: 'https://youniwemi.github.io/playwright-director/gallery/',
 	lang: 'en',
+	// The CI deploy builds the gallery twice (deploy-site.yml): Académie here, Classic under /gallery/classic/
+	themeSwitcher: {
+		Académie: '/playwright-director/gallery/',
+		Classic: '/playwright-director/gallery/classic/'
+	},
+	docsUrl: 'https://github.com/Youniwemi/playwright-director',
 	tutorials: {
 		featured: 'two-profiles-one-video',
+		// "Read the docs" link per video: README sections
+		links: {
+			'zoom-demo': { docs: '#zooming-on-an-element' },
+			'fast-forward-demo': { docs: '#fast-forwarding-long-waits' },
+			'two-profiles-one-video': { docs: '#multiple-user-profiles' },
+			'mobile-split-demo': { docs: '#variants--record-the-same-tutorial-for-mobile' },
+			'overlay-tl': { docs: '#styling' }
+		},
 		// Sections in display order; `items` lists e2e testNames in reading order
 		categories: {
 			start: {

@@ -95,7 +95,7 @@
 
 	var CSS = [
 		// `all: initial` isolates the widget; font-family is re-inherited so it uses the app's font.
-		':host { all: initial; font-family: inherit; --pd-accent: var(--playwright-director-accent, #6366f1); --pd-surface: #fff;',
+		':host { all: initial; font-family: inherit; --pd-accent: var(--playwright-director-accent, #4f46e5); --pd-surface: #fff;',
 		'  --pd-text: #0f172a; --pd-muted: #64748b; --pd-border: #e2e8f0; --pd-radius: 12px;',
 		'  --pd-focus-ring: 0 0 0 3px color-mix(in srgb, var(--pd-accent) 45%, transparent); }',
 		'* { box-sizing: border-box; margin: 0; padding: 0; }',

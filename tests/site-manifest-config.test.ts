@@ -117,7 +117,7 @@ describe('links', () => {
 	it('defaults the widget accent to the theme primary, a config primary wins', () => {
 		const v = generateManifest([tutorial('a')], config).videos[0];
 		expect(buildEmbedTutorial(v, config).accent).toBe('oklch(42% 0.09 165)');
-		expect(buildEmbedTutorial(v, { ...config, theme: 'classic' }).accent).toBe('#6366f1');
+		expect(buildEmbedTutorial(v, { ...config, theme: 'classic' }).accent).toBe('#4f46e5');
 		expect(buildEmbedTutorial(v, { ...config, tokens: { primary: '#0b5d47' } }).accent).toBe('#0b5d47');
 	});
 });

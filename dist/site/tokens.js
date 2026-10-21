@@ -19,7 +19,7 @@ export const TOKENS = {
  *  accent when the config sets no primary, so the in-app widget matches the gallery. */
 export const THEME_PRIMARY = {
     academy: 'oklch(42% 0.09 165)',
-    classic: '#6366f1'
+    classic: '#4f46e5'
 };
 /**
  * `html:root { --pd-…: … }` from the config tokens. `html:root` outranks the themes' `:root`
