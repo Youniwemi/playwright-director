@@ -85,6 +85,46 @@ const configSlugOf = (t) => {
     const variant = t.timeline.variant;
     return variant && slug.endsWith(`-${variant}`) ? slug.slice(0, -variant.length - 1) : slug;
 };
+/**
+ * The site's video pages: every recording, plus — when `lang` lists several languages — a page for each language
+ * a tutorial (slug + variant) was not recorded in, playing the default-language recording (else the first one)
+ * with the UI in the page language (`videoLang` = the recording's). `tutorials.paths` overrides page paths.
+ */
+export function buildPages(manifest, config) {
+    const langs = config.lang.split(',').map((l) => l.trim()).filter(Boolean);
+    const paths = config.tutorials?.paths ?? {};
+    const pathOf = (v, lang, fallback) => {
+        const slug = v.slug ?? v.id;
+        const custom = paths[v.variant && slug.endsWith(`-${v.variant}`) ? slug.slice(0, -v.variant.length - 1) : slug]?.[lang];
+        if (!custom)
+            return fallback;
+        return `${lang === langs[0] ? '' : `${lang}/`}${custom}${v.variant ? `-${v.variant}` : ''}`;
+    };
+    const recorded = manifest.videos.map((v) => ({ ...v, id: pathOf(v, v.lang ?? langs[0], v.id) }));
+    if (langs.length < 2)
+        return recorded;
+    const groups = new Map();
+    for (const v of recorded) {
+        const key = `${v.slug ?? v.id}|${v.variant ?? ''}`;
+        (groups.get(key) ?? groups.set(key, []).get(key)).push(v);
+    }
+    // Each fallback page follows its group's last recording, so every language keeps the manifest order.
+    const pages = [];
+    for (const v of recorded) {
+        pages.push(v);
+        const group = groups.get(`${v.slug ?? v.id}|${v.variant ?? ''}`);
+        if (group[group.length - 1] !== v)
+            continue;
+        const source = group.find((o) => (o.lang ?? langs[0]) === langs[0]) ?? group[0];
+        for (const lang of langs) {
+            if (group.some((o) => (o.lang ?? langs[0]) === lang))
+                continue;
+            const id = pathOf(source, lang, `${lang}/${source.slug ?? source.id}`);
+            pages.push({ ...source, id, lang, videoLang: source.lang ?? langs[0] });
+        }
+    }
+    return pages;
+}
 export function generateManifest(tutorials, config) {
     const configured = config.tutorials?.categories ?? {};
     // A slug listed in a configured section's `items` belongs there, whatever its timeline feature.

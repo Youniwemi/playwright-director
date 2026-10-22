@@ -1,11 +1,11 @@
 ---
 // One home page per extra language (/en/, /ar/ …); the default language lives at /.
 import Home from '../../theme/Home.astro';
-import { recordedLangs } from '../../lib/site';
+import { pageLangs } from '../../lib/site';
 import { siteLang } from '../../i18n';
 
 export function getStaticPaths() {
-	return recordedLangs()
+	return pageLangs()
 		.filter((lang) => lang !== siteLang)
 		.map((lang) => ({ params: { lang } }));
 }

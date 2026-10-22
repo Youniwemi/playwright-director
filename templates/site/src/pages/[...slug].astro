@@ -3,6 +3,7 @@ import VideoPage from '../theme/VideoPage.astro';
 import { allVideos } from '../lib/site';
 
 export function getStaticPaths() {
+	// Rest param: fallback and `tutorials.paths` pages live under /<lang>/
 	return allVideos.map((video) => ({ params: { slug: video.id }, props: { video } }));
 }
 

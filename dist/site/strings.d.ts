@@ -28,6 +28,8 @@ export interface UiStrings {
     theme: string;
     openInApp: string;
     readDocs: string;
+    /** Fallback page note: `{lang}` = the recording language, named in the page language */
+    videoInLang: string;
     search: string;
     noResults: string;
     startHere: string;

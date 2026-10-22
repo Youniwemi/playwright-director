@@ -8,7 +8,7 @@ import StepGuide from '../components/StepGuide.astro';
 import Lightbox from '../components/Lightbox.astro';
 import PrevNext from '../components/PrevNext.astro';
 import VideoLinks from '../components/VideoLinks.astro';
-import { config, manifest, homeOf, loc, numberSteps, neighbours, videosForLang, steps, videoSeo, appHref, type Video } from '../lib/site';
+import { config, manifest, homeOf, loc, numberSteps, neighbours, videosForLang, steps, videoSeo, appHref, videoLangNote, type Video } from '../lib/site';
 import { t, siteLang } from '../i18n';
 
 interface Props {
@@ -49,8 +49,9 @@ const ctaHref = config.cta ? appHref(L, video) : undefined;
 					<span class="ac-muted">{video.duration}</span>
 					{video.premium && <span class="ac-badge ac-pro">PRO</span>}
 				</p>
-				<h1>{video.title}</h1>
-				{video.description && <p class="ac-lead">{video.description}</p>}
+				<h1 lang={video.videoLang}>{video.title}</h1>
+				{video.description && <p class="ac-lead" lang={video.videoLang}>{video.description}</p>}
+				{video.videoLang && <p class="ac-muted video-lang-note">{videoLangNote(video, L)}</p>}
 				<VideoLinks video={video} />
 			</div>
 

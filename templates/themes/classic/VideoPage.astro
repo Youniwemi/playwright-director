@@ -7,7 +7,7 @@ import StepGuide from '../components/StepGuide.astro';
 import Lightbox from '../components/Lightbox.astro';
 import PrevNext from '../components/PrevNext.astro';
 import VideoLinks from '../components/VideoLinks.astro';
-import { homeOf, numberSteps, neighbours, sameLang, steps, videoSeo, type Video } from '../lib/site';
+import { homeOf, numberSteps, neighbours, sameLang, steps, videoSeo, videoLangNote, type Video } from '../lib/site';
 import { t } from '../i18n';
 
 interface Props {
@@ -30,8 +30,9 @@ const { prev, next } = neighbours(sameLang(video), video);
 		<VideoPlayer video={video} />
 
 		<div class="video-page-info">
-			<h1 class="video-page-title">{video.title}</h1>
-			{video.description && <p class="video-page-desc">{video.description}</p>}
+			<h1 class="video-page-title" lang={video.videoLang}>{video.title}</h1>
+			{video.description && <p class="video-page-desc" lang={video.videoLang}>{video.description}</p>}
+			{video.videoLang && <p class="video-lang-note">{videoLangNote(video, L!)}</p>}
 			<div class="video-page-meta">
 				<span class="video-duration">&#x1F553; {video.duration}</span>
 			</div>

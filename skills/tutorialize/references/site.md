@@ -51,6 +51,7 @@ export default {
 | `tutorials.featured` | first video | Slug of the Académie "start here" video |
 | `tutorials.premium` | `[]` | Slugs with a PRO badge |
 | `tutorials.links` | test `links` | Per-slug `{ app, docs }`, over the test's |
+| `tutorials.paths` | — | Per-slug page path per language: `{ look: { en: 'your-look' } }` (§6) |
 | `tutorials.ui.heroTitle` | `title` | `*word*` marks emphasis (italic). String or `{ fr, en }` |
 | `tutorials.ui.heroSubtitle` | "Video tutorials" | String or per language |
 | `tutorials.stepsLayout` | `'text'` | Video page step guide: `'text'` \| `'cards'` \| `'full'` \| `'none'` |
@@ -129,6 +130,11 @@ const tutorial = new Tutorial(page, {
 - Record one spec per language with `TUTORIAL_LANG=xx` (`api.md` §1). Each home lists every tutorial
   once, in its language when recorded, else in its first recorded language — a missing translation
   never hides a tutorial.
+- No need to record every language: each language of `lang` gets its home and one page per tutorial.
+  A page without its recording plays the default-language one (else the first), with the UI in the page
+  language and a "This video is in French." note; JSON-LD `inLanguage` = the recording's language.
+  Default path `/<lang>/<slug>/`; `tutorials.paths: { <slug>: { en: 'your-look', ar: '…' } }` sets one
+  per language (no `/<lang>/` prefix for the default language) — use it to keep old URLs.
 - UI strings: built-in en/fr/ar; `strings` adds or overrides keys. A new language starts from English.
   Plurals: a `<key>_<category>` entry (`sectionStats_one`) is picked by `Intl.PluralRules`.
 

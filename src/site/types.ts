@@ -76,6 +76,10 @@ export interface SiteConfig {
 		premium?: string[];
 		/** Per-slug links, over the ones declared in the test: `{ invoice: { app: '/invoices/new', docs: '/invoices/' } }` */
 		links?: Record<string, TutorialLinks>;
+		/** Per-slug page path per language, without the `/<lang>/` prefix (added for all but the default language):
+		 *  `{ 'l-identite': { en: 'your-business-identity', ar: 'هوية-مقاولتك' } }`. Default: the recording id,
+		 *  `<lang>/<slug>` for a page without a recording in its language. */
+		paths?: Record<string, Record<string, string>>;
 		/** Video page step guide layout:
 		 *  - 'text':  text-only cards, click to reveal the screenshot (default)
 		 *  - 'cards': numbered text cards with a small screenshot, click to enlarge
@@ -115,8 +119,10 @@ export interface VideoManifestEntry {
 	duration: string;
 	/** Final video length in seconds (0 when unknown) */
 	durationSeconds: number;
-	/** Narration language, from the timeline */
+	/** Narration language, from the timeline — on a page (`buildPages`), the page language */
 	lang?: string;
+	/** Fallback page only: the language of the recording it plays (no recording in the page language) */
+	videoLang?: string;
 	/** id without its `.<lang>` suffix (TUTORIAL_LANG recordings) — groups one tutorial's languages */
 	slug?: string;
 	/** Every language this slug was recorded in, sorted */

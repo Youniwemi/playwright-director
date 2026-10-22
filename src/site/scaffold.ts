@@ -5,6 +5,7 @@ import { buildEmbedFiles, siteLang } from './embed.js';
 import { mergeStrings } from './strings.js';
 import { tokensCss } from './tokens.js';
 import { siteUrlOf, videoJsonLd, buildSitemap, buildRobots, buildLinksFile } from './seo.js';
+import { buildPages } from './generate-manifest.js';
 import type { SiteConfig, VideoManifest } from './types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -87,10 +88,12 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 	writeFileSync(join(tempDir, 'src', 'styles', 'user.css'), userCss || '/* no tokens, no css */\n');
 
 	// SEO needs absolute URLs: JSON-LD per video page, sitemap, robots, links.json only with a full baseUrl.
-	const pageData = site ? { ...manifest, videos: manifest.videos.map((v) => ({ ...v, jsonLd: videoJsonLd(v, site) })) } : manifest;
+	// Pages = recordings + one per config language without its recording (embed and links.json stay per recording).
+	const pages = { ...manifest, videos: buildPages(manifest, config) };
+	const pageData = site ? { ...pages, videos: pages.videos.map((v) => ({ ...v, jsonLd: videoJsonLd(v, site) })) } : pages;
 	mkdirSync(join(tempDir, 'public'), { recursive: true });
 	if (site) {
-		writeFileSync(join(tempDir, 'public', 'sitemap.xml'), buildSitemap(manifest, site, siteLang(config)));
+		writeFileSync(join(tempDir, 'public', 'sitemap.xml'), buildSitemap(pages, site, siteLang(config)));
 		// Crawlers only read robots.txt at the host root
 		if (new URL(site).pathname === '/') writeFileSync(join(tempDir, 'public', 'robots.txt'), buildRobots(site));
 		writeFileSync(join(tempDir, 'public', 'links.json'), JSON.stringify(buildLinksFile(manifest, site), null, 2));

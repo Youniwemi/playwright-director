@@ -458,6 +458,22 @@ the default language (or the only one recorded), and `index.json` lists each
 slug once with its `langs`. `load(slug, { lang })` falls back to the default
 language when that language was not recorded.
 
+You don't have to record every language. With `lang: 'fr,en,ar'` and only
+French recordings, `/en/` and `/ar/` still get their home and one page per
+tutorial: the UI is in English or Arabic, the video is the French one, and a
+note says so ("This video is in French."). Those pages are in the language
+switchers, the hreflang alternates and the sitemap. Their path is
+`/<lang>/<slug>/`; to keep existing URLs, set one per language:
+
+```js
+tutorials: {
+  paths: {
+    'l-identite-de-votre-entreprise': { en: 'your-business-identity', ar: 'هوية-مقاولتك' }
+  }
+}
+// → /en/your-business-identity/, /ar/هوية-مقاولتك/ (a `fr` entry would replace the default-language path)
+```
+
 ## Variants — record the same tutorial for mobile
 
 Set `TUTORIAL_VARIANT=mobile` (or pass `variant: 'mobile'`) to record a second,

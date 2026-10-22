@@ -75,7 +75,7 @@ test.beforeAll(async () => {
 		const output = join(root, theme);
 		// .mjs: Playwright's loader turns a .js config outside a "type": "module" package into CommonJS
 		const configPath = join(root, `${theme}.config.mjs`);
-		writeFileSync(configPath, `export default ${JSON.stringify({ title: 'Aide', theme, input: root, timelines, videos, output, lang: 'fr,ar', baseUrl: '/', tutorials: { roles: { payroll: { label: { fr: 'Je gère la paie', ar: 'أدير الأجور' }, sections: ['payroll'] } } } })};`);
+		writeFileSync(configPath, `export default ${JSON.stringify({ title: 'Aide', theme, input: root, timelines, videos, output, lang: 'fr,ar,en', baseUrl: '/', tutorials: { paths: { pay: { en: 'payroll' } }, roles: { payroll: { label: { fr: 'Je gère la paie', ar: 'أدير الأجور' }, sections: ['payroll'] } } } })};`);
 		await buildSite(configPath);
 		origins[theme] = await serve(output);
 	}
@@ -110,11 +110,22 @@ for (const theme of THEMES) {
 			await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThanOrEqual(6);
 		});
 
-		for (const [lang, path] of [['fr', ''], ['ar', 'ar/']]) {
+		test('a config language without recordings gets its home and fallback pages (UI in that language, fr video)', async ({ page }) => {
+			await page.goto(origins[theme] + 'en/');
+			await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+			await expect(page.locator(`a[hreflang="en"][href="/en/"]`)).toHaveCount(1); // language switcher
+			await page.goto(origins[theme] + 'en/payroll/');
+			await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+			await expect(page.locator('.video-lang-note')).toHaveText('This video is in French.');
+			await expect(page.locator('h1[lang="fr"]')).toHaveText('Paie');
+			for (const href of ['/pay.fr/', '/pay.ar/', '/en/payroll/']) await expect(page.locator(`nav a[href="${href}"]`).first()).toBeAttached();
+		});
+
+		for (const [lang, path, video] of [['fr', '', 'look.fr/'], ['ar', 'ar/', 'look.ar/'], ['en', 'en/', 'en/look/']]) {
 			test(`axe: no violations on the ${lang} home and video page`, async ({ page }) => {
 				// Off-screen cards sit at 25% opacity until the scroll-linked rise plays; reduced motion turns it off
 				await page.emulateMedia({ reducedMotion: 'reduce' });
-				for (const p of [path, `look.${lang}/`]) {
+				for (const p of [path, video]) {
 					await page.goto(origins[theme] + p);
 					expect(await page.locator('html').getAttribute('dir')).toBe(lang === 'ar' ? 'rtl' : 'ltr');
 					const { violations } = await new AxeBuilder({ page }).analyze();

@@ -1,14 +1,14 @@
 ---
 // Links to the home page of every recorded language (hidden when there is only one).
 import { t, LANG_NAMES } from '../i18n';
-import { homeOf, recordedLangs } from '../lib/site';
+import { homeOf, pageLangs } from '../lib/site';
 
 interface Props {
 	lang: string;
 }
 
 const { lang } = Astro.props;
-const langs = recordedLangs();
+const langs = pageLangs();
 ---
 
 {langs.length > 1 && (

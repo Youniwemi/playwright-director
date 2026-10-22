@@ -28,6 +28,8 @@ export interface UiStrings {
 	theme: string;
 	openInApp: string;
 	readDocs: string;
+	/** Fallback page note: `{lang}` = the recording language, named in the page language */
+	videoInLang: string;
 	search: string;
 	noResults: string;
 	startHere: string;
@@ -76,6 +78,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		theme: 'Theme',
 		openInApp: 'Open in the app',
 		readDocs: 'Read the documentation',
+		videoInLang: 'This video is in {lang}.',
 		search: 'Search tutorials',
 		noResults: 'No tutorial matches “{q}”.',
 		startHere: 'Start here',
@@ -120,6 +123,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		theme: 'Thème',
 		openInApp: 'Ouvrir dans l’application',
 		readDocs: 'Lire la documentation',
+		videoInLang: 'Cette vidéo est en {lang}.',
 		search: 'Rechercher un tutoriel',
 		noResults: 'Aucun tutoriel ne correspond à « {q} ».',
 		startHere: 'Commencez ici',
@@ -164,6 +168,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		theme: 'السمة',
 		openInApp: 'فتح في التطبيق',
 		readDocs: 'قراءة التوثيق',
+		videoInLang: 'هذا الفيديو باللغة {lang}.',
 		search: 'ابحث في الدروس',
 		noResults: 'لا يوجد درس يطابق «{q}».',
 		startHere: 'ابدأ من هنا',

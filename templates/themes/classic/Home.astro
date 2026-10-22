@@ -5,7 +5,7 @@ import VideoModal from '../components/VideoModal.astro';
 import HomeLangs from '../components/HomeLangs.astro';
 import VariantFilter from '../components/VariantFilter.astro';
 import Emphasis from '../components/Emphasis.astro';
-import { manifest, media, videoHref, videosForLang, sections, numberSteps, loc, homeSeo, plainText } from '../lib/site';
+import { manifest, media, videoHref, videosForLang, sections, numberSteps, loc, homeSeo, plainText, textLang } from '../lib/site';
 import { t, siteLang } from '../i18n';
 
 interface Props {
@@ -47,7 +47,7 @@ const subtitle = ui.heroSubtitle === t(siteLang, 'videoTutorials') ? t(lang, 'vi
 						steps={numberSteps(video).filter((s) => s.image).map((s) => media(s.image!))}
 						href={videoHref(video)}
 						variant={video.variant}
-						lang={video.lang}
+						lang={textLang(video)}
 					/>
 				))}
 			</div>

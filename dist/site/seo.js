@@ -34,7 +34,7 @@ export function videoJsonLd(v, site) {
         contentUrl: `${site}videos/${v.file}`,
         url,
         ...(v.durationSeconds ? { duration: isoDuration(v.durationSeconds) } : {}),
-        ...(v.lang ? { inLanguage: v.lang } : {}),
+        ...(v.videoLang || v.lang ? { inLanguage: v.videoLang || v.lang } : {}),
         uploadDate: `${v.uploadDate}T00:00:00+00:00`,
         ...(v.dateModified ? { dateModified: `${v.dateModified}T00:00:00+00:00` } : {}),
         ...(transcript ? { transcript } : {}),

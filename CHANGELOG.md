@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.2
+
+### Added
+
+- **Every config language gets its pages** — with `lang: 'fr,en,ar'`, a
+  tutorial not recorded in en/ar still gets `/en/…` and `/ar/…` pages (and
+  homes): UI in the page language, the default-language video, a "This video
+  is in French." note. They appear in the language switchers, hreflang and the
+  sitemap; JSON-LD `inLanguage` stays the recording's language.
+- **`tutorials.paths`** — page path per slug and language
+  (`{ look: { en: 'your-look' } }`), to keep existing URLs.
+
+### Changed
+
+- The language switchers list languages in config `lang` order.
+- Footer "Built with playwright-director" links to the project site.
+- Overrides: the video page route is now `pages/[...slug].astro` (was
+  `[slug].astro`) — rename an overridden copy.
+
 ## 0.6.1
 
 ### Changed

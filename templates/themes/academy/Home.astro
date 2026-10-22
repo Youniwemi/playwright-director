@@ -4,7 +4,7 @@ import VideoModal from '../components/VideoModal.astro';
 import HomeLangs from '../components/HomeLangs.astro';
 import VariantFilter from '../components/VariantFilter.astro';
 import Emphasis from '../components/Emphasis.astro';
-import { config, manifest, media, videoHref, videosForLang, sections, posterOf, loc, homeSeo, plainText, sectionStats, appHref, type Video } from '../lib/site';
+import { config, manifest, media, videoHref, videosForLang, sections, posterOf, loc, homeSeo, plainText, sectionStats, appHref, textLang, type Video } from '../lib/site';
 import { normalize } from '../lib/filter';
 import { t, siteLang } from '../i18n';
 
@@ -98,7 +98,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 								data-video-id={video.id}
 								data-variant={video.variant ?? ''}
 								data-search={searchText(video)}
-								lang={video.lang}
+								lang={textLang(video)}
 							>
 								<span class="ac-thumb" data-quickview>
 									{poster ? <img src={media(poster)} alt="" loading="lazy" /> : <span class="ac-thumb-empty"></span>}

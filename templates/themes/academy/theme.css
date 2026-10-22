@@ -973,6 +973,14 @@ button.ac-chip {
 	gap: 0.5rem;
 }
 
+.ac-footer a {
+	color: inherit;
+}
+
+.ac-footer a:hover {
+	color: var(--pd-primary);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

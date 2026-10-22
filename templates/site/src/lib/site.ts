@@ -12,7 +12,10 @@ export type Video = {
 	category: string;
 	duration: string;
 	durationSeconds: number;
+	/** Page language */
 	lang?: string;
+	/** Fallback page: language of the recording it plays */
+	videoLang?: string;
 	langs?: string[];
 	variant?: string;
 	premium?: boolean;
@@ -47,9 +50,23 @@ export const videoHref = (v: Video) => `${base}/${v.id}/`;
 export const homeOf = (lang?: string) => (!lang || lang === siteLang ? `${base}/` : `${base}/${lang}/`);
 export const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
 
-/** Every language a video was recorded in, sorted */
-export const recordedLangs = (): string[] =>
-	([...new Set(allVideos.map((v) => v.lang).filter(Boolean))] as string[]).sort();
+const configLangs = String(config.lang || '').split(',').map((l) => l.trim());
+/** Config `lang` order first, then alphabetical */
+const byLang = (a: string, b: string) => {
+	const rank = (l: string) => (configLangs.includes(l) ? configLangs.indexOf(l) : Infinity);
+	return rank(a) - rank(b) || a.localeCompare(b);
+};
+
+/** Every page language — the recorded ones plus, with several config languages, all of them (fallback pages) */
+export const pageLangs = (): string[] =>
+	([...new Set(allVideos.map((v) => v.lang).filter(Boolean))] as string[]).sort(byLang);
+
+/** Content language of a page's video texts: the recording's on a fallback page */
+export const textLang = (v: Video) => v.videoLang ?? v.lang;
+
+/** "This video is in French." on a fallback page, '' otherwise */
+export const videoLangNote = (v: Video, lang: string) =>
+	v.videoLang ? t(lang, 'videoInLang', { lang: new Intl.DisplayNames([lang], { type: 'language' }).of(v.videoLang) ?? v.videoLang }) : '';
 
 /** One tutorial across its languages: slug + variant */
 export const tutorialKey = (v: Video) => `${v.slug ?? v.id}|${v.variant ?? ''}`;
@@ -91,7 +108,7 @@ export const posterOf = (video: Video) => video.poster ?? numberSteps(video).fin
 export const translationsOf = (video: Video) =>
 	allVideos
 		.filter((v) => tutorialKey(v) === tutorialKey(video))
-		.sort((a, b) => String(a.lang).localeCompare(String(b.lang)));
+		.sort((a, b) => byLang(String(a.lang), String(b.lang)));
 
 /** Previous / next video in a list (null at the ends) */
 export function neighbours(list: Video[], video: Video): { prev: Video | null; next: Video | null } {
@@ -122,6 +139,6 @@ export function videoSeo(video: Video) {
 }
 
 /** <head> SEO data of a home page */
-export const homeSeo = () => ({ alternates: recordedLangs().map((lang) => ({ lang, href: homeOf(lang) })) });
+export const homeSeo = () => ({ alternates: pageLangs().map((lang) => ({ lang, href: homeOf(lang) })) });
 
 export const steps = { layout: (config.stepsLayout || 'text') as 'text' | 'cards' | 'full' | 'none', strip: config.showStrip !== false };
