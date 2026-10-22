@@ -4,7 +4,7 @@
   "title": "Overlay BR",
   "description": "First step",
   "duration": "0:09",
-  "durationSeconds": 8.9,
+  "durationSeconds": 9,
   "slug": "overlay-br",
   "lang": "en",
   "langs": [
@@ -25,7 +25,7 @@
     },
     {
       "num": 2,
-      "at": 2.31,
+      "at": 2.37,
       "title": "Second step",
       "key": "Second step",
       "text": "Second step",

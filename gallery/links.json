@@ -7,7 +7,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/two-profiles-one-video/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/two-profiles-one-video-poster.webp",
       "duration": "0:23",
-      "durationSeconds": 22.7
+      "durationSeconds": 23.2
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#zooming-on-an-element": [
@@ -17,8 +17,8 @@
       "title": "Zooming on what matters",
       "url": "https://youniwemi.github.io/playwright-director/gallery/zoom-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/zoom-demo-poster.webp",
-      "duration": "0:44",
-      "durationSeconds": 44.4
+      "duration": "0:46",
+      "durationSeconds": 45.6
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#fast-forwarding-long-waits": [
@@ -29,7 +29,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/fast-forward-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/fast-forward-demo-poster.webp",
       "duration": "0:24",
-      "durationSeconds": 23.9
+      "durationSeconds": 24.1
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#styling": [
@@ -51,7 +51,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/mobile-split-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/mobile-split-demo-poster.webp",
       "duration": "0:17",
-      "durationSeconds": 16.5
+      "durationSeconds": 17
     }
   ]
 }
