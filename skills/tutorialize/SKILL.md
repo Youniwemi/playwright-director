@@ -10,7 +10,7 @@ Turn a Playwright test into a tutorial that **teaches**, not just demonstrates.
 Three reference files support this skill:
 - [`references/storytelling.md`](references/storytelling.md) — Persona analysis, emotional arc, narration voice, pacing decisions
 - [`references/api.md`](references/api.md) — `playwright-director` API, timing model, technical rules, checklist
-- [`references/site.md`](references/site.md) — Gallery site (`build-site`): config, themes, sections, tokens/css/overrides, app + docs links, languages, SEO
+- [`references/site.md`](references/site.md) — Gallery site (`build-site`): config, themes, sections, role chips, tokens/css/overrides, app + docs links, languages, SEO
 
 **Read the first two before tutorializing.** Storytelling comes first — it drives every API decision.
 Read `site.md` when you touch `tutorial-site.config.js`, a site override, or the test's `links`.

@@ -169,12 +169,24 @@ a {
 	background: var(--ac-secondary);
 	font-size: 0.875rem;
 	font-weight: 500;
+	color: inherit;
+	font-family: inherit;
 	text-decoration: none;
 	transition: border-color 0.3s var(--ac-ease);
 }
 
+button.ac-chip {
+	cursor: pointer;
+}
+
 .ac-chip:hover {
 	border-color: var(--pd-primary);
+}
+
+.ac-chip[aria-pressed='true'] {
+	border-color: var(--pd-primary);
+	background: var(--pd-primary);
+	color: var(--pd-on-primary);
 }
 
 .ac-badge {

@@ -106,6 +106,12 @@ export function generateManifest(tutorials: ScannedTutorial[], config: SiteConfi
 		categories[cat] ??= { icon: DEFAULT_CATEGORY_ICONS[cat] || '📹', label: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' ') };
 	}
 
+	const roles = config.tutorials?.roles;
+	for (const [id, role] of Object.entries(roles ?? {})) {
+		const unknown = role.sections.find((s) => !(s in categories));
+		if (unknown) throw new Error(`Unknown section "${unknown}" in role "${id}". Sections: ${Object.keys(categories).join(', ')}`);
+	}
+
 	// Recording dates per slug (all languages and variants): first = uploadDate, last = dateModified.
 	const dates = new Map<string, string[]>();
 	for (const t of tutorials) {
@@ -167,6 +173,7 @@ export function generateManifest(tutorials: ScannedTutorial[], config: SiteConfi
 
 	return {
 		categories,
+		...(roles ? { roles } : {}),
 		...(config.tutorials?.featured ? { featured: config.tutorials.featured } : {}),
 		videos,
 		ui: {

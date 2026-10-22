@@ -52,6 +52,12 @@ test.beforeAll(async () => {
 	};
 	for (const [lang, t] of Object.entries(texts)) {
 		if (lang !== 'fr') copyFileSync(join(videos, 'look.fr.webm'), join(videos, `look.${lang}.webm`));
+		// A second tutorial in another section, for the role chips
+		copyFileSync(join(videos, 'look.fr.webm'), join(videos, `pay.${lang}.webm`));
+		writeFileSync(
+			join(timelines, `pay.${lang}_timeline.json`),
+			JSON.stringify({ testName: `pay.${lang}`, testTitle: 'pay', title: 'Paie', feature: 'payroll', lang, totalDurationMs: 12000, steps: [] })
+		);
 		writeFileSync(
 			join(timelines, `look.${lang}_timeline.json`),
 			JSON.stringify({
@@ -69,7 +75,7 @@ test.beforeAll(async () => {
 		const output = join(root, theme);
 		// .mjs: Playwright's loader turns a .js config outside a "type": "module" package into CommonJS
 		const configPath = join(root, `${theme}.config.mjs`);
-		writeFileSync(configPath, `export default ${JSON.stringify({ title: 'Aide', theme, input: root, timelines, videos, output, lang: 'fr,ar', baseUrl: '/' })};`);
+		writeFileSync(configPath, `export default ${JSON.stringify({ title: 'Aide', theme, input: root, timelines, videos, output, lang: 'fr,ar', baseUrl: '/', tutorials: { roles: { payroll: { label: { fr: 'Je gère la paie', ar: 'أدير الأجور' }, sections: ['payroll'] } } } })};`);
 		await buildSite(configPath);
 		origins[theme] = await serve(output);
 	}
@@ -106,6 +112,8 @@ for (const theme of THEMES) {
 
 		for (const [lang, path] of [['fr', ''], ['ar', 'ar/']]) {
 			test(`axe: no violations on the ${lang} home and video page`, async ({ page }) => {
+				// Off-screen cards sit at 25% opacity until the scroll-linked rise plays; reduced motion turns it off
+				await page.emulateMedia({ reducedMotion: 'reduce' });
 				for (const p of [path, `look.${lang}/`]) {
 					await page.goto(origins[theme] + p);
 					expect(await page.locator('html').getAttribute('dir')).toBe(lang === 'ar' ? 'rtl' : 'ltr');
@@ -126,4 +134,16 @@ test('academy search filters the cards and shows the empty state', async ({ page
 	await expect(page.locator('.ac-card:visible')).toHaveCount(0);
 	await expect(page.locator('.ac-empty')).toBeVisible();
 	await expect(page.locator('.ac-empty')).toContainText('zzz');
+});
+
+test('academy role chips show only their sections, "All" resets', async ({ page }) => {
+	await page.goto(origins.academy);
+	const chip = page.getByRole('button', { name: 'Je gère la paie' });
+	await chip.click();
+	await expect(chip).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.locator('.ac-card:visible')).toHaveCount(1);
+	await expect(page.locator('#settings')).toBeHidden();
+	await expect(page.locator('.ac-toc li:visible')).toHaveCount(1);
+	await page.getByRole('button', { name: 'Tous' }).click();
+	await expect(page.locator('.ac-card:visible')).toHaveCount(2);
 });

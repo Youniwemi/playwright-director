@@ -879,7 +879,7 @@ Two themes share the same pages and data. Pick one with `theme` in the config
 | `theme: 'academy'` (default) | `theme: 'classic'` |
 |---|---|
 | ![Académie home](docs/images/theme-academy.png) | ![Classic home](docs/images/theme-classic.png) |
-| Hero with search and section chips, a featured "start here" video, a side table of contents, numbered cards (thumbnail = quick view, title = page), a course sidebar and a "your turn" call-to-action on video pages | Card grid grouped by section, dark mode, a thumbnail carousel per card |
+| Hero with search and role chips (`tutorials.roles` — a click shows only that profile's sections), a featured "start here" video, a side table of contents, numbered cards (thumbnail = quick view, title = page), a course sidebar and a "your turn" call-to-action on video pages | Card grid grouped by section, dark mode, a thumbnail carousel per card |
 
 Brand it with the lightest layer that does the job:
 
@@ -1058,6 +1058,9 @@ export default {
     categories: {          // Sections in display order; `items` = slugs in reading order
       "getting-started": { icon: "⭐", label: "Getting Started", blurb: "The first ten minutes", items: ["sign-up", "first-invoice"] },
       "advanced":        { icon: "🚀", label: "Advanced" },
+    },
+    roles: {               // Académie hero chips: a click shows only these sections (no roles = no chips)
+      "new": { label: { en: "I'm starting", fr: "Je démarre" }, sections: ["getting-started"] },
     },
     featured: "sign-up",              // Académie "start here" video (default: the first one)
     premium: ["bank-reconciliation"], // PRO badge

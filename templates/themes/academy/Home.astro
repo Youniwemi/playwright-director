@@ -20,6 +20,10 @@ const heroTitle = loc(ui.heroTitle, lang);
 // The default subtitle is a UI string — translate it; a configured one stays as is.
 const subtitle = ui.heroSubtitle === t(siteLang, 'videoTutorials') ? t(lang, 'videoTutorials') : loc(ui.heroSubtitle, lang);
 const list = sections(videos);
+// Role chips: only the roles with a section on this page
+const roles = Object.entries((manifest.roles ?? {}) as Record<string, { label: any; sections: string[] }>)
+	.map(([id, r]) => ({ id, label: loc(r.label, lang), sections: r.sections.filter((s) => list.some((l) => l.id === s)) }))
+	.filter((r) => r.sections.length > 0);
 const longest = Math.max(1, Math.ceil(Math.max(0, ...videos.map((v) => v.durationSeconds || 0)) / 60));
 const featured = videos.find((v) => (v.slug ?? v.id) === manifest.featured) ?? videos[0];
 const featuredPoster = featured && posterOf(featured);
@@ -42,10 +46,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 				<label for="ac-search-input" class="ac-sr">{t(lang, 'search')}</label>
 				<input id="ac-search-input" type="search" placeholder={t(lang, 'search')} autocomplete="off" />
 			</form>
-			{list.length > 1 && (
-				<nav class="ac-chips" aria-label={t(lang, 'sections')}>
-					{list.map((s) => <a class="ac-chip" href={`#${s.id}`}>{loc(s.label, lang)}</a>)}
-				</nav>
+			{roles.length > 0 && (
+				<div class="ac-chips" role="group" aria-label={t(lang, 'roles')}>
+					<button type="button" class="ac-chip" aria-pressed="true" data-sections="">{t(lang, 'all')}</button>
+					{roles.map((r) => <button type="button" class="ac-chip" aria-pressed="false" data-sections={r.sections.join(' ')}>{r.label}</button>)}
+				</div>
 			)}
 		</div>
 		{featured && (
@@ -64,7 +69,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 		<nav class="ac-toc" aria-label={t(lang, 'sections')}>
 			<ul>
 				{list.map((s) => (
-					<li><a href={`#${s.id}`}>{loc(s.label, lang)} <span class="ac-count">({s.videos.length})</span></a></li>
+					<li data-section={s.id}><a href={`#${s.id}`}>{loc(s.label, lang)} <span class="ac-count">({s.videos.length})</span></a></li>
 				))}
 			</ul>
 		</nav>
@@ -130,8 +135,19 @@ const pad = (n: number) => String(n).padStart(2, '0');
 	const input = document.getElementById('ac-search-input') as HTMLInputElement | null;
 	const empty = document.querySelector<HTMLElement>('.ac-empty');
 	input?.addEventListener('input', () => setFilter({ query: input.value }));
+	const chips = [...document.querySelectorAll<HTMLButtonElement>('.ac-chips .ac-chip')];
+	for (const chip of chips) {
+		chip.addEventListener('click', () => {
+			for (const c of chips) c.setAttribute('aria-pressed', String(c === chip));
+			setFilter({ sections: (chip.dataset.sections ?? '').split(' ').filter(Boolean) });
+		});
+	}
 	document.addEventListener('pd:filter', (e) => {
 		const { visible, query } = (e as CustomEvent).detail;
+		// The table of contents follows the hidden sections
+		document.querySelectorAll<HTMLElement>('.ac-toc li[data-section]').forEach((li) => {
+			li.hidden = !!document.getElementById(li.dataset.section!)?.hidden;
+		});
 		if (!empty) return;
 		empty.hidden = visible > 0;
 		empty.textContent = (empty.dataset.template ?? '').replace('{q}', query);

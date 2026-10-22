@@ -37,6 +37,8 @@ export interface UiStrings {
     /** Plural form for n = 1 — the site's t() picks `<key>_<Intl.PluralRules category>` when present */
     sectionStats_one: string;
     sections: string;
+    /** Label of the role chips (Académie hero) */
+    roles: string;
     nextSection: string;
     ctaTitle: string;
     ctaText: string;
