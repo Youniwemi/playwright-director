@@ -51,6 +51,12 @@ export default {
 				items: ['mobile-split-demo']
 			}
 		},
+		// Hero chips: a click shows only the role's sections
+		roles: {
+			first: { label: 'My first video', sections: ['start', 'overlays'] },
+			polish: { label: 'I polish videos', sections: ['camera', 'overlays'] },
+			mobile: { label: 'I ship a mobile app', sections: ['mobile'] }
+		},
 		ui: {
 			heroTitle: 'playwright-director *in action*',
 			heroSubtitle:

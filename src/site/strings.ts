@@ -37,6 +37,8 @@ export interface UiStrings {
 	/** Plural form for n = 1 — the site's t() picks `<key>_<Intl.PluralRules category>` when present */
 	sectionStats_one: string;
 	sections: string;
+	/** Label of the role chips (Académie hero) */
+	roles: string;
 	nextSection: string;
 	ctaTitle: string;
 	ctaText: string;
@@ -82,6 +84,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		sectionStats: '{n} videos · ~{m} min',
 		sectionStats_one: '1 video · ~{m} min',
 		sections: 'Sections',
+		roles: 'Your profile',
 		nextSection: 'Next section',
 		ctaTitle: 'Your turn',
 		ctaText: 'Open the app and repeat these steps in a few minutes.',
@@ -125,6 +128,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		sectionStats: '{n} vidéos · ~{m} min',
 		sectionStats_one: '1 vidéo · ~{m} min',
 		sections: 'Sections',
+		roles: 'Votre profil',
 		nextSection: 'Section suivante',
 		ctaTitle: 'À vous de jouer',
 		ctaText: 'Ouvrez l’application et refaites ces étapes en quelques minutes.',
@@ -168,6 +172,7 @@ export const STRINGS: Record<string, UiStrings> = {
 		sectionStats: '{n} فيديو · ~{m} د',
 		sectionStats_one: 'فيديو واحد · ~{m} د',
 		sections: 'الأقسام',
+		roles: 'ملفك',
 		nextSection: 'القسم التالي',
 		ctaTitle: 'دورك الآن',
 		ctaText: 'افتح التطبيق وكرر هذه الخطوات في بضع دقائق.',

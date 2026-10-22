@@ -12,6 +12,12 @@ export interface SiteCategory {
     /** Tutorial slugs of this section, in display order — wins over the timeline `feature` */
     items?: string[];
 }
+export interface SiteRole {
+    /** Chip text, e.g. "Je suis comptable" */
+    label: Localized;
+    /** Section ids shown when the chip is on */
+    sections: string[];
+}
 export interface SiteConfig {
     title: string;
     logo?: string;
@@ -55,6 +61,9 @@ export interface SiteConfig {
     tutorials?: {
         /** Sections in display order */
         categories?: Record<string, SiteCategory>;
+        /** Académie hero chips, one per reader profile: a click shows only its sections.
+         *  `{ accountant: { label: { fr: 'Je suis comptable' }, sections: ['accounting', 'lecteur'] } }`. No roles = no chips. */
+        roles?: Record<string, SiteRole>;
         ui?: {
             heroTitle?: Localized;
             heroSubtitle?: Localized;
@@ -135,6 +144,8 @@ export interface VideoManifest {
         label: Localized;
         blurb?: Localized;
     }>;
+    /** Reader profiles (Académie chips), each a list of section ids */
+    roles?: Record<string, SiteRole>;
     /** Slug of the "start here" tutorial */
     featured?: string;
     videos: VideoManifestEntry[];

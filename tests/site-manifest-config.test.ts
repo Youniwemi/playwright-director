@@ -68,6 +68,16 @@ describe('generateManifest sections', () => {
 		expect(m.featured).toBe('a');
 	});
 
+	it('carries the roles and rejects an unknown section', () => {
+		const roles = { accountant: { label: { fr: 'Je suis comptable' }, sections: ['billing'] } };
+		const m = generateManifest([tutorial('a', { feature: 'billing' })], { ...config, tutorials: { roles } });
+		expect(m.roles).toEqual(roles);
+		expect(generateManifest([tutorial('a')], config).roles).toBeUndefined();
+		expect(() =>
+			generateManifest([tutorial('a', { feature: 'billing' })], { ...config, tutorials: { roles: { x: { label: 'X', sections: ['nope'] } } } })
+		).toThrow(/Unknown section "nope" in role "x".*billing/);
+	});
+
 	it('dates a slug from its oldest and newest recordings, across languages', () => {
 		const m = generateManifest(
 			[tutorial('a', {}, '2026-09-05T08:00:00Z'), tutorial('a.en', { lang: 'en' }, '2026-08-01T08:00:00Z')],

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.1
+
+### Changed
+
+- **Role chips** — the Académie hero chips now come from `tutorials.roles`
+  (`{ id: { label, sections } }`): one chip per reader profile ("Je suis
+  comptable"), a click shows only that profile's sections, "All" resets. They
+  combine with search and the variant filter.
+
+### Migration
+
+- The 0.6.0 section chips are gone (they repeated the table of contents).
+  Add `tutorials.roles` to get chips back.
+
 ## 0.6.0
 
 ### Added

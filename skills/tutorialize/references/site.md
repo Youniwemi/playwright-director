@@ -47,6 +47,7 @@ export default {
 | `strings` | built-in en/fr/ar | UI text overrides per language: `{ fr: { ctaButton: 'Essayer' } }` |
 | `primaryColor` / `font` | — | Pre-0.6 spellings of `tokens.primary` / `tokens.fontBody` |
 | `tutorials.categories` | from `@feature:` tags | Sections in display order (§3) |
+| `tutorials.roles` | — | Académie hero chips, one per reader profile: a click shows only its sections (§3) |
 | `tutorials.featured` | first video | Slug of the Académie "start here" video |
 | `tutorials.premium` | `[]` | Slugs with a PRO badge |
 | `tutorials.links` | test `links` | Per-slug `{ app, docs }`, over the test's |
@@ -76,6 +77,16 @@ tutorials: {
 - `items` wins over the timeline `@feature:` tag. A slug = the test name without `.<lang>` / `-<variant>`,
   so one entry covers every language and variant (`items`, `premium`, `featured`, `links` alike).
 - Empty sections are dropped. Section stats ("3 videos · ~4 min") are computed.
+- **Roles** (Académie hero chips) filter by reader profile, not by section — the side table of contents
+  already lists the sections. Keep labels short ("Je suis comptable"); a role lists section ids, an
+  unknown id fails the build. No `roles` = no chips.
+
+```js
+roles: {
+	accountant: { label: { fr: 'Je suis comptable', en: 'I am an accountant' }, sections: ['accounting', 'lecteur'] },
+	payroll: { label: { fr: 'Je gère la paie' }, sections: ['payroll'] }
+}
+```
 
 ## 4. Look: tokens → css → overrides
 
@@ -153,6 +164,7 @@ Two themes from one config: build twice with `--theme` + `--base` + `--output`, 
 - [ ] `baseUrl` is a full URL in production (SEO files and JSON-LD need it)
 - [ ] Every recorded slug is in a section's `items` (or has a meaningful `@feature:` tag)
 - [ ] `featured` names an existing slug
+- [ ] Académie chips: `roles` per reader profile (short labels), never one chip per section
 - [ ] Tests that show an app screen set `links.app`; tests with a docs page set `links.docs`
 - [ ] Customization uses tokens first, `css` second, `overrides` last
 - [ ] `--only` builds are for checking a page — deploy a full build

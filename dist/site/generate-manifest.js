@@ -102,6 +102,12 @@ export function generateManifest(tutorials, config) {
         const cat = categoryOf(t);
         categories[cat] ??= { icon: DEFAULT_CATEGORY_ICONS[cat] || '📹', label: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' ') };
     }
+    const roles = config.tutorials?.roles;
+    for (const [id, role] of Object.entries(roles ?? {})) {
+        const unknown = role.sections.find((s) => !(s in categories));
+        if (unknown)
+            throw new Error(`Unknown section "${unknown}" in role "${id}". Sections: ${Object.keys(categories).join(', ')}`);
+    }
     // Recording dates per slug (all languages and variants): first = uploadDate, last = dateModified.
     const dates = new Map();
     for (const t of tutorials) {
@@ -160,6 +166,7 @@ export function generateManifest(tutorials, config) {
     videos.sort((a, b) => sectionRank.indexOf(a.category) - sectionRank.indexOf(b.category) || rank(a) - rank(b));
     return {
         categories,
+        ...(roles ? { roles } : {}),
         ...(config.tutorials?.featured ? { featured: config.tutorials.featured } : {}),
         videos,
         ui: {
