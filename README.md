@@ -81,6 +81,12 @@ The way out was to flip the question: stop naming the output, name the role. Pla
 npm install --save-dev playwright-director
 ```
 
+To test an unreleased local copy, install a packed tarball, not a `file:` link:
+`npm pack` in the package, then `npm install --save-dev ./playwright-director-<version>.tgz`.
+A `file:` dependency is a symlink that keeps the package's own `node_modules`, so the
+project loads `@playwright/test` twice ("Requiring @playwright/test second time") and
+every test file fails.
+
 ### Peer Dependencies
 
 | Package | Required | Notes |
