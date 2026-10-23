@@ -4,7 +4,7 @@
   "title": "Overlay TR",
   "description": "First step",
   "duration": "0:09",
-  "durationSeconds": 8.9,
+  "durationSeconds": 9,
   "slug": "overlay-tr",
   "lang": "en",
   "langs": [
@@ -17,7 +17,7 @@
   "steps": [
     {
       "num": 1,
-      "at": 0.02,
+      "at": 0.03,
       "title": "First step",
       "key": "First step",
       "text": "First step",
@@ -25,7 +25,7 @@
     },
     {
       "num": 2,
-      "at": 2.35,
+      "at": 2.36,
       "title": "Second step",
       "key": "Second step",
       "text": "Second step",

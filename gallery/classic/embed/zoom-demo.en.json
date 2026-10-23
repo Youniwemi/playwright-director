@@ -3,8 +3,8 @@
   "id": "zoom-demo",
   "title": "Zooming on what matters",
   "description": "Point the camera at what matters. zoom() pushes in on any element — a badge, a card, a whole panel — with or without blurring the rest.",
-  "duration": "0:46",
-  "durationSeconds": 45.6,
+  "duration": "0:45",
+  "durationSeconds": 45.4,
   "slug": "zoom-demo",
   "lang": "en",
   "langs": [
@@ -36,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 18.05,
+      "at": 18.03,
       "title": "One invoice is late",
       "key": "One invoice is late",
       "text": "One invoice is late",
@@ -44,7 +44,7 @@
     },
     {
       "num": 4,
-      "at": 23.99,
+      "at": 23.96,
       "title": "The sidebar counts late invoices too",
       "key": "The sidebar counts late invoices too",
       "text": "The sidebar counts late invoices too",
@@ -52,7 +52,7 @@
     },
     {
       "num": 5,
-      "at": 27.64,
+      "at": 27.61,
       "title": "Turn on automatic reminders",
       "key": "Turn on automatic reminders",
       "text": "Turn on automatic reminders",
@@ -60,7 +60,7 @@
     },
     {
       "num": 6,
-      "at": 35.2,
+      "at": 35.02,
       "title": "Save",
       "key": "Save",
       "text": "Save",

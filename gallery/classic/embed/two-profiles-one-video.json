@@ -4,7 +4,7 @@
   "title": "Two profiles, one video",
   "description": "Two people, two sessions, one screen.",
   "duration": "0:23",
-  "durationSeconds": 23.2,
+  "durationSeconds": 23.1,
   "slug": "two-profiles-one-video",
   "lang": "en",
   "langs": [
@@ -28,7 +28,7 @@
     },
     {
       "num": 2,
-      "at": 9.65,
+      "at": 9.6,
       "title": "ACME signs in to the client portal",
       "key": "ACME signs in to the client portal",
       "text": "ACME signs in to the client portal",
@@ -36,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 15.44,
+      "at": 15.37,
       "title": "Both profiles, signed in at once",
       "key": "Both profiles, signed in at once",
       "text": "Both profiles, signed in at once",

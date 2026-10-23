@@ -20,7 +20,7 @@
   "steps": [
     {
       "num": 1,
-      "at": 7.71,
+      "at": 7.7,
       "title": "Generate the quarterly report",
       "key": "Generate the quarterly report",
       "text": "Generate the quarterly report",
@@ -36,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 16.54,
+      "at": 16.53,
       "title": "The PDF is ready",
       "key": "The PDF is ready",
       "text": "The PDF is ready",

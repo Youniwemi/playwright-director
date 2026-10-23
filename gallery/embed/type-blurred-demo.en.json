@@ -4,7 +4,7 @@
   "title": "Typing a secret without leaking it",
   "description": "The email is typed normally — it stays readable",
   "duration": "0:15",
-  "durationSeconds": 15.4,
+  "durationSeconds": 15.3,
   "slug": "type-blurred-demo",
   "lang": "en",
   "langs": [
@@ -25,7 +25,7 @@
     },
     {
       "num": 2,
-      "at": 4.06,
+      "at": 4.02,
       "title": "The password is typed blurred — unreadable on screen",
       "key": "The password is typed blurred — unreadable on screen",
       "text": "The password is typed blurred — unreadable on screen",
@@ -33,7 +33,7 @@
     },
     {
       "num": 3,
-      "at": 8.37,
+      "at": 8.29,
       "title": "Submit",
       "key": "Submit",
       "text": "Submit",

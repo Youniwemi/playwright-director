@@ -7,7 +7,7 @@
       "slug": "two-profiles-one-video",
       "title": "Two profiles, one video",
       "duration": "0:23",
-      "durationSeconds": 23.2,
+      "durationSeconds": 23.1,
       "lang": "en",
       "langs": [
         "en"
@@ -17,7 +17,7 @@
       "id": "split-screen-demo",
       "slug": "split-screen-demo",
       "title": "Split screen demo",
-      "duration": "0:23",
+      "duration": "0:22",
       "durationSeconds": 22.5,
       "lang": "fr",
       "langs": [
@@ -28,8 +28,8 @@
       "id": "zoom-demo",
       "slug": "zoom-demo",
       "title": "Zooming on what matters",
-      "duration": "0:46",
-      "durationSeconds": 45.6,
+      "duration": "0:45",
+      "durationSeconds": 45.4,
       "lang": "en",
       "langs": [
         "en"
@@ -51,7 +51,7 @@
       "slug": "type-blurred-demo",
       "title": "Typing a secret without leaking it",
       "duration": "0:15",
-      "durationSeconds": 15.4,
+      "durationSeconds": 15.3,
       "lang": "en",
       "langs": [
         "en"
@@ -73,7 +73,7 @@
       "slug": "overlay-tr",
       "title": "Overlay TR",
       "duration": "0:09",
-      "durationSeconds": 8.9,
+      "durationSeconds": 9,
       "lang": "en",
       "langs": [
         "en"
@@ -95,7 +95,7 @@
       "slug": "overlay-br",
       "title": "Overlay BR",
       "duration": "0:09",
-      "durationSeconds": 9,
+      "durationSeconds": 8.9,
       "lang": "en",
       "langs": [
         "en"
@@ -117,7 +117,7 @@
       "slug": "mobile-split-demo",
       "title": "Mobile split demo",
       "duration": "0:17",
-      "durationSeconds": 17,
+      "durationSeconds": 16.9,
       "lang": "fr",
       "langs": [
         "fr"
