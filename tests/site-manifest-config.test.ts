@@ -131,3 +131,43 @@ describe('links', () => {
 		expect(buildEmbedTutorial(v, { ...config, tokens: { primary: '#0b5d47' } }).accent).toBe('#0b5d47');
 	});
 });
+
+describe('generateManifest translated-title recordings', () => {
+	const t = (id: string, lang: string, extra: Partial<TimelineData> = {}) =>
+		tutorial(id, { lang, testFile: 'invoice.spec.ts', testTitle: 'invoice.first', ...extra });
+	const set = () => [
+		t('creer-votre-premiere-facture', 'fr'),
+		t('create-your-first-invoice.en', 'en'),
+		t('انشاء-اول-فاتورة.ar', 'ar')
+	];
+
+	it('groups languages by test under the site-language slug', () => {
+		const m = generateManifest(set(), {
+			...config,
+			lang: 'fr,en,ar',
+			tutorials: { categories: { start: { label: 'S', items: ['creer-votre-premiere-facture'] } }, premium: ['creer-votre-premiere-facture'] }
+		});
+		expect(m.videos.map((v) => v.slug)).toEqual(Array(3).fill('creer-votre-premiere-facture'));
+		expect(m.videos.map((v) => v.id)).toEqual(['creer-votre-premiere-facture', 'create-your-first-invoice.en', 'انشاء-اول-فاتورة.ar']);
+		expect(m.videos.every((v) => v.langs!.join() === 'ar,en,fr')).toBe(true);
+		expect(m.videos.every((v) => v.category === 'start' && v.premium)).toBe(true);
+	});
+
+	it('uses config links of the group slug for every language', () => {
+		const m = generateManifest(set(), {
+			...config,
+			lang: 'fr,en,ar',
+			appUrl: 'https://app/{lang}',
+			tutorials: { links: { 'creer-votre-premiere-facture': { app: '/new' } } }
+		});
+		expect(m.videos.map((v) => v.links?.app)).toEqual(['https://app/fr/new', 'https://app/en/new', 'https://app/ar/new']);
+	});
+
+	it('falls back to the first language without a site-language sibling, and keeps variants apart', () => {
+		const m = generateManifest(
+			[t('b.ar', 'ar'), t('a.en', 'en'), t('a-mobile.en', 'en', { variant: 'mobile' }), t('own', 'fr', { testTitle: 'other' })],
+			{ ...config, lang: 'fr' }
+		);
+		expect(m.videos.map((v) => v.slug).sort()).toEqual(['a-mobile', 'b', 'b', 'own']);
+	});
+});

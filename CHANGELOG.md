@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.2
+
+### Fixed
+
+- **Languages grouped by test, not by id** — recordings named after their
+  translated title (`creer-ma-facture`, `create-my-invoice.en`) now form one
+  tutorial: the manifest `slug`, `langs`, `featured`, `items`/`links`/`premium`,
+  language switch, prev/next and hreflang use the site-language recording's
+  slug, found by `testFile` + `testTitle` + variant. Ids and URLs are unchanged.
+
 ## 0.6.1
 
 ### Changed
