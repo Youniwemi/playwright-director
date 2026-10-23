@@ -76,6 +76,8 @@ tutorials: {
 - Sections show in key order; videos in `items` order, then unlisted ones in scan order.
 - `items` wins over the timeline `@feature:` tag. A slug = the test name without `.<lang>` / `-<variant>`,
   so one entry covers every language and variant (`items`, `premium`, `featured`, `links` alike).
+  Recordings named after a translated title still group: languages of one test (same `testFile` + `testTitle`
+  + variant) share the site-language recording's slug (else the first language's), whatever their ids.
 - Empty sections are dropped. Section stats ("3 videos · ~4 min") are computed.
 - **Roles** (Académie hero chips) filter by reader profile, not by section — the side table of contents
   already lists the sections. Keep labels short ("Je suis comptable"); a role lists section ids, an

@@ -79,13 +79,38 @@ export function resolveLink(path, origin, lang) {
 }
 /** id without its `.<lang>` suffix (TUTORIAL_LANG recordings) */
 const slugOf = (id, lang) => (lang && id.endsWith(`.${lang}`) ? id.slice(0, -lang.length - 1) : id);
-/** The name the config uses (`items`, `premium`, `links`): the slug without its `-<variant>` suffix too */
-const configSlugOf = (t) => {
-    const slug = slugOf(t.timeline.testName, t.timeline.lang);
-    const variant = t.timeline.variant;
-    return variant && slug.endsWith(`-${variant}`) ? slug.slice(0, -variant.length - 1) : slug;
-};
+/**
+ * The slug that groups the languages of one tutorial. Recordings named after their translated title have
+ * different ids, so group by test (`testFile` + `testTitle` + variant) and take the site-language recording's
+ * slug (else the first language's). No `testFile`/`testTitle` (old timelines) = own slug.
+ */
+function groupSlugs(tutorials, defaultLang) {
+    const own = (t) => slugOf(t.timeline.testName, t.timeline.lang);
+    const groups = new Map();
+    for (const t of tutorials) {
+        const { testFile, testTitle, variant } = t.timeline;
+        if (!testFile || !testTitle)
+            continue;
+        const key = `${testFile}|${testTitle}|${variant ?? ''}`;
+        (groups.get(key) ?? groups.set(key, []).get(key)).push(t);
+    }
+    const result = new Map(tutorials.map((t) => [t, own(t)]));
+    for (const members of groups.values()) {
+        const lang = (t) => t.timeline.lang || defaultLang;
+        const head = members.find((t) => lang(t) === defaultLang) ?? [...members].sort((a, b) => lang(a).localeCompare(lang(b)))[0];
+        for (const t of members)
+            result.set(t, own(head));
+    }
+    return result;
+}
 export function generateManifest(tutorials, config) {
+    const groupSlug = groupSlugs(tutorials, siteLang(config));
+    /** The name the config uses (`items`, `premium`, `links`): the group slug without its `-<variant>` suffix too */
+    const configSlugOf = (t) => {
+        const slug = groupSlug.get(t);
+        const variant = t.timeline.variant;
+        return variant && slug.endsWith(`-${variant}`) ? slug.slice(0, -variant.length - 1) : slug;
+    };
     const configured = config.tutorials?.categories ?? {};
     // A slug listed in a configured section's `items` belongs there, whatever its timeline feature.
     const listed = new Map();
@@ -151,12 +176,12 @@ export function generateManifest(tutorials, config) {
     });
     // Group the languages of one tutorial: `look`, `look.en`, `look.ar` share the slug `look`.
     const langsBySlug = new Map();
-    for (const v of videos) {
+    videos.forEach((v, i) => {
         const lang = v.lang ?? '';
-        v.slug = slugOf(v.id, lang);
+        v.slug = groupSlug.get(tutorials[i]);
         if (lang)
             (langsBySlug.get(v.slug) ?? langsBySlug.set(v.slug, new Set()).get(v.slug)).add(lang);
-    }
+    });
     for (const v of videos)
         v.langs = [...(langsBySlug.get(v.slug) ?? [])].sort();
     // Section order, then the configured `items` order; unlisted videos keep the scan order (stable sort).
