@@ -89,7 +89,7 @@ npm install --save-dev playwright-director
 | Package | Required | Notes |
 |---|---|---|
 | `@playwright/test` | Yes | >= 1.40.0 |
-| `sharp` | Optional | For optimized WebP screenshots (falls back to raw PNG) |
+| `sharp` | Installed with the package | Resizes step screenshots and posters to WebP |
 | `ffmpeg` | Runtime | Required on PATH for audio/video merge |
 | `ffprobe` | Runtime | Required on PATH for audio duration detection |
 
@@ -687,6 +687,12 @@ CSS variables for theming:
   --tutorial-text: #f8fafc;
   --tutorial-z-index: 10000;
   --tutorial-animation-duration: 0.3s;
+
+  /* Overlay insets: top corners use -top, bottom corners (BL/BR) use -bottom.
+     Raise -bottom when the video is shorter than the viewport, e.g. a 1280x808
+     viewport recorded as 1280x720 (headless Chrome 154+) needs 108px. */
+  --tutorial-overlay-top: 20px;
+  --tutorial-overlay-bottom: 20px; /* default: follows -top */
 
   /* Multi-scene stage */
   --tutorial-stage-bg: #1e293b;

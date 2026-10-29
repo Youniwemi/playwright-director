@@ -1,6 +1,6 @@
 {
   "name": "playwright-director",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "AI-assisted Playwright tool that turns executable tests into directed video guides — demos, tutorials, and documentation that never lag behind the product.",
   "repository": {
     "type": "git",
@@ -73,21 +73,16 @@
   "author": "Youniwemi",
   "license": "MIT",
   "dependencies": {
-    "astro": "^5.0.0"
+    "astro": "^7.4.4",
+    "sharp": "^0.35.5"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0"
-  },
-  "peerDependenciesMeta": {
-    "sharp": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.52.0",
     "@types/node": "^26.2.0",
-    "@types/sharp": "^0.31.1",
     "typescript": "^5.7.0",
     "vitest": "^3.1.0"
   }

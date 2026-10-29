@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.5
+
+### Added
+
+- **`--tutorial-overlay-bottom`** (and `--tutorial-overlay-bottom-mobile`) — inset of the
+  bottom overlay cards (`BL`/`BR`). It defaults to `--tutorial-overlay-top`, so existing
+  setups look the same. Raise it when the recorded video is shorter than the viewport
+  (headless Chrome 154+ records a 1280x808 viewport as 1280x720; `108px` keeps the card
+  in the picture; from a test, set it inline on `<html>` with `style.setProperty`). Before, the bottom cards reused `--tutorial-overlay-top` and could not
+  be moved on their own.
+
+### Changed
+
+- `sharp` is now a regular dependency (was an optional peer), so step screenshots and
+  posters are always WebP.
+- `astro` bumped to `^7.4.4` (security fixes); `@types/sharp` removed.
+
 ## 0.6.3
 
 ### Added

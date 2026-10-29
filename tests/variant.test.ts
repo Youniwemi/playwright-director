@@ -186,6 +186,13 @@ describe('Variant CSS', () => {
 		expect(styles).toContain('background: var(--tutorial-overlay-bg)');
 	});
 
+	it('insets the bottom corners with --tutorial-overlay-bottom, not the top variable', () => {
+		const rule = (sel: string) => styles.match(new RegExp(`\\.${sel} \\{[^}]*\\}`))![0];
+		expect(rule('tutorial-overlay-bl')).toContain('bottom: var(--tutorial-overlay-bottom)');
+		expect(rule('tutorial-overlay-br')).toContain('bottom: var(--tutorial-overlay-bottom)');
+		expect(styles).toContain('--tutorial-overlay-bottom: var(--tutorial-overlay-bottom-mobile)');
+	});
+
 	it('defines mobile values in :root and remaps them under the variant scope', () => {
 		expect(styles).toContain('--tutorial-overlay-width-mobile');
 		expect(styles).toContain("html[data-tutorial-variant='mobile']");
