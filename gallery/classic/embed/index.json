@@ -7,7 +7,7 @@
       "slug": "two-profiles-one-video",
       "title": "Two profiles, one video",
       "duration": "0:23",
-      "durationSeconds": 23.1,
+      "durationSeconds": 23,
       "lang": "en",
       "langs": [
         "en"
@@ -17,8 +17,8 @@
       "id": "split-screen-demo",
       "slug": "split-screen-demo",
       "title": "Split screen demo",
-      "duration": "0:23",
-      "durationSeconds": 22.5,
+      "duration": "0:22",
+      "durationSeconds": 22.3,
       "lang": "fr",
       "langs": [
         "fr"
@@ -29,7 +29,7 @@
       "slug": "first-invoice-walkthrough",
       "title": "Your first invoice",
       "duration": "1:07",
-      "durationSeconds": 67.1,
+      "durationSeconds": 67,
       "lang": "en",
       "langs": [
         "en"
@@ -39,8 +39,8 @@
       "id": "first-invoice-docs-snippet",
       "slug": "first-invoice-docs",
       "title": "Your first invoice",
-      "duration": "0:29",
-      "durationSeconds": 29,
+      "duration": "0:28",
+      "durationSeconds": 28.2,
       "lang": "en",
       "langs": [
         "en"
@@ -50,8 +50,8 @@
       "id": "first-invoice-social-demo",
       "slug": "first-invoice-social",
       "title": "Your first invoice",
-      "duration": "0:25",
-      "durationSeconds": 24.6,
+      "duration": "0:24",
+      "durationSeconds": 24.3,
       "lang": "en",
       "langs": [
         "en"
@@ -62,7 +62,7 @@
       "slug": "zoom-demo",
       "title": "Zooming on what matters",
       "duration": "0:45",
-      "durationSeconds": 45.2,
+      "durationSeconds": 44.9,
       "lang": "en",
       "langs": [
         "en"
@@ -84,7 +84,7 @@
       "slug": "type-blurred-demo",
       "title": "Typing a secret without leaking it",
       "duration": "0:15",
-      "durationSeconds": 15.3,
+      "durationSeconds": 15.1,
       "lang": "en",
       "langs": [
         "en"
@@ -150,10 +150,21 @@
       "slug": "mobile-split-demo",
       "title": "Mobile split demo",
       "duration": "0:17",
-      "durationSeconds": 17,
+      "durationSeconds": 16.8,
       "lang": "fr",
       "langs": [
         "fr"
+      ]
+    },
+    {
+      "id": "overlay-bottom-inset",
+      "slug": "overlay-bottom-inset",
+      "title": "Bottom inset",
+      "duration": "0:07",
+      "durationSeconds": 6.6,
+      "lang": "en",
+      "langs": [
+        "en"
       ]
     }
   ]

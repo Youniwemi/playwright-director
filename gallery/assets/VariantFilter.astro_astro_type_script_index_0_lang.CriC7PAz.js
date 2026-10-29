@@ -1,1 +1,0 @@
-import{s as n}from"./filter.RJsREWrK.js";const e=document.querySelector("button[data-variant]")?.closest(".variant-filter");e?.addEventListener("click",r=>{const t=r.target.closest(".variant-btn");t&&(e.querySelectorAll(".variant-btn").forEach(a=>a.classList.toggle("active",a===t)),n({variant:t.dataset.variant}))});

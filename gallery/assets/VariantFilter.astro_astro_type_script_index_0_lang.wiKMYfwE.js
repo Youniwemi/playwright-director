@@ -1,0 +1,1 @@
+import{t as e}from"./filter.C2uGzMfT.js";var t=document.querySelector(`button[data-variant]`)?.closest(`.variant-filter`);t?.addEventListener(`click`,n=>{let r=n.target.closest(`.variant-btn`);r&&(t.querySelectorAll(`.variant-btn`).forEach(e=>e.classList.toggle(`active`,e===r)),e({variant:r.dataset.variant}))});

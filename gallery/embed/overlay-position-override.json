@@ -17,7 +17,7 @@
   "steps": [
     {
       "num": 1,
-      "at": 0.03,
+      "at": 0.01,
       "title": "Top-left step",
       "key": "Top-left step",
       "text": "Top-left step",
@@ -25,7 +25,7 @@
     },
     {
       "num": 2,
-      "at": 2.47,
+      "at": 2.44,
       "title": "Bottom-right step",
       "key": "Bottom-right step",
       "text": "Bottom-right step",

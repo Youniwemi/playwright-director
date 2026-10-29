@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "overlay-bottom-inset",
+  "title": "Bottom inset",
+  "description": "Raised card",
+  "duration": "0:07",
+  "durationSeconds": 6.6,
+  "slug": "overlay-bottom-inset",
+  "lang": "en",
+  "langs": [
+    "en"
+  ],
+  "accent": "#4f46e5",
+  "video": "videos/overlay-bottom-inset.webm",
+  "poster": "videos/overlay-bottom-inset-poster.webp",
+  "page": "overlay-bottom-inset/",
+  "steps": [
+    {
+      "num": 1,
+      "at": 0.02,
+      "title": "Raised card",
+      "key": "Raised card",
+      "text": "Raised card",
+      "image": "videos/overlay-bottom-inset-step-1.webp"
+    }
+  ]
+}
