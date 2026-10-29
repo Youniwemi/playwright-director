@@ -7,6 +7,7 @@ import { createInterface } from 'readline';
 import { scanTutorials } from './scan-tutorials.js';
 import { generateManifest } from './generate-manifest.js';
 import { scaffold } from './scaffold.js';
+import { applyTarget } from './targets.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const DEFAULT_CONFIG = {
@@ -73,6 +74,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
         }
         config = { ...DEFAULT_CONFIG };
     }
+    config = applyTarget(config, options.target);
     if (options.base)
         config.baseUrl = options.base;
     if (options.theme)
@@ -87,6 +89,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
         config.overrides = resolve(config.overrides);
     config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
     config.videos = resolve(config.videos ?? join(config.input, 'videos'));
+    console.log(`  Target: ${options.target ?? '(main config)'} → ${config.output}`);
     console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
     const tutorials = scanTutorials(config.input, config.timelines, config.videos).filter((t) => !options.only?.length || matchesOnly(t.timeline.testName, options.only));
     if (tutorials.length === 0) {

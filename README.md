@@ -62,6 +62,7 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **Playwright Reporter** — Auto-merges audio into video as each tutorial test completes
 - **Gallery site** — `build-site` turns your recordings into a static video gallery with step-by-step guides, ready for any static host
 - **Two site themes** — Académie (editorial: hero, search, sections, course sidebar) or Classic (card grid); design tokens, extra CSS or file overrides for your brand
+- **Public & internal builds** — `build-site --target public` merges a named config override; `tutorials.exclude` leaves whole sections or slug globs out with no trace
 - **SEO built in** — VideoObject JSON-LD with chapters, `sitemap.xml` with hreflang, canonical and Open Graph tags
 - **App and docs links** — each video links to the matching screen of your app and page of your docs
 - **In-app help widget** — the published gallery serves a `widget.js`: one `data-tutorial` attribute opens any tutorial as an overlay inside your own app
@@ -1062,6 +1063,7 @@ export default {
     roles: {               // Académie hero chips: a click shows only these sections (no roles = no chips)
       "new": { label: { en: "I'm starting", fr: "Je démarre" }, sections: ["getting-started"] },
     },
+    exclude: { categories: ["internal"], slugs: ["draft-*"] },  // Optional: never published (also: include)
     featured: "sign-up",              // Académie "start here" video (default: the first one)
     premium: ["bank-reconciliation"], // PRO badge
     links: { "first-invoice": { app: "/invoices/new", docs: "/invoices/" } },  // Over the test's `links`
@@ -1072,8 +1074,48 @@ export default {
     stepsLayout: "text",   // Step guide on video pages: 'text' | 'cards' | 'full' | 'none'
     showStrip: true,       // Thumbnail strip above the guide (click = lightbox + caption)
   },
+
+  // Named overrides, picked with --target <name> (optional)
+  targets: {
+    public: { output: "tutorial-site-public/", tutorials: { exclude: { categories: ["admin"] } } },
+  },
 };
 ```
+
+### Build targets — a public and an internal site from one config
+
+`targets` holds named overrides; `build-site --target <name>` deep-merges one
+over the config (objects merged, arrays and values replaced, `null` deletes a
+key). With `tutorials.exclude` / `tutorials.include` it builds a public site
+without the internal tutorials — no second config, no second input folder:
+
+```js
+export default {
+  title: "Académie", input: "tutorials/", output: "tutorials/site/dist/", baseUrl: "/", lang: "fr",
+  tutorials: { categories: { general: { label: "Général" }, admin: { label: "Administration" } } },
+  targets: {
+    public: { output: "tutorials/site/public/", tutorials: { exclude: { categories: ["admin"] } } },
+  },
+};
+```
+
+```bash
+playwright-director build-site                  # everything → tutorials/site/dist/
+playwright-director build-site --target public  # without the admin section → tutorials/site/public/
+```
+
+- `exclude` / `include` take `{ categories?: string[], slugs?: string[] }`:
+  section ids (the section a tutorial is shown in) and slug globs (`admin-*`).
+  A tutorial is published if it matches `include` (or there is none) and not
+  `exclude`; its languages and variants (`.en`, `-mobile`) follow it.
+- An excluded tutorial leaves nothing in the output: no page, embed payload,
+  `embed/index.json` entry, video or screenshot, sitemap or search entry, and
+  it is not counted. Sections and role chips left empty are hidden.
+- Deleting a section from `categories` does **not** unpublish its tutorials
+  (they warn and show under a detected section) — `exclude.categories` does.
+- An excluded `featured` falls back to the first published tutorial, excluded
+  `items` / `premium` slugs only warn, and nothing left to publish fails.
+  An unknown `--target` fails and lists the targets.
 
 ### How videos are discovered
 
@@ -1102,6 +1144,7 @@ playwright-director build-site -y                    # Never prompt (CI); also a
 playwright-director build-site --only=look,billing   # Only these tutorials (all languages/variants)
 playwright-director build-site --theme=classic       # Override the config theme
 playwright-director build-site --output=site-classic/  # Override the output folder
+playwright-director build-site --target public       # Merge targets.public over the config
 playwright-director build-site --dev                 # Serve with live reload (astro dev) instead of building
 ```
 

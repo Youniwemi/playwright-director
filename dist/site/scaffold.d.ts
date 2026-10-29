@@ -6,6 +6,8 @@ import type { SiteConfig, VideoManifest } from './types.js';
  * Returns '' when `cors` is false.
  */
 export declare function buildHeadersFile(basePath: string, cors: string | false): string;
+/** Matches the files of these tutorial ids in the videos folder: `<id>.<ext>`, `<id>-poster.*`, `<id>-step-N.*` */
+export declare function ownedBy(ids: string[]): (file: string) => boolean;
 export declare const THEMES: readonly ["academy", "classic"];
 export type Theme = (typeof THEMES)[number];
 /**

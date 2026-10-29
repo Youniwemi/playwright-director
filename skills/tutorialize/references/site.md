@@ -48,6 +48,8 @@ export default {
 | `primaryColor` / `font` | — | Pre-0.6 spellings of `tokens.primary` / `tokens.fontBody` |
 | `tutorials.categories` | from `@feature:` tags | Sections in display order (§3) |
 | `tutorials.roles` | — | Académie hero chips, one per reader profile: a click shows only its sections (§3) |
+| `tutorials.exclude` / `include` | — | `{ categories, slugs }` — leave tutorials out of the build entirely (§7b) |
+| `targets` | — | Named config overrides picked with `--target <name>` (§7b) |
 | `tutorials.featured` | first video | Slug of the Académie "start here" video |
 | `tutorials.premium` | `[]` | Slugs with a PRO badge |
 | `tutorials.links` | test `links` | Per-slug `{ app, docs }`, over the test's |
@@ -143,12 +145,47 @@ npx playwright-director build-site --theme=classic     # override config.theme
 npx playwright-director build-site --base=/help/       # override baseUrl's path
 npx playwright-director build-site --output=dist/help/ # override output
 npx playwright-director build-site --only=onboarding   # only these slugs (all languages/variants)
+npx playwright-director build-site --target public     # merge targets.public over the config (§7b)
 npx playwright-director build-site -y                  # never prompt (CI; automatic without a TTY)
 npx playwright-director build-site --dev               # astro dev with live reload, no build
 ```
 
 Two themes from one config: build twice with `--theme` + `--base` + `--output`, and set
 `themeSwitcher` so each build links to the other.
+
+## 7b. Targets, include / exclude — a public and an internal site from one config
+
+```js
+export default {
+	title: 'Académie', input: 'tutorials/', output: 'tutorials/site/dist/', baseUrl: '/', lang: 'fr',
+	tutorials: { categories: { general: { label: 'Général' }, admin: { label: 'Administration' } } },
+	targets: {
+		public: { output: 'tutorials/site/public/', tutorials: { exclude: { categories: ['admin'] } } }
+	}
+};
+```
+
+```bash
+npx playwright-director build-site                  # everything → tutorials/site/dist/
+npx playwright-director build-site --target public  # no admin tutorials → tutorials/site/public/
+```
+
+- **`targets.<name>`** is deep-merged over the config: objects merge, arrays and plain values replace,
+  `null` deletes a key. No `--target` = the main config. An unknown name fails and lists the targets.
+  CLI flags (`--output`, `--base`, `--theme`) still win over the target.
+- **`tutorials.exclude` / `include`**: `{ categories?: string[], slugs?: string[] }`. `categories` are
+  section ids (`tutorials.categories` keys — the section a tutorial is shown in: `items`, else its
+  `@feature:` tag); `slugs` are globs on the slug (`*` any, `?` one character), e.g. `['admin-*']`.
+  Published = matches `include` (or no `include`) and does not match `exclude`; matching = its
+  category is listed or its slug matches. `.<lang>` and `-<variant>` recordings follow their slug.
+- An excluded tutorial leaves **no trace**: no page, no `embed/<slug>*.json`, no `embed/index.json`
+  entry, no `videos/<slug>*` file, nothing in search, sitemap, `links.json`, counts or durations.
+  Sections left empty are hidden; a role whose sections are all hidden is hidden.
+- **Removing a section from `categories` (or setting it to `null` in a target) does not unpublish
+  it** — its tutorials ship under a detected section, with a warning. Use `exclude.categories`.
+- Warnings, not failures: an excluded `featured` (falls back to the first published tutorial), an
+  excluded slug in `items` or `premium`. Nothing left to publish fails.
+- Build into a fresh `output` folder: files from an earlier, larger build are not deleted.
 
 ## 8. Output
 
@@ -170,3 +207,4 @@ Two themes from one config: build twice with `--theme` + `--base` + `--output`, 
 - [ ] Tests that show an app screen set `links.app`; tests with a docs page set `links.docs`
 - [ ] Customization uses tokens first, `css` second, `overrides` last
 - [ ] `--only` builds are for checking a page — deploy a full build
+- [ ] Internal tutorials stay out of a public build with `exclude` in a target, never by deleting their section

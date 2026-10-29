@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.7.0
+
+### Added
+
+- **Build targets** — `targets: { <name>: { …overrides } }` in the site config,
+  picked with `build-site --target <name>` (or `--target=<name>`): the target is
+  deep-merged over the config (objects merged, arrays and values replaced, `null`
+  deletes a key). One config builds an internal and a public site. An unknown
+  name fails and lists the targets; the build log prints the target used.
+- **`tutorials.exclude` / `tutorials.include`** — `{ categories?: string[], slugs?: string[] }`
+  (slugs are globs: `admin-*`). A tutorial is published if it matches `include`
+  (or there is none) and not `exclude`; its languages and variants follow it.
+  An excluded tutorial leaves nothing in the output: no page, embed payload,
+  `embed/index.json` entry, video/poster/screenshot, sitemap or search entry,
+  count or duration. Sections and role chips left empty are hidden. An excluded
+  `featured` falls back to the first published tutorial (warning); excluded
+  `items` / `premium` slugs warn; nothing left to publish fails.
+
+### Changed
+
+- `videos/` in the built site only holds the published tutorials' files (video,
+  `-poster`, `-step-N`) instead of a copy of the whole folder — `--only` builds
+  no longer ship the other videos either.
+- A published tutorial whose category is not in `tutorials.categories` now
+  warns: removing a section from the config does not unpublish its tutorials —
+  use `exclude.categories`.
+
 ## 0.6.2
 
 ### Fixed

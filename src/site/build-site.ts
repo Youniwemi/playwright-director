@@ -7,6 +7,7 @@ import { createInterface } from 'readline';
 import { scanTutorials } from './scan-tutorials.js';
 import { generateManifest } from './generate-manifest.js';
 import { scaffold } from './scaffold.js';
+import { applyTarget } from './targets.js';
 import type { SiteConfig } from './types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -65,6 +66,8 @@ export interface BuildSiteOptions {
 	yes?: boolean;
 	/** Only these tutorials (slugs or ids) — all their languages and variants */
 	only?: string[];
+	/** Name of a config `targets` entry merged over the config, e.g. 'public' */
+	target?: string;
 }
 
 /** `look` matches look, look.en, look-mobile.ar…; an exact id matches itself. */
@@ -97,6 +100,8 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 		config = { ...DEFAULT_CONFIG };
 	}
 
+	config = applyTarget(config, options.target);
+
 	if (options.base) config.baseUrl = options.base;
 	if (options.theme) config.theme = options.theme as SiteConfig['theme'];
 	if (options.output) config.output = options.output;
@@ -106,6 +111,7 @@ export default ${JSON.stringify(DEFAULT_CONFIG, null, 2)};
 	if (config.overrides) config.overrides = resolve(config.overrides);
 	config.timelines = resolve(config.timelines ?? join(config.input, 'output'));
 	config.videos = resolve(config.videos ?? join(config.input, 'videos'));
+	console.log(`  Target: ${options.target ?? '(main config)'} → ${config.output}`);
 
 	console.log(`\n  Scanning ${config.timelines} and ${config.videos} for tutorials...`);
 	const tutorials = scanTutorials(config.input, config.timelines, config.videos).filter(
