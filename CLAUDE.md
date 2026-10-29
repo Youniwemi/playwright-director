@@ -11,13 +11,16 @@ No `Co-Authored-By` trailer in commits.
 A feature or behavior change is **not done** until all of these ship together (same PR):
 
 1. **`CLAUDE.md`** updated — architecture, options, design decisions
-2. **The skill** in `skills/tutorialize/` updated — especially `references/api.md` for API or timing changes
+2. **The skill AND the agent** updated — **mandatory after every change or improvement to this plugin**, never optional:
+   - `skills/tutorialize/SKILL.md` (process + verify lines) and every reference file the change touches: `references/api.md` (API, timing), `references/site.md` (gallery site, `build-site`), `references/storytelling.md` (when to use it)
+   - `skills/tutorialize/agent.md` (the `tutorial-crafter` agent): its reference list and its "Apply technical rules" bullets must name the new behavior
+   - Bump the version in `package.json` (+ `package-lock.json`): the installed copies are stamped with it, and that is what tells users to re-run `init`
 3. **`README.md`** updated — every user-facing option and workflow; site-visible changes get screenshots in `docs/images/` (~900px wide, referenced with relative paths like `docs/images/x.png` — GitHub renders them on any branch, and npm resolves them through package.json's `repository` field)
 4. **Unit tests** covering the new behavior (`npm test` green)
 5. **`npm run build`** run, so the committed `dist/` matches `src/`
 6. **The project site** (`landing/index.html`) updated when the change is meaningful to users — a new feature, capability, or workflow deserves a feature card, section, or hero mention (with a live demo where the deployed gallery makes one possible). Internal refactors, fixes, and minor option tweaks don't.
 
-Before declaring any task complete, walk this list and fix what's missing.
+Before declaring any task complete, walk this list item by item — skill **and** agent included — and fix what's missing. Stay on the current minor version (0.6.x) unless told otherwise.
 
 ## What this is
 

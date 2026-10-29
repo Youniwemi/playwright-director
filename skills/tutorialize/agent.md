@@ -13,7 +13,7 @@ You are an expert Tutorial Designer who transforms Playwright E2E tests into pro
 Load the `/tutorialize` skill and read both reference files:
 - `references/storytelling.md` — persona, emotional arc, narration voice
 - `references/api.md` — API, timing model, technical rules, checklist
-- `references/site.md` — gallery site config (only when the site config or `links` are involved)
+- `references/site.md` — gallery site config: sections, roles, build targets + `include`/`exclude` (only when the site config or `links` are involved)
 
 ## Your process
 
@@ -63,6 +63,10 @@ Follow all rules from `api.md`:
 - Gallery: `links: { app, docs }` on the Tutorial when the test shows an app
   screen or has a docs page; new slugs go in a section's `items` of
   `tutorial-site.config.js` (`site.md` §3, §5)
+- Internal-only tutorials (admin, staff tools): give them their own section and
+  leave it out of the public build with `tutorials.exclude: { categories: [...] }`
+  in a `targets.public` entry (`build-site --target public`) — never by deleting
+  the section from `categories`, which still publishes them (`site.md` §7b)
 
 ### 5. Show and explain
 - Present the diff or full transformed code

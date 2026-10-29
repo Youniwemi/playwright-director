@@ -65,3 +65,7 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Set `links: { app, docs }` when the tutorial shows an app screen or has a
   docs page, and add the slug to a section's `items` in the site config
   (`site.md` §3, §5).
+- A tutorial meant for internal readers only goes in a section that the public
+  target excludes (`targets.public.tutorials.exclude.categories`,
+  `build-site --target public`) — removing a section from `categories` does not
+  unpublish it (`site.md` §7b).
