@@ -4,7 +4,7 @@
   "title": "Skipping the waits",
   "description": "Skip the boring part. Long waits are fast-forwarded in the final video, like an old VHS tape.",
   "duration": "0:24",
-  "durationSeconds": 24.1,
+  "durationSeconds": 24,
   "slug": "fast-forward-demo",
   "lang": "en",
   "langs": [
@@ -28,7 +28,7 @@
     },
     {
       "num": 2,
-      "at": 12.43,
+      "at": 12.39,
       "title": "Export it as a PDF",
       "key": "Export it as a PDF",
       "text": "Export it as a PDF",
@@ -36,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 16.53,
+      "at": 16.49,
       "title": "The PDF is ready",
       "key": "The PDF is ready",
       "text": "The PDF is ready",
