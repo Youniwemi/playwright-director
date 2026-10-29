@@ -1,7 +1,7 @@
 .PHONY: build test e2e video site clean help
 
 help: ## Show available targets
-	@grep -E '^[a-z][a-z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-12s %s\n", $$1, $$2}'
+	@grep -hE '^[a-z][a-z0-9_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-12s %s\n", $$1, $$2}'
 
 build: ## Compile TypeScript + copy styles
 	npm run build
