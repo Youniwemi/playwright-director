@@ -3,12 +3,15 @@ import { join } from 'path';
 import { buildMergeCommand } from './merge.js';
 import { buildTranscriptMarkdown } from './transcript.js';
 import { fastForwardOutputMs, type FastForwardSegment } from './fast-forward.js';
-import type { TutorialLinks } from './types.js';
+import type { TutorialLinks, Pace } from './types.js';
 
 export interface TimelineStep {
 	step: number;
 	title: string;
+	/** What was narrated (transcripts and corrections read this) */
 	text?: string;
+	/** Whole written text when the pace narrated less (`snippet`/`demo`) — the gallery reads it first */
+	fullText?: string;
 	key?: string;
 	audioFile: string;
 	startMs: number;
@@ -52,6 +55,8 @@ export interface TimelineData {
 	 *  Lets the reporter pick the right timeline when the same test was recorded
 	 *  in several variants, and the site filter videos by variant. */
 	variant?: string;
+	/** Rendering pace; absent = walkthrough. testName carries `-<pace>` too. */
+	pace?: Pace;
 	/** App / docs paths for the gallery (Tutorial option `links`) */
 	links?: TutorialLinks;
 	/** When the timeline was saved (ISO 8601) — the gallery's uploadDate / dateModified */
@@ -76,6 +81,7 @@ export class TutorialTimeline {
 	private lang: string;
 	private feature: string = '';
 	private variant: string = '';
+	private pace?: Pace;
 	private links?: TutorialLinks;
 	private musicOptions: TimelineMusicOptions;
 	private startTime: number = 0;
@@ -96,9 +102,11 @@ export class TutorialTimeline {
 		musicOptions: TimelineMusicOptions = {},
 		title: string = '',
 		variant: string = '',
-		links?: TutorialLinks
+		links?: TutorialLinks,
+		pace?: Pace
 	) {
 		this.variant = variant;
+		this.pace = pace;
 		this.links = links;
 		this.testName = testName;
 		this.testTitle = testTitle;
@@ -167,13 +175,14 @@ export class TutorialTimeline {
 	 * Record a step at a specific timestamp (for accurate voice timing).
 	 * `startMs` is stored in final-video time, i.e. after fast-forwards.
 	 */
-	addStep(step: number, title: string, audioFile: string, durationMs: number, timestamp: number, text?: string, key?: string, scene?: string | string[]): void {
+	addStep(step: number, title: string, audioFile: string, durationMs: number, timestamp: number, text?: string, key?: string, scene?: string | string[], fullText?: string): void {
 		const tapeMs = timestamp - this.startTime;
 		const startMs = fastForwardOutputMs(tapeMs, this.segmentsAt(tapeMs));
 		this.steps.push({
 			step,
 			title,
 			...(text ? { text } : {}),
+			...(fullText && fullText !== text ? { fullText } : {}),
 			...(key ? { key } : {}),
 			...(scene ? { scene } : {}),
 			audioFile,
@@ -198,6 +207,7 @@ export class TutorialTimeline {
 			lang: this.lang,
 			feature: this.feature || undefined,
 			variant: this.variant || undefined,
+			pace: this.pace && this.pace !== 'walkthrough' ? this.pace : undefined,
 			links: this.links && (this.links.app || this.links.docs) ? this.links : undefined,
 			recordedAt: new Date().toISOString(),
 			totalDurationMs: fastForwardOutputMs(tapeDurationMs, fastForward),

@@ -57,6 +57,7 @@ export default {
 | `tutorials.ui.heroSubtitle` | "Video tutorials" | String or per language |
 | `tutorials.stepsLayout` | `'text'` | Video page step guide: `'text'` \| `'cards'` \| `'full'` \| `'none'` |
 | `tutorials.showStrip` | `true` | Thumbnail strip above the step guide |
+| `tutorials.pace` | `['walkthrough', 'snippet', 'demo']` | Which cut to publish when a tutorial was recorded at several paces (`TUTORIAL_PACE`, `api.md` §15): one pace or a preference order; a tutorial missing the preferred one falls back to what was recorded. The step guide always shows the full written text |
 
 ## 3. Sections and order
 

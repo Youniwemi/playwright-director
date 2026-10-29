@@ -1,4 +1,5 @@
 export { Tutorial, narrationActionOffset } from './Tutorial.js';
+export { PACES, PACE_PROFILES, resolvePace } from './pace.js';
 export { buildMergeCommand } from './merge.js';
 export { slugify } from './slugify.js';
 export { mobileStage } from './stage-presets.js';

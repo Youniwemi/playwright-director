@@ -42,6 +42,7 @@ Or use a fixture that wraps this (the consuming project typically provides a `tu
 | `customStyles` | `string` | built-in | CSS for overlay |
 | `overlayPosition` | `'TL' \| 'TR' \| 'BL' \| 'BR'` | `'TR'` | Overlay corner position |
 | `links` | `{ app?, docs? }` | — | Gallery buttons + docs cross-links: paths on the site's `appUrl` / `docsUrl`, or full URLs. No effect on the recording (`site.md` §5) |
+| `pace` | `'walkthrough' \| 'snippet' \| 'demo'` | `env TUTORIAL_PACE`, else `'walkthrough'` | Rendering cut of the same written tutorial (§15). Non-walkthrough paces suffix `testName` `-<pace>` (after the variant). Read `tutorial.pace` in the spec if needed |
 | `variant` | `string` | `env TUTORIAL_VARIANT` | Suffixes `testName` (`<testName>-<variant>`) so a second recording never overwrites the first. `'mobile'` also compacts the overlay and pins the multi-scene split (see below) |
 
 ## 2. Core Methods
@@ -569,7 +570,50 @@ tutorial.step('Fill the twelve rows', async () => {
 - Fast-forward the wait, not the payoff: end the span before the result the viewer must see.
 - No-op without `TUTORIAL_MODE` — `fastForward()` just runs the action; a speed `≤ 1` throws in both modes.
 
-## 15. Checklist
+## 15. Paces — one script, three cuts
+
+Write the tutorial **once**, in full (goal context with text, `do` + `explain`
+on every step that needs a why). The pace decides how much of it is narrated:
+
+```bash
+npx playwright test e2e/invoice                              # walkthrough (default)
+TUTORIAL_PACE=snippet TUTORIAL_MODE=true npx playwright test e2e/invoice   # doc clip
+TUTORIAL_PACE=demo    TUTORIAL_MODE=true npx playwright test e2e/invoice   # LinkedIn / showcase
+```
+
+| | `walkthrough` | `snippet` | `demo` |
+|---|---|---|---|
+| Step narration | `do` + `explain` | `do` only | `do` only |
+| Overlay description | shown | shown | hidden |
+| `goal` context | centered card, title + text | corner banner, title only | corner banner, title only |
+| `clarification` context | shown | dropped | dropped |
+| `attention` context | shown | corner banner, title only | dropped |
+| Pause after context / unvoiced step (`stepDelay`) | 500 ms | 200 ms | 150 ms |
+| Pause after each step (unless `delay`) | 300 ms | 150 ms | 100 ms |
+| Hold on the completion screen | 2 s | 1 s | 1.5 s |
+| Cursor (`mouseSteps` / `pauseBeforeClick`) | 25 / 300 ms | 25 / 150 ms | 15 / 100 ms |
+| `typeSlowly` / `typeBlurred` delay | ×1 | ×0.6 | ×0.4 |
+
+- **Nothing is lost for the gallery.** What a short pace doesn't say stays in
+  the timeline: steps get `fullText` (the whole `do. explain`), dropped contexts
+  are recorded unvoiced with their text. The site's step guide, description and
+  SEO read the full text; transcripts and `tutorial-transcript apply` work on
+  what was actually said.
+- **Splitting rule:** the narrated part is the first sentence — `do` with
+  `do`/`explain`, the title with `description`, a context's title, or the text
+  before the first `'. '` of a custom `voiceText`. So the first sentence must
+  stand on its own.
+- **Explicit options win:** `stepDelay`, `mouseSteps`, `pauseBeforeClick` passed
+  to the constructor override the pace defaults; a step's `delay` overrides
+  the after-step pause.
+- Outputs coexist: `invoice`, `invoice-snippet`, `invoice-demo` (and
+  `invoice-mobile-demo` with `TUTORIAL_VARIANT=mobile`). The reporter matches
+  `TUTORIAL_PACE` when it is set. The gallery publishes one cut per tutorial
+  (`tutorials.pace`, `site.md` §2); slugs, config entries and embeds never carry
+  the pace suffix.
+- An unknown pace throws, in both modes.
+
+## 16. Checklist
 
 Before submitting a tutorialized test:
 
@@ -588,6 +632,8 @@ Before submitting a tutorialized test:
 - [ ] Zooms (if any) land on what the narration names, ≤ 3 per tutorial, each `zoomIn` paired with a `zoomOut` in the same step
 - [ ] Secrets (passwords, API keys) typed with `typeBlurred`, never `fill`/`typeSlowly`
 - [ ] Long waits / repetitive chores wrapped in `fastForward(speed, …)` inside their step, and the narration announces the skip
+- [ ] Every step's and context's first sentence works alone — it is all `snippet` / `demo` narrate (§15)
+- [ ] The goal context's title is a one-liner (≤ 12 words): it is the whole opening of the short cuts
 
 Multi-scene tutorials, additionally:
 

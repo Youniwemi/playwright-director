@@ -61,6 +61,11 @@ export interface TutorialOptions {
      *  The variant `'mobile'` also switches to a compact overlay and, with 2+
      *  scenes, a permanent split stage (all scenes visible, ratios ignored). */
     variant?: string;
+    /** Rendering pace — `walkthrough` (default, everything narrated), `snippet`
+     *  (doc clip: "do" halves and context titles only) or `demo` (showcase cut).
+     *  Defaults to process.env.TUTORIAL_PACE. A non-walkthrough pace suffixes
+     *  testName `-<pace>` (after the variant). */
+    pace?: Pace;
     /** Where the gallery sends a viewer next: `app` = the screen this tutorial shows
      *  (path on the site config `appUrl`), `docs` = its documentation page (path on `docsUrl`).
      *  Full URLs are kept as is. Stored in the timeline; no effect on the recording. */
@@ -104,6 +109,8 @@ export interface StepOptions {
     /** Override overlay position for this step */
     overlayPosition?: OverlayPosition;
 }
+/** See `src/pace.ts` */
+export type Pace = 'walkthrough' | 'snippet' | 'demo';
 export type OverlayPosition = 'TL' | 'TR' | 'BL' | 'BR';
 export type ContextStyle = 'goal' | 'clarification' | 'attention';
 export interface ContextOptions {

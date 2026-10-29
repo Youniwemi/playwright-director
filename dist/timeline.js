@@ -15,6 +15,7 @@ export class TutorialTimeline {
     lang;
     feature = '';
     variant = '';
+    pace;
     links;
     musicOptions;
     startTime = 0;
@@ -24,8 +25,9 @@ export class TutorialTimeline {
     fastForwards = [];
     openFastForward = null;
     videoPath = '';
-    constructor(testName, testFile = '', projectName = '', lang = 'fr', testTitle = '', feature = '', musicOptions = {}, title = '', variant = '', links) {
+    constructor(testName, testFile = '', projectName = '', lang = 'fr', testTitle = '', feature = '', musicOptions = {}, title = '', variant = '', links, pace) {
         this.variant = variant;
+        this.pace = pace;
         this.links = links;
         this.testName = testName;
         this.testTitle = testTitle;
@@ -90,13 +92,14 @@ export class TutorialTimeline {
      * Record a step at a specific timestamp (for accurate voice timing).
      * `startMs` is stored in final-video time, i.e. after fast-forwards.
      */
-    addStep(step, title, audioFile, durationMs, timestamp, text, key, scene) {
+    addStep(step, title, audioFile, durationMs, timestamp, text, key, scene, fullText) {
         const tapeMs = timestamp - this.startTime;
         const startMs = fastForwardOutputMs(tapeMs, this.segmentsAt(tapeMs));
         this.steps.push({
             step,
             title,
             ...(text ? { text } : {}),
+            ...(fullText && fullText !== text ? { fullText } : {}),
             ...(key ? { key } : {}),
             ...(scene ? { scene } : {}),
             audioFile,
@@ -120,6 +123,7 @@ export class TutorialTimeline {
             lang: this.lang,
             feature: this.feature || undefined,
             variant: this.variant || undefined,
+            pace: this.pace && this.pace !== 'walkthrough' ? this.pace : undefined,
             links: this.links && (this.links.app || this.links.docs) ? this.links : undefined,
             recordedAt: new Date().toISOString(),
             totalDurationMs: fastForwardOutputMs(tapeDurationMs, fastForward),

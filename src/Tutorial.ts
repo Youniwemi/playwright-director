@@ -11,8 +11,10 @@ import type {
 	SceneOptions,
 	SceneFocus,
 	FocusOptions,
-	TutorialLinks
+	TutorialLinks,
+	Pace
 } from './types.js';
+import { resolvePace, paceSuffix, PACE_PROFILES, type PaceProfile } from './pace.js';
 import { renderStage } from './overlay-html.js';
 import { TutorialVoice } from './voice.js';
 import { TutorialMusic } from './music.js';
@@ -55,6 +57,10 @@ interface PendingContext {
 	text?: string;
 	style: ContextStyle;
 	voiceText: string;
+	/** Title + text — what the gallery shows, even when the pace narrates less */
+	fullText: string;
+	/** False when the pace drops this context style: recorded unvoiced, never shown */
+	shown: boolean;
 	voicePreload: Promise<void>;
 	key?: string;
 }
@@ -68,6 +74,8 @@ interface PendingStep {
 	voiceText: string;
 	/** The "do" half of a two-phase narration — the action starts when it ends. */
 	voiceDoText?: string;
+	/** Full written narration when the pace speaks only its "do" half */
+	fullText?: string;
 	skipVoice?: boolean;
 	delay?: number;
 	voicePreload: Promise<void>;
@@ -97,6 +105,12 @@ export function narrationActionOffset(
 	const fraction = Math.min(1, (doText.length + 2) / fullText.length);
 	return Math.round(durationMs * fraction);
 }
+
+/** Text up to its first `'. '` (the do/explain boundary used everywhere), else all of it. */
+const firstSentence = (text: string): string => {
+	const boundary = text.indexOf('. ');
+	return boundary > 0 ? text.slice(0, boundary) : text;
+};
 
 const asList = (focus: SceneFocus): string[] => (Array.isArray(focus) ? focus : [focus]);
 
@@ -131,6 +145,7 @@ export class Tutorial {
 	private activeScenes: string[] = [];
 	private sceneTransitionMs: number;
 	private variant?: string;
+	private paceProfile: PaceProfile;
 	/** Mobile multi-scene: every scene stays on stage, focus() only marks the active one. */
 	private pinnedSplit = false;
 
@@ -140,9 +155,11 @@ export class Tutorial {
 		this.variant = options.variant ?? (process.env.TUTORIAL_VARIANT || undefined);
 		// TUTORIAL_LANG records one spec per language: it wins over the option and suffixes outputs `.<lang>`.
 		const envLang = process.env.TUTORIAL_LANG || undefined;
+		const pace = resolvePace(options.pace);
+		this.paceProfile = PACE_PROFILES[pace];
 		const baseName = options.testName ?? `tutorial_${Date.now()}`;
 		this.testName = options.testName
-			? `${baseName}${this.variant ? `-${this.variant}` : ''}${envLang ? `.${envLang}` : ''}`
+			? `${baseName}${this.variant ? `-${this.variant}` : ''}${paceSuffix(pace)}${envLang ? `.${envLang}` : ''}`
 			: baseName;
 		this.translateFn = options.translate ?? ((k: string) => k);
 
@@ -158,10 +175,11 @@ export class Tutorial {
 			feature: options.feature,
 			lang: envLang ?? options.lang ?? 'en',
 			audioBaseUrl,
-			stepDelay: options.stepDelay ?? 500,
+			// Explicit options win over the pace's defaults.
+			stepDelay: options.stepDelay ?? this.paceProfile.stepDelay ?? 500,
 			highlightDuration: options.highlightDuration ?? 800,
-			mouseSteps: options.mouseSteps ?? 25,
-			pauseBeforeClick: options.pauseBeforeClick ?? 300,
+			mouseSteps: options.mouseSteps ?? this.paceProfile.mouseSteps ?? 25,
+			pauseBeforeClick: options.pauseBeforeClick ?? this.paceProfile.pauseBeforeClick ?? 300,
 			enableVoice: options.enableVoice ?? TUTORIAL_VOICE,
 			voiceName: options.voiceName ?? TUTORIAL_VOICE_NAME ?? '',
 			voiceRate: options.voiceRate ?? 1.0,
@@ -171,7 +189,8 @@ export class Tutorial {
 			voiceVolume: options.voiceVolume ?? TUTORIAL_VOICE_VOLUME,
 			customStyles: options.customStyles ?? '',
 			playAudioInBrowser: options.playAudioInBrowser ?? true,
-			overlayPosition: options.overlayPosition ?? 'TR'
+			overlayPosition: options.overlayPosition ?? 'TR',
+			pace
 		};
 
 		this.voice = new TutorialVoice(page, {
@@ -219,7 +238,8 @@ export class Tutorial {
 			},
 			this.options.title,
 			this.variant ?? '',
-			options.links
+			options.links,
+			pace
 		);
 
 		this.scenes = options.scenes ?? {};
@@ -347,6 +367,11 @@ export class Tutorial {
 		return this.options.lang;
 	}
 
+	/** Rendering pace of this recording (`pace` option or `TUTORIAL_PACE`) */
+	get pace(): Pace {
+		return this.options.pace;
+	}
+
 	private translate(key: string): string {
 		return this.translateFn(key);
 	}
@@ -448,18 +473,23 @@ export class Tutorial {
 		const title = this.translate(key);
 		const style = options?.style ?? 'goal';
 		const text = options?.text;
-		const voiceText = options?.voiceText ?? (text ? `${title}. ${text}` : title);
+		const fullText = options?.voiceText ?? (text ? `${title}. ${text}` : title);
+		const shown = this.paceProfile.contexts.includes(style);
+		// A short pace says the title only — of a custom voiceText, its first sentence.
+		const voiceText = this.paceProfile.contextText ? fullText : firstSentence(options?.voiceText ?? title);
 
-		const voicePreload = this.options.enableVoice
+		const voicePreload = this.options.enableVoice && shown
 			? this.voice.preloadSingle(voiceText)
 			: Promise.resolve();
 
 		this.pendingItems.push({
 			type: 'context',
 			title,
-			text,
+			text: this.paceProfile.contextText ? text : undefined,
 			style,
 			voiceText,
+			fullText,
+			shown,
 			voicePreload,
 			key
 		});
@@ -502,6 +532,15 @@ export class Tutorial {
 			voiceText = title;
 		}
 
+		// A short pace narrates the "do" half only; the whole text stays in the
+		// timeline for the gallery's step guide (and its SEO).
+		let fullText: string | undefined;
+		if (!this.paceProfile.voiceExplain && voiceDoText) {
+			fullText = voiceText;
+			voiceText = voiceDoText;
+			voiceDoText = undefined;
+		}
+
 		const voicePreload = this.options.enableVoice && !options?.skipVoice
 			? this.voice.preloadSingle(voiceText)
 			: Promise.resolve();
@@ -511,9 +550,10 @@ export class Tutorial {
 			title,
 			action,
 			overlayText: options?.do ?? title,
-			overlayDescription: options?.explain ?? options?.description,
+			overlayDescription: this.paceProfile.overlayDescription ? (options?.explain ?? options?.description) : undefined,
 			voiceText,
 			voiceDoText,
+			fullText,
 			skipVoice: options?.skipVoice,
 			delay: options?.delay,
 			voicePreload,
@@ -658,7 +698,7 @@ export class Tutorial {
 			await this.highlight(locator);
 			await this.animateClick();
 			await locator.click({ clickCount: 3 });
-			await locator.pressSequentially(value, { delay });
+			await locator.pressSequentially(value, { delay: this.typingDelay(delay) });
 			await this.unhighlight(locator);
 		} else {
 			await locator.fill(value);
@@ -687,12 +727,16 @@ export class Tutorial {
 			await locator.evaluate((el: HTMLElement, px: number) => {
 				el.style.filter = `blur(${px}px)`;
 			}, blur);
-			await locator.pressSequentially(value, { delay });
+			await locator.pressSequentially(value, { delay: this.typingDelay(delay) });
 			if (reveal) await this.unblur(locator);
 			await this.unhighlight(locator);
 		} else {
 			await locator.fill(value);
 		}
+	}
+
+	private typingDelay(delay: number): number {
+		return Math.round(delay * this.paceProfile.typingFactor);
 	}
 
 	/** Remove the blur left by `typeBlurred`. */
@@ -843,8 +887,11 @@ export class Tutorial {
 
 			await this.ensureStyles();
 
-			if (item.type === 'context') {
-				await this.overlay.showContext(item.title, item.text, item.style);
+			if (item.type === 'context' && !item.shown) {
+				// Dropped by the pace: off screen and silent, but its text still reaches the gallery.
+				this.timeline.addStep(0, 'Context', '', 0, Date.now(), item.fullText, item.key, this.stagedScene);
+			} else if (item.type === 'context') {
+				await this.overlay.showContext(item.title, item.text, item.style, this.paceProfile.compactContext);
 
 				if (this.options.enableVoice) {
 					// Wall clock comes from the clip's metadata duration, not from the
@@ -854,13 +901,13 @@ export class Tutorial {
 					const voiceStartTime = Date.now();
 					const duration = await this.voice.startPlayback(item.voiceText);
 					this.narrationEndsAt = voiceStartTime + duration;
-					this.timeline.addStep(0, 'Context', audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
+					this.timeline.addStep(0, 'Context', audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene, item.fullText);
 					const remaining = duration - (Date.now() - voiceStartTime);
 					if (remaining > 0) await this.page.waitForTimeout(remaining);
 				} else {
 					// Unvoiced (empty audioFile, zero duration): recorded for the site's
 					// step guide, ignored by the merge/transcript/prerender pipeline.
-					this.timeline.addStep(0, 'Context', '', 0, Date.now(), item.voiceText, item.key, this.stagedScene);
+					this.timeline.addStep(0, 'Context', '', 0, Date.now(), item.voiceText, item.key, this.stagedScene, item.fullText);
 				}
 
 				await this.page.waitForTimeout(this.options.stepDelay);
@@ -890,7 +937,7 @@ export class Tutorial {
 					const voiceStartTime = Date.now();
 					const duration = await this.voice.startPlayback(item.voiceText);
 					this.narrationEndsAt = voiceStartTime + duration;
-					this.timeline.addStep(currentStep, item.title, audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene);
+					this.timeline.addStep(currentStep, item.title, audioFilename, duration, voiceStartTime, item.voiceText, item.key, this.stagedScene, item.fullText);
 
 					const offset = narrationActionOffset(duration, item.voiceText, item.voiceDoText);
 					if (offset > 0) await this.page.waitForTimeout(offset);
@@ -898,14 +945,14 @@ export class Tutorial {
 					const remaining = duration - (Date.now() - voiceStartTime);
 					if (remaining > 0) await this.page.waitForTimeout(remaining);
 				} else {
-					this.timeline.addStep(currentStep, item.title, '', 0, Date.now(), item.voiceText, item.key, this.stagedScene);
+					this.timeline.addStep(currentStep, item.title, '', 0, Date.now(), item.voiceText, item.key, this.stagedScene, item.fullText);
 					await this.page.waitForTimeout(this.options.stepDelay);
 					await item.action();
 				}
 				// A span never outlives its action: the VHS overlay must not reach
 				// the step screenshot, nor the next narration play over sped-up video.
 				await this.endFastForward();
-				await this.page.waitForTimeout(item.delay ?? 300);
+				await this.page.waitForTimeout(item.delay ?? this.paceProfile.afterStep);
 
 				await this.captureStepScreenshot(currentStep);
 			}
@@ -929,7 +976,7 @@ export class Tutorial {
 			await this.music.stop(true);
 		}
 
-		await this.page.waitForTimeout(2000);
+		await this.page.waitForTimeout(this.paceProfile.endHold);
 
 		const video = this.page.video();
 		if (video) {

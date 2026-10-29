@@ -105,14 +105,18 @@ export interface ContextOverlayParams {
 	text?: string;
 	style: ContextStyle;
 	isRtl?: boolean;
+	/** Corner banner at the overlay position (snippet/demo paces) instead of a centered card */
+	compact?: boolean;
+	position?: OverlayPosition;
 }
 
 export function renderContextOverlay(params: ContextOverlayParams): string {
-	const { tutorialTitle, contextTitle, text, style, isRtl } = params;
+	const { tutorialTitle, contextTitle, text, style, isRtl, compact = false, position = 'TR' } = params;
 	const icon = CONTEXT_ICONS[style];
 	const rtlClass = isRtl ? 'tutorial-overlay-rtl' : '';
+	const layoutClass = compact ? `tutorial-context-compact ${positionClass(position, !!isRtl)}` : 'tutorial-overlay-context';
 
-	return `<div id="tutorial-overlay" class="tutorial-overlay tutorial-overlay-context tutorial-context-${style} ${rtlClass}">
+	return `<div id="tutorial-overlay" class="tutorial-overlay ${layoutClass} tutorial-context-${style} ${rtlClass}">
 	<div class="tutorial-header">
 		<span class="tutorial-icon">${icon}</span>
 		<h3 class="tutorial-title">${tutorialTitle}</h3>

@@ -45,14 +45,16 @@ export class TutorialOverlay {
             (document.getElementById('tutorial-zoom-layer') ?? document.body).appendChild(overlay);
         }, html);
     }
-    async showContext(contextTitle, text, style = 'goal') {
+    async showContext(contextTitle, text, style = 'goal', compact = false) {
         const isRtl = this.options.lang === 'ar';
         const html = renderContextOverlay({
             tutorialTitle: this.options.title,
             contextTitle,
             text,
             style,
-            isRtl
+            isRtl,
+            compact,
+            position: this.options.position
         });
         await this.page.evaluate((html) => {
             const existing = document.getElementById('tutorial-overlay');

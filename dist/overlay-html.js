@@ -67,10 +67,11 @@ export function renderStepOverlay(params) {
 </div>`;
 }
 export function renderContextOverlay(params) {
-    const { tutorialTitle, contextTitle, text, style, isRtl } = params;
+    const { tutorialTitle, contextTitle, text, style, isRtl, compact = false, position = 'TR' } = params;
     const icon = CONTEXT_ICONS[style];
     const rtlClass = isRtl ? 'tutorial-overlay-rtl' : '';
-    return `<div id="tutorial-overlay" class="tutorial-overlay tutorial-overlay-context tutorial-context-${style} ${rtlClass}">
+    const layoutClass = compact ? `tutorial-context-compact ${positionClass(position, !!isRtl)}` : 'tutorial-overlay-context';
+    return `<div id="tutorial-overlay" class="tutorial-overlay ${layoutClass} tutorial-context-${style} ${rtlClass}">
 	<div class="tutorial-header">
 		<span class="tutorial-icon">${icon}</span>
 		<h3 class="tutorial-title">${tutorialTitle}</h3>

@@ -3,6 +3,7 @@ import type { ScannedTutorial } from './scan-tutorials.js';
 import { mergeStrings, uiString } from './strings.js';
 import { siteLang } from './embed.js';
 import { isPublished } from './targets.js';
+import { PACES, paceSuffix, type Pace } from '../pace.js';
 
 const warn = (message: string) => console.warn(`  ⚠ ${message}`);
 
@@ -38,9 +39,11 @@ export function buildStepsDetail(t: ScannedTutorial): { description?: string; st
 	for (const s of t.timeline.steps) {
 		const at = Math.round(s.startMs / 10) / 100;
 		if (s.step === 0 && s.title === 'Context') {
-			if (!s.text) continue;
-			if (seenStep) stepsDetail.push({ at, text: s.text, context: true });
-			else leadingContext.push(s.text);
+			// fullText: a snippet/demo cut narrates less, the guide (and its SEO) keeps it all.
+			const text = s.fullText ?? s.text;
+			if (!text) continue;
+			if (seenStep) stepsDetail.push({ at, text, context: true });
+			else leadingContext.push(text);
 			continue;
 		}
 		if (s.title === 'Complete') continue;
@@ -48,13 +51,14 @@ export function buildStepsDetail(t: ScannedTutorial): { description?: string; st
 		const image = shotByN.get(s.step);
 		if (image !== undefined) usedShots.add(s.step);
 		// An untranslated step (identity translate) has its key as title — show the narration's first sentence instead.
-		const title = s.key && s.title === s.key && s.text ? s.text.split('. ')[0].replace(/\.$/, '') : s.title;
+		const text = s.fullText ?? s.text;
+		const title = s.key && s.title === s.key && text ? text.split('. ')[0].replace(/\.$/, '') : s.title;
 		stepsDetail.push({
 			n: s.step,
 			at,
 			title,
 			...(s.key ? { key: s.key } : {}),
-			...(s.text ? { text: s.text } : {}),
+			...(text ? { text } : {}),
 			...(image ? { image } : {})
 		});
 	}
@@ -89,7 +93,12 @@ const slugOf = (id: string, lang?: string) => (lang && id.endsWith(`.${lang}`) ?
  * slug (else the first language's). No `testFile`/`testTitle` (old timelines) = own slug.
  */
 function groupSlugs(tutorials: ScannedTutorial[], defaultLang: string): Map<ScannedTutorial, string> {
-	const own = (t: ScannedTutorial) => slugOf(t.timeline.testName, t.timeline.lang);
+	// The pace suffix is not part of the slug: `look-snippet` stays `look` for the config, embeds and languages.
+	const own = (t: ScannedTutorial) => {
+		const slug = slugOf(t.timeline.testName, t.timeline.lang);
+		const pace = paceSuffix(t.timeline.pace);
+		return pace && slug.endsWith(pace) ? slug.slice(0, -pace.length) : slug;
+	};
 	const groups = new Map<string, ScannedTutorial[]>();
 	for (const t of tutorials) {
 		const { testFile, testTitle, variant } = t.timeline;
@@ -106,7 +115,27 @@ function groupSlugs(tutorials: ScannedTutorial[], defaultLang: string): Map<Scan
 	return result;
 }
 
-export function generateManifest(scanned: ScannedTutorial[], config: SiteConfig): VideoManifest {
+/**
+ * One cut per recording: the same test (`testFile` + `testTitle` + variant + lang) recorded at several
+ * paces keeps the first pace of `preference`, else the first of the others (PACES order).
+ */
+export function pickPaces(tutorials: ScannedTutorial[], preference: Pace | Pace[] = [...PACES]): ScannedTutorial[] {
+	const order = [...new Set([...(Array.isArray(preference) ? preference : [preference]), ...PACES])];
+	const rank = (t: ScannedTutorial) => order.indexOf(t.timeline.pace ?? 'walkthrough');
+	const best = new Map<string, ScannedTutorial>();
+	for (const t of tutorials) {
+		const { testFile, testTitle, variant, lang } = t.timeline;
+		if (!testFile || !testTitle) continue;
+		const key = `${testFile}|${testTitle}|${variant ?? ''}|${lang ?? ''}`;
+		const kept = best.get(key);
+		if (!kept || rank(t) < rank(kept)) best.set(key, t);
+	}
+	const kept = new Set(best.values());
+	return tutorials.filter((t) => !t.timeline.testFile || !t.timeline.testTitle || kept.has(t));
+}
+
+export function generateManifest(allScanned: ScannedTutorial[], config: SiteConfig): VideoManifest {
+	const scanned = pickPaces(allScanned, config.tutorials?.pace);
 	const groupSlug = groupSlugs(scanned, siteLang(config));
 	/** The name the config uses (`items`, `premium`, `links`): the group slug without its `-<variant>` suffix too */
 	const configSlugOf = (t: ScannedTutorial) => {
@@ -187,6 +216,7 @@ export function generateManifest(scanned: ScannedTutorial[], config: SiteConfig)
 
 		return {
 			id: t.timeline.testName,
+			...(t.timeline.pace ? { pace: t.timeline.pace } : {}),
 			category: categoryOf(t),
 			// Older timelines don't carry `title` (the Tutorial display title) —
 			// fall back to the Playwright test title, then the slug.

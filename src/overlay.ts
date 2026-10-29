@@ -72,7 +72,8 @@ export class TutorialOverlay {
 	async showContext(
 		contextTitle: string,
 		text?: string,
-		style: ContextStyle = 'goal'
+		style: ContextStyle = 'goal',
+		compact = false
 	): Promise<void> {
 		const isRtl = this.options.lang === 'ar';
 
@@ -81,7 +82,9 @@ export class TutorialOverlay {
 			contextTitle,
 			text,
 			style,
-			isRtl
+			isRtl,
+			compact,
+			position: this.options.position
 		});
 
 		await this.page.evaluate((html) => {
