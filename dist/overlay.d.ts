@@ -18,7 +18,7 @@ export declare class TutorialOverlay {
     incrementStep(): number;
     get step(): number;
     showStep(title: string, description?: string, position?: OverlayPosition): Promise<void>;
-    showContext(contextTitle: string, text?: string, style?: ContextStyle): Promise<void>;
+    showContext(contextTitle: string, text?: string, style?: ContextStyle, compact?: boolean): Promise<void>;
     showComplete(message: string): Promise<void>;
     /**
      * Show a simulated email preview popup with HTML rendering

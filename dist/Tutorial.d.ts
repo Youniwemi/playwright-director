@@ -1,5 +1,5 @@
 import type { Page, Locator, FrameLocator } from '@playwright/test';
-import type { TutorialOptions, StepOptions, ContextOptions, SceneFocus, FocusOptions } from './types.js';
+import type { TutorialOptions, StepOptions, ContextOptions, SceneFocus, FocusOptions, Pace } from './types.js';
 import { TutorialTimeline } from './timeline.js';
 import { type ZoomOptions } from './zoom.js';
 import { type FastForwardOptions } from './fast-forward.js';
@@ -37,6 +37,7 @@ export declare class Tutorial {
     private activeScenes;
     private sceneTransitionMs;
     private variant?;
+    private paceProfile;
     /** Mobile multi-scene: every scene stays on stage, focus() only marks the active one. */
     private pinnedSplit;
     constructor(page: Page, options: TutorialOptions);
@@ -66,6 +67,8 @@ export declare class Tutorial {
     static get isEnabled(): boolean;
     /** Narration language (TUTORIAL_LANG, else the `lang` option) — drive the app UI with it, e.g. `?lang=${tutorial.lang}`. */
     get lang(): string;
+    /** Rendering pace of this recording (`pace` option or `TUTORIAL_PACE`) */
+    get pace(): Pace;
     private translate;
     clearFields(): void;
     get hasSteps(): boolean;
@@ -122,6 +125,7 @@ export declare class Tutorial {
         blur?: number;
         reveal?: boolean;
     } | number): Promise<void>;
+    private typingDelay;
     /** Remove the blur left by `typeBlurred`. */
     unblur(selector: string | Locator): Promise<void>;
     selectOption(selector: string | Locator, value: string): Promise<void>;

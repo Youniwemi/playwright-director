@@ -20,6 +20,7 @@ An AI agent can also write or adapt the test for a specific communication goal �
   - [Zooming on an element](#zooming-on-an-element)
   - [Fast-forwarding long waits](#fast-forwarding-long-waits)
 - [Multiple user profiles](#multiple-user-profiles)
+- [Paces — one script, three cuts](#paces--one-script-three-cuts)
 - [Variants — record the same tutorial for mobile](#variants--record-the-same-tutorial-for-mobile)
 - [TTS Configuration](#tts-configuration)
 - [Environment Variables](#environment-variables)
@@ -49,6 +50,7 @@ Most software teams maintain **tests** and **documentation** separately. Tests v
 - **Animated cursor** — Smooth, eased mouse movements with click animations that follow your test actions
 - **Step overlays** — On-screen banners showing current step, progress bar, and descriptions
 - **Context screens** — Goal / clarification / attention cards between steps to explain what's happening
+- **Three paces, one script** — `TUTORIAL_PACE=snippet` (docs clip) or `demo` (LinkedIn cut) narrates only each step's first sentence and opens on the live screen; `walkthrough` keeps every explanation. The full text still feeds the gallery's step guide and SEO
 - **Background music** — Looping audio with fade-out on completion
 - **Camera zoom** — `zoom()` pushes in on a button, a field or a whole panel, optionally blurring the rest, then zooms back out
 - **Fast-forward** — `fastForward(speed, …)` plays a slow generation or a repetitive chore sped up in the final video, VHS-style (`▶▶ ×4` badge, scanlines, tape grain)
@@ -222,6 +224,7 @@ const tutorial = new Tutorial(page, options);
 | `voiceVolume` | `number` | `2.5` | Voice volume multiplier |
 | `stepDelay` | `number` | `500` | Delay before the action for non-voiced steps (ms). Voiced steps overlap narration and action instead: the action starts at the estimated end of the `do` sentence inside the clip (25% of the clip for single-phase steps), and the step lasts `max(narration, offset + action)` |
 | `mouseSteps` | `number` | `25` | Cursor animation smoothness |
+| `pace` | `'walkthrough' \| 'snippet' \| 'demo'` | `env TUTORIAL_PACE`, else `'walkthrough'` | How much of the narration is spoken — see [Paces](#paces--one-script-three-cuts). Explicit `stepDelay` / `mouseSteps` / `pauseBeforeClick` win over the pace defaults |
 | `customStyles` | `string` | built-in | Custom CSS for overlays |
 | `scenes` | `Record<string, SceneOptions>` | — | Named scenes for multi-profile tutorials — see [Multiple user profiles](#multiple-user-profiles) |
 | `focus` | `string \| string[]` | first scene | Scene(s) active when the stage mounts |
@@ -459,6 +462,47 @@ the default language (or the only one recorded), and `index.json` lists each
 slug once with its `langs`. `load(slug, { lang })` falls back to the default
 language when that language was not recorded.
 
+## Paces — one script, three cuts
+
+Most tutorial videos are short clips in a docs page; some are a whole journey
+shared on LinkedIn. Write the tutorial **once**, in full — goal context with its
+text, `do` + `explain` on the steps — and pick the cut when you record:
+
+```bash
+TUTORIAL_MODE=true npx playwright test e2e/invoice                       # → invoice.webm (walkthrough)
+TUTORIAL_MODE=true TUTORIAL_PACE=snippet npx playwright test e2e/invoice  # → invoice-snippet.webm
+TUTORIAL_MODE=true TUTORIAL_PACE=demo    npx playwright test e2e/invoice  # → invoice-demo.webm
+```
+
+| | `walkthrough` (default) | `snippet` — docs, widget | `demo` — LinkedIn, landing page |
+|---|---|---|---|
+| Step narration | `do` + `explain` | `do` only | `do` only |
+| Opening `goal` context | centered card, title + text | title only, as a corner banner over the live screen | same |
+| `clarification` contexts | shown | dropped | dropped |
+| `attention` contexts | shown | title only, banner | dropped |
+| Overlay description | shown | shown | hidden |
+| Pauses (after a step / end hold) | 300 ms / 2 s | 150 ms / 1 s | 100 ms / 1.5 s |
+| Cursor and typing | normal | quicker pre-click pause, typing ×0.6 | faster cursor, typing ×0.4 |
+
+What a short cut doesn't say is **not lost**: the timeline keeps each step's
+`fullText` and records dropped contexts unvoiced, so the gallery's step guide,
+the page description and the JSON-LD carry the whole explanation — the "why"
+stays on the page for readers and search engines. Transcripts (and
+`tutorial-transcript apply`) work on what was actually said.
+
+The narrated part is always the **first sentence** — the `do`, the title of a
+`description` step, a context's title, or the text before the first `'. '` of a
+custom `voiceText`. Write it to stand alone, and keep the goal title to one
+outcome-shaped line: in the short cuts it is the whole opening.
+
+The three cuts coexist (`-<pace>` comes after the variant:
+`invoice-mobile-demo` for a vertical LinkedIn cut). The reporter matches the
+run's `TUTORIAL_PACE`. When several cuts of a tutorial are recorded, the gallery
+publishes one of them, set by `tutorials.pace` in the site config (default
+preference: walkthrough, then snippet, then demo); slugs, `items`, embeds and
+`data-tutorial` never carry the suffix. Read `tutorial.pace` in a spec to branch
+on the cut.
+
 ## Variants — record the same tutorial for mobile
 
 Set `TUTORIAL_VARIANT=mobile` (or pass `variant: 'mobile'`) to record a second,
@@ -605,6 +649,7 @@ run picks the clips up from cache.
 |---|---|---|
 | `TUTORIAL_MODE` | `false` | Enable tutorial video generation |
 | `TUTORIAL_VARIANT` | none | Recording variant — suffixes outputs; `mobile` also compacts the overlay and pins the split |
+| `TUTORIAL_PACE` | `walkthrough` | Rendering cut: `walkthrough`, `snippet` (docs) or `demo` (social) — non-walkthrough paces suffix outputs `-<pace>` |
 | `TUTORIAL_VOICE_DIR` | `tutorials/.cache/voice` | Voice clip cache (read by recording, merge and `regen-voices`) |
 | `TUTORIAL_LANG` | none | Recording language — overrides `lang`, suffixes outputs `.<lang>` (one run per language) |
 | `TUTORIAL_VOICE` | `true` | Enable/disable voice narration |
@@ -1073,6 +1118,7 @@ export default {
     },
     stepsLayout: "text",   // Step guide on video pages: 'text' | 'cards' | 'full' | 'none'
     showStrip: true,       // Thumbnail strip above the guide (click = lightbox + caption)
+    pace: "snippet",       // Cut to publish when several were recorded (default: walkthrough > snippet > demo)
   },
 
   // Named overrides, picked with --target <name> (optional)

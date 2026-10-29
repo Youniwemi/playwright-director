@@ -1,6 +1,6 @@
 import type { UiStrings } from './strings.js';
 import type { Tokens } from './tokens.js';
-import type { TutorialLinks } from '../types.js';
+import type { TutorialLinks, Pace } from '../types.js';
 
 export type { TutorialLinks };
 
@@ -109,6 +109,11 @@ export interface SiteConfig {
 		 *  Independent of stepsLayout; clicking a thumbnail opens the screenshot
 		 *  with its step's title + text. */
 		showStrip?: boolean;
+		/** Which cut the gallery shows when a tutorial was recorded at several paces
+		 *  (`TUTORIAL_PACE`): one pace or a preference order. Default
+		 *  `['walkthrough', 'snippet', 'demo']`; a tutorial recorded only at other
+		 *  paces falls back to the first of the remaining ones. */
+		pace?: Pace | Pace[];
 	};
 }
 
@@ -133,6 +138,8 @@ export interface ManifestStep {
 
 export interface VideoManifestEntry {
 	id: string;
+	/** Rendering pace of this recording; absent = walkthrough */
+	pace?: Pace;
 	category: string;
 	title: string;
 	duration: string;

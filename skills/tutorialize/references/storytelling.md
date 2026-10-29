@@ -245,3 +245,49 @@ A real app makes the viewer wait: a report generates for 30 seconds, an import c
 ### Say it
 
 Announce the skip in the step's narration — "this takes a minute — let's skip ahead" — so the speed-up reads as a directing choice, not a glitch.
+
+## 11. Pick the Cut — Pace
+
+Most videos are short clips inside documentation; some are a whole journey
+shared on LinkedIn. You write the tutorial **once, in full**, and the pace
+(`TUTORIAL_PACE`, `api.md` §15) chooses how much of it is spoken:
+
+| Pace | Where it lives | Feels like | Typical length |
+|---|---|---|---|
+| `walkthrough` (default) | Onboarding, first-time setup, a full course | Someone sitting next to you, explaining every why | 1–3 min |
+| `snippet` | A docs page, the in-app widget, "how do I…?" | A colleague showing you, fast | 20–45 s |
+| `demo` | LinkedIn, a landing page, a sales email | A product trailer: it moves, it lands, it ends | 45–90 s |
+
+The "why" is never wasted: a short cut doesn't speak it, but the gallery's step
+guide still shows it — it is the page's text, and its SEO.
+
+### Write so every cut works
+
+- **The first sentence carries the step.** `snippet` and `demo` say only the
+  `do` half (or the title, or the text before the first `'. '`). If the `do`
+  needs the `explain` to make sense, rewrite the `do`.
+- **The goal title is the hook.** In the short cuts it is the whole opening —
+  one line over the live screen, no card in the middle. ≤ 12 words, an outcome:
+  "Send your first invoice in a minute", not "Invoicing module overview".
+- **Clarifications are bonus material.** They are dropped by both short cuts,
+  so the story must hold without them. An `attention` survives in `snippet` —
+  keep it for what really can't be skipped.
+- **Never two seconds of stillness.** The viewer should see the app from the
+  first frame and something moving within two seconds — a still screen under a
+  long sentence is where people leave. This is why the short cuts shrink the
+  opening to its title.
+
+### The demo cut is a trailer
+
+- End on the payoff with a zoom (`§9`): the generated document, the "Paid"
+  status, the dashboard filling up. That's the frame people remember.
+- Fast-forward generously (`§10`) — dead time is fatal on a feed.
+- The completion message is the call to action: what the viewer gets, not "done".
+- On a feed most people watch muted: the overlay title must tell the story on its own.
+
+### Word budget
+
+TTS speaks about 2.5 words per second. Before writing, check what each cut will
+say: a 40 s `snippet` holds ~100 spoken words in all (goal title + every `do` +
+completion). If the `do` halves alone overflow, the tutorial has too many steps
+— group them (§6) or split the tutorial.

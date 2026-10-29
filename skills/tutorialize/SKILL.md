@@ -50,12 +50,18 @@ COMPLETE: Celebrate the outcome, suggest what's next
   through `typeBlurred()`
 - Fast-forward the dead time: wrap slow generations or repetitive chores in
   `fastForward(speed, …)` inside their step (`storytelling.md` §10, `api.md` §14)
+- Write once, in full, for every pace: `walkthrough` narrates everything,
+  `snippet` (docs) and `demo` (LinkedIn) speak only each step's first sentence
+  and the goal title — so those must stand alone (`storytelling.md` §11,
+  `api.md` §15). Ask which cut the video is for when the request doesn't say
 - Apply the polish checklist before submitting
 
 ### 4. Verify
 - Test passes without `TUTORIAL_MODE` (plain E2E)
 - Test passes with `TUTORIAL_MODE=true` (video generation)
-- Watch the generated video — does it feel human?
+- Watch the generated video — does it feel human? Does something move on
+  screen within two seconds? Record the short cut too
+  (`TUTORIAL_PACE=snippet` or `demo`) and check it still tells the story.
 - Narration texts also become the gallery site's step-by-step guide
   (`npx playwright-director build-site`) — even `skipVoice` steps show their
   text there, so write every step text to read well on the page too.

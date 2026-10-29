@@ -25,6 +25,9 @@ export interface ContextOverlayParams {
     text?: string;
     style: ContextStyle;
     isRtl?: boolean;
+    /** Corner banner at the overlay position (snippet/demo paces) instead of a centered card */
+    compact?: boolean;
+    position?: OverlayPosition;
 }
 export declare function renderContextOverlay(params: ContextOverlayParams): string;
 export interface CompleteOverlayParams {
