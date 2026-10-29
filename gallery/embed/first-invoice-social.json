@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "first-invoice-social-demo",
+  "title": "Your first invoice",
+  "description": "Send your first invoice in a minute. By the end, your client receives a numbered invoice by email, and you can follow its payment from this list.",
+  "duration": "0:25",
+  "durationSeconds": 24.5,
+  "slug": "first-invoice-social",
+  "lang": "en",
+  "langs": [
+    "en"
+  ],
+  "accent": "oklch(42% 0.09 165)",
+  "video": "videos/first-invoice-social-demo.webm",
+  "poster": "videos/first-invoice-social-demo-poster.webp",
+  "page": "first-invoice-social-demo/",
+  "links": {
+    "docs": "https://github.com/Youniwemi/playwright-director/#paces--one-script-three-cuts"
+  },
+  "steps": [
+    {
+      "num": 1,
+      "at": 3.03,
+      "title": "Start a new invoice",
+      "key": "Start a new invoice",
+      "text": "Start a new invoice. It begins as a draft, so nothing leaves until you decide.",
+      "image": "videos/first-invoice-social-demo-step-1.webp"
+    },
+    {
+      "num": 2,
+      "at": 5.51,
+      "title": "Pick your client",
+      "key": "Pick your client",
+      "text": "Pick your client. Their address and tax ID fill in by themselves.",
+      "image": "videos/first-invoice-social-demo-step-2.webp"
+    },
+    {
+      "num": 3,
+      "at": 7.78,
+      "title": "Add what you sold",
+      "key": "Add what you sold",
+      "text": "Add what you sold. Type a description and a price; the VAT is computed for you.",
+      "image": "videos/first-invoice-social-demo-step-3.webp"
+    },
+    {
+      "at": 11.96,
+      "text": "Why drafts have no number. Invoice numbers must follow each other with no gap, so a number is only given when the invoice is sent.",
+      "context": true
+    },
+    {
+      "num": 4,
+      "at": 11.97,
+      "title": "Check the total",
+      "key": "Check the total",
+      "text": "Check the total. VAT included, it is exactly what your client will pay.",
+      "image": "videos/first-invoice-social-demo-step-4.webp"
+    },
+    {
+      "at": 15.4,
+      "text": "Sending is final. Once sent, an invoice can no longer be edited, only cancelled with a credit note.",
+      "context": true
+    },
+    {
+      "num": 5,
+      "at": 15.4,
+      "title": "Send it",
+      "key": "Send it",
+      "text": "Send it. It gets its number now, and your client receives it by email.",
+      "image": "videos/first-invoice-social-demo-step-5.webp"
+    }
+  ]
+}
