@@ -18,6 +18,8 @@ export interface BuildSiteOptions {
     yes?: boolean;
     /** Only these tutorials (slugs or ids) — all their languages and variants */
     only?: string[];
+    /** Name of a config `targets` entry merged over the config, e.g. 'public' */
+    target?: string;
 }
 /** `look` matches look, look.en, look-mobile.ar…; an exact id matches itself. */
 export declare function matchesOnly(id: string, only: string[]): boolean;

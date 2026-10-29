@@ -10,7 +10,7 @@ Turn a Playwright test into a tutorial that **teaches**, not just demonstrates.
 Three reference files support this skill:
 - [`references/storytelling.md`](references/storytelling.md) — Persona analysis, emotional arc, narration voice, pacing decisions
 - [`references/api.md`](references/api.md) — `playwright-director` API, timing model, technical rules, checklist
-- [`references/site.md`](references/site.md) — Gallery site (`build-site`): config, themes, sections, role chips, tokens/css/overrides, app + docs links, languages, SEO
+- [`references/site.md`](references/site.md) — Gallery site (`build-site`): config, themes, sections, role chips, build targets + include/exclude, tokens/css/overrides, app + docs links, languages, SEO
 
 **Read the first two before tutorializing.** Storytelling comes first — it drives every API decision.
 Read `site.md` when you touch `tutorial-site.config.js`, a site override, or the test's `links`.
@@ -65,3 +65,7 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Set `links: { app, docs }` when the tutorial shows an app screen or has a
   docs page, and add the slug to a section's `items` in the site config
   (`site.md` §3, §5).
+- A tutorial meant for internal readers only goes in a section that the public
+  target excludes (`targets.public.tutorials.exclude.categories`,
+  `build-site --target public`) — removing a section from `categories` does not
+  unpublish it (`site.md` §7b).

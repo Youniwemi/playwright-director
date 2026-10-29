@@ -46,6 +46,7 @@ Options:
   --only=<slug,...>      build-site: only these tutorials (all their languages and variants)
   --theme=<name>         build-site: academy or classic (overrides theme)
   --output=<dir>         build-site: output folder (overrides output)
+  --target=<name>        build-site: merge the config's targets.<name> over it (e.g. --target=public)
   --dev                  build-site: serve with live reload (astro dev) instead of building
   --lang=<lang>          regen-voices: only this language
   --workers=<n>          regen-voices: parallel TTS syntheses (default 2)
@@ -155,7 +156,13 @@ if (!command || command === 'init') {
 		process.exit(1);
 	});
 } else if (command === 'build-site') {
-	const flag = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
+	// `--name=value` or `--name value`
+	const flag = (name: string) => {
+		const at = process.argv.findIndex((a) => a === `--${name}` || a.startsWith(`--${name}=`));
+		if (at === -1) return undefined;
+		const arg = process.argv[at];
+		return arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : process.argv[at + 1];
+	};
 	import('./site/build-site.js')
 		.then(({ buildSite }) =>
 			buildSite(flag('config'), {
@@ -164,7 +171,8 @@ if (!command || command === 'init') {
 				output: flag('output'),
 				dev: process.argv.includes('--dev'),
 				yes: AUTO_YES,
-				only: flag('only')?.split(',').filter(Boolean)
+				only: flag('only')?.split(',').filter(Boolean),
+				target: flag('target')
 			})
 		)
 		.catch((err) => {
@@ -178,7 +186,13 @@ if (!command || command === 'init') {
 	} catch {
 		// no .env — environment variables alone drive the TTS
 	}
-	const flag = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
+	// `--name=value` or `--name value`
+	const flag = (name: string) => {
+		const at = process.argv.findIndex((a) => a === `--${name}` || a.startsWith(`--${name}=`));
+		if (at === -1) return undefined;
+		const arg = process.argv[at];
+		return arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : process.argv[at + 1];
+	};
 	Promise.all([import('./voice-prerender.js'), import('./voice-dir.js')])
 		.then(([{ regenVoices }, { voiceCacheDir }]) =>
 			regenVoices(voiceCacheDir(), {

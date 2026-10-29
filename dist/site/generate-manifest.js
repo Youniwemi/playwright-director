@@ -1,5 +1,7 @@
 import { mergeStrings, uiString } from './strings.js';
 import { siteLang } from './embed.js';
+import { isPublished } from './targets.js';
+const warn = (message) => console.warn(`  ⚠ ${message}`);
 const DEFAULT_CATEGORY_ICONS = {
     'getting-started': '⭐',
     premium: '💎',
@@ -103,8 +105,8 @@ function groupSlugs(tutorials, defaultLang) {
     }
     return result;
 }
-export function generateManifest(tutorials, config) {
-    const groupSlug = groupSlugs(tutorials, siteLang(config));
+export function generateManifest(scanned, config) {
+    const groupSlug = groupSlugs(scanned, siteLang(config));
     /** The name the config uses (`items`, `premium`, `links`): the group slug without its `-<variant>` suffix too */
     const configSlugOf = (t) => {
         const slug = groupSlug.get(t);
@@ -123,15 +125,45 @@ export function generateManifest(tutorials, config) {
     for (const [id, cat] of Object.entries(configured)) {
         categories[id] = { icon: cat.icon ?? DEFAULT_CATEGORY_ICONS[id] ?? '📹', label: cat.label, blurb: cat.blurb };
     }
-    for (const t of tutorials) {
+    for (const t of scanned) {
         const cat = categoryOf(t);
         categories[cat] ??= { icon: DEFAULT_CATEGORY_ICONS[cat] || '📹', label: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' ') };
     }
-    const roles = config.tutorials?.roles;
-    for (const [id, role] of Object.entries(roles ?? {})) {
+    // Checked against every section, excluded ones included: a target that drops a section keeps its roles valid.
+    const configRoles = config.tutorials?.roles;
+    for (const [id, role] of Object.entries(configRoles ?? {})) {
         const unknown = role.sections.find((s) => !(s in categories));
         if (unknown)
             throw new Error(`Unknown section "${unknown}" in role "${id}". Sections: ${Object.keys(categories).join(', ')}`);
+    }
+    // include / exclude: a tutorial left out leaves no trace — everything below only sees the published ones.
+    const tutorials = scanned.filter((t) => isPublished(config.tutorials, configSlugOf(t), categoryOf(t)));
+    const publishedSlugs = new Set(tutorials.map(configSlugOf));
+    const excludedSlugs = new Set(scanned.map(configSlugOf).filter((s) => !publishedSlugs.has(s)));
+    if (tutorials.length === 0) {
+        throw new Error(`Nothing to publish: tutorials.include / exclude left none of the ${scanned.length} tutorial(s).`);
+    }
+    if (excludedSlugs.size > 0)
+        console.log(`  Excluded ${excludedSlugs.size} tutorial(s): ${[...excludedSlugs].join(', ')}`);
+    for (const [id, cat] of Object.entries(configured)) {
+        for (const slug of cat.items ?? [])
+            if (excludedSlugs.has(slug))
+                warn(`"${slug}" is in categories.${id}.items but excluded — skipped.`);
+    }
+    for (const slug of config.tutorials?.premium ?? [])
+        if (excludedSlugs.has(slug))
+            warn(`"${slug}" is in premium but excluded — skipped.`);
+    if (Object.keys(configured).length > 0) {
+        const unknown = new Set(tutorials.map(categoryOf).filter((c) => !(c in configured)));
+        for (const c of unknown) {
+            warn(`Category "${c}" is not in tutorials.categories — its tutorials are published anyway. Use tutorials.exclude.categories to leave them out.`);
+        }
+    }
+    let featured = config.tutorials?.featured;
+    if (featured && !publishedSlugs.has(featured) && excludedSlugs.has(featured)) {
+        const fallback = configSlugOf(tutorials[0]);
+        warn(`Featured tutorial "${featured}" is excluded — featuring "${fallback}" instead.`);
+        featured = fallback;
     }
     // Recording dates per slug (all languages and variants): first = uploadDate, last = dateModified.
     const dates = new Map();
@@ -189,10 +221,17 @@ export function generateManifest(tutorials, config) {
     const slugById = new Map(tutorials.map((t) => [t.timeline.testName, configSlugOf(t)]));
     const rank = (v) => listed.get(slugById.get(v.id))?.rank ?? Infinity;
     videos.sort((a, b) => sectionRank.indexOf(a.category) - sectionRank.indexOf(b.category) || rank(a) - rank(b));
+    // Sections and roles left with nothing to show are hidden.
+    for (const id of Object.keys(categories))
+        if (!videos.some((v) => v.category === id))
+            delete categories[id];
+    const roles = Object.fromEntries(Object.entries(configRoles ?? {})
+        .map(([id, role]) => [id, { ...role, sections: role.sections.filter((s) => s in categories) }])
+        .filter(([, role]) => role.sections.length > 0));
     return {
         categories,
-        ...(roles ? { roles } : {}),
-        ...(config.tutorials?.featured ? { featured: config.tutorials.featured } : {}),
+        ...(configRoles && Object.keys(roles).length > 0 ? { roles } : {}),
+        ...(featured ? { featured } : {}),
         videos,
         ui: {
             heroTitle: config.tutorials?.ui?.heroTitle || config.title,

@@ -18,6 +18,16 @@ export interface SiteRole {
     /** Section ids shown when the chip is on */
     sections: string[];
 }
+/** Tutorials picked by section id (`tutorials.categories` key, else the timeline `feature`) or slug glob (`admin-*`) */
+export interface TutorialFilter {
+    categories?: string[];
+    slugs?: string[];
+}
+/** Deep-partial config for `targets`: objects merge, arrays and values replace, `null` deletes */
+export type SiteOverride<T> = {
+    [K in keyof T]?: (NonNullable<T[K]> extends readonly unknown[] | string | number | boolean ? T[K] : SiteOverride<NonNullable<T[K]>>) | null;
+};
+export type SiteTarget = SiteOverride<Omit<SiteConfig, 'targets'>>;
 export interface SiteConfig {
     title: string;
     logo?: string;
@@ -58,7 +68,15 @@ export interface SiteConfig {
     /** UI string overrides per language, merged over the built-in en/fr/ar
      *  (site chrome + widget), e.g. `{ fr: { allTutorials: 'Toute l’aide' }, es: { … } }` */
     strings?: Record<string, Partial<UiStrings>>;
+    /** Named overrides picked with `build-site --target <name>`, merged over this config:
+     *  `{ public: { output: 'dist-public/', tutorials: { exclude: { categories: ['admin'] } } } }` */
+    targets?: Record<string, SiteTarget>;
     tutorials?: {
+        /** Publish only these tutorials (unset = all). Languages and variants follow their base slug. */
+        include?: TutorialFilter;
+        /** Leave these tutorials out entirely: no page, embed, video, sitemap entry or count.
+         *  The way to drop a section — removing it from `categories` still publishes its tutorials. */
+        exclude?: TutorialFilter;
         /** Sections in display order */
         categories?: Record<string, SiteCategory>;
         /** Académie hero chips, one per reader profile: a click shows only its sections.

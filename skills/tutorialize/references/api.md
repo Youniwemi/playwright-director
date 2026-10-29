@@ -330,6 +330,11 @@ equivalent. Apps with their own player use the headless API:
 URLs and chapter times (`steps[].at`, seconds). Schema:
 `schemas/embed-v1.schema.json`.
 
+One config can build several sites: `build-site --target public` merges
+`targets.public` over the config, and `tutorials.exclude` / `include`
+(`{ categories, slugs }`, slug globs like `admin-*`) leave whole tutorials out —
+no page, embed, video or sitemap entry (`site.md` §7b).
+
 Widget: a native modal `<dialog>` (focus trap, Esc, focus returned), chapters
 that seek (arrows/Home/End), fr/en/ar strings picked from `data-tutorial-lang`
 or `<html lang>`. Theme it from the app with `--pd-accent`, `--pd-surface`,

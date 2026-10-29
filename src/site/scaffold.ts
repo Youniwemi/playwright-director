@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 'fs';
+import { cpSync, mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { buildEmbedFiles, siteLang } from './embed.js';
@@ -23,6 +23,13 @@ export function buildHeadersFile(basePath: string, cors: string | false): string
 		`${base}${path}\n  Access-Control-Allow-Origin: ${cors}\n  Cache-Control: public, max-age=${maxAge}\n`;
 	// shortcut: media keep their name across re-recordings, so a week, not immutable — upgrade with hashed names.
 	return [rule('embed/*', 300), rule('client.js', 300), rule('widget.js', 300), rule('videos/*', 604800)].join('\n');
+}
+
+/** Matches the files of these tutorial ids in the videos folder: `<id>.<ext>`, `<id>-poster.*`, `<id>-step-N.*` */
+export function ownedBy(ids: string[]): (file: string) => boolean {
+	const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const re = new RegExp(`^(${ids.map(esc).join('|')})(\\.[a-z0-9]+|-poster\\.[a-z0-9]+|-step-\\d+\\.[a-z0-9]+)$`, 'i');
+	return (file) => re.test(file);
 }
 
 export const THEMES = ['academy', 'classic'] as const;
@@ -112,11 +119,13 @@ export function scaffold(config: SiteConfig, manifest: VideoManifest, tempDir: s
 		writeFileSync(join(tempDir, 'public', file.path), JSON.stringify(file.data, null, 2));
 	}
 
+	// Only the published tutorials' files: an excluded (or --only filtered) tutorial must leave no video behind.
 	const videosDir = resolve(config.videos ?? join(config.input, 'videos'));
 	const publicVideos = join(tempDir, 'public', 'videos');
 	if (existsSync(videosDir)) {
 		mkdirSync(publicVideos, { recursive: true });
-		cpSync(videosDir, publicVideos, { recursive: true });
+		const owned = ownedBy(manifest.videos.map((v) => v.id));
+		for (const file of readdirSync(videosDir)) if (owned(file)) cpSync(join(videosDir, file), join(publicVideos, file));
 	}
 
 	// baseUrl is a full URL (site + base) or just a path ("/docs/") for a sub-path deployment.

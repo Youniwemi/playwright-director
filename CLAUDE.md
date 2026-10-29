@@ -11,13 +11,16 @@ No `Co-Authored-By` trailer in commits.
 A feature or behavior change is **not done** until all of these ship together (same PR):
 
 1. **`CLAUDE.md`** updated — architecture, options, design decisions
-2. **The skill** in `skills/tutorialize/` updated — especially `references/api.md` for API or timing changes
+2. **The skill AND the agent** updated — **mandatory after every change or improvement to this plugin**, never optional:
+   - `skills/tutorialize/SKILL.md` (process + verify lines) and every reference file the change touches: `references/api.md` (API, timing), `references/site.md` (gallery site, `build-site`), `references/storytelling.md` (when to use it)
+   - `skills/tutorialize/agent.md` (the `tutorial-crafter` agent): its reference list and its "Apply technical rules" bullets must name the new behavior
+   - Bump the version in `package.json` (+ `package-lock.json`): the installed copies are stamped with it, and that is what tells users to re-run `init`
 3. **`README.md`** updated — every user-facing option and workflow; site-visible changes get screenshots in `docs/images/` (~900px wide, referenced with relative paths like `docs/images/x.png` — GitHub renders them on any branch, and npm resolves them through package.json's `repository` field)
 4. **Unit tests** covering the new behavior (`npm test` green)
 5. **`npm run build`** run, so the committed `dist/` matches `src/`
 6. **The project site** (`landing/index.html`) updated when the change is meaningful to users — a new feature, capability, or workflow deserves a feature card, section, or hero mention (with a live demo where the deployed gallery makes one possible). Internal refactors, fixes, and minor option tweaks don't.
 
-Before declaring any task complete, walk this list and fix what's missing.
+Before declaring any task complete, walk this list item by item — skill **and** agent included — and fix what's missing. Stay on the current minor version (0.6.x) unless told otherwise.
 
 ## What this is
 
@@ -66,6 +69,7 @@ Orchestrates seven subsystems, each in its own file:
 - `src/tts-provider.ts` — TTS provider abstraction: `CommandTTSProvider` (macOS say / custom `TUTORIAL_TTS_CMD`), `EdgeTTSProvider`, `TTSManager`
 - `src/slugify.ts` — Unicode-aware slug generation (handles Latin diacritics + Arabic hamza marks)
 - `src/transcript.ts` — Shared transcript markdown builder + parser + `applyCorrections()` (writes edited transcript texts back into the test source)
+- `src/site/targets.ts` — `build-site --target`: `deepMerge()`, `applyTarget()`; `tutorials.include/exclude` matching (`globMatch()`, `isPublished()`)
 - `src/bin/export-transcript.ts` — `tutorial-transcript` CLI: regenerates transcript markdown from timeline JSON; `tutorial-transcript apply` writes edited transcripts back into the test sources
 
 ### Package exports
@@ -111,6 +115,7 @@ Entry points: `playwright-director` (main), `playwright-director/reporter`, `pla
 - **Role chips** (`tutorials.roles`, Académie hero): `{ id: { label, sections } }`, passed into the manifest; unknown section ids fail the build. A chip is an `aria-pressed` button ("All" first) calling `setFilter({ sections })` — one shared filter with search and variant; the table of contents hides the sections the filter hides. No roles = no chips (0.6.0 section chips duplicated the table of contents).
 - **Links**: test option `links: { app, docs }` (stored in the timeline) merged under config `tutorials.links[slug]`, each resolved by `resolveLink()` on `appUrl` / `docsUrl` (`{lang}` → timeline lang; absolute URLs kept). Académie shows a call-to-action (`cta`, default on) when there is an app link.
 - **SEO** (`src/site/seo.ts`, only with a full `baseUrl`): VideoObject JSON-LD with chapter `Clip`s computed in Node by `scaffold()` and stored in `tutorials.json` (templates can't import `src/`); `uploadDate` = oldest `recordedAt` of the slug. `Seo.astro` writes canonical, hreflang (+ `x-default`), og:*. Build writes `sitemap.xml` (hreflang alternates), `robots.txt` (host root only) and `links.json` (docs URL → tutorials).
+- **Build targets + include/exclude** (`src/site/targets.ts`): `applyTarget()` deep-merges `targets[--target]` over the config in `buildSite()` before paths resolve (objects merge, arrays/values replace, `null` deletes; `targets` itself is dropped; CLI flags still win; unknown name lists the targets). `generateManifest()` filters with `isPublished(config.tutorials, configSlugOf(t), categoryOf(t))` right after computing the full category set and validating roles against it (so a role naming an excluded section stays valid) — everything downstream (dates, langs, featured, embeds, sitemap, search, counts) only sees published tutorials. Then empty categories are deleted from the manifest and role sections filtered to the remaining ones (roles left empty dropped). `scaffold()` copies only the files of published ids (`ownedBy()`: `<id>.<ext>`, `<id>-poster.*`, `<id>-step-N.*`) instead of the whole videos dir. Removing a section from `categories` is deliberately not an exclusion — a published tutorial with a category missing from a non-empty `categories` warns. Excluded `featured` → first published + warning; excluded `items`/`premium` → warning; nothing published → error.
 - **Site i18n plurals**: `t()` tries `<key>_<Intl.PluralRules category>` (`sectionStats_one`, `_two`, `_few`… for ar) before `<key>`.
 - **Quick-view dialog** (`VideoModal.astro`): opens only from `[data-quickview]` inside a `.video-card`; prev/next stay within the card's `.category`; ←/→ are swapped under `dir=rtl`. The box follows the video ratio (`--pd-video-ratio` set on `loadedmetadata`, `--pd-video-w`). RTL arrows: `‹ ›` are bidi-mirrored glyphs, so never flip them with `scaleX(-1)` (only `←` gets it); up/down chevrons use physical borders.
 - **Site e2e** (`e2e/site.spec.ts`): builds both themes from a generated 12 s ffmpeg video (fr + ar), serves them with an in-test static server that answers Range requests (seeking needs `206`), and checks overflow at 375 / 1280, chapter seek + `?t=`, Académie search, and axe on home + video page per language. Configs are written as `.mjs` — Playwright's loader turns a `.js` outside a `"type": "module"` package into CommonJS (`default` ends up nested).
