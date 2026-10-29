@@ -4,7 +4,7 @@
   "title": "Mobile split demo",
   "description": "Sara ouvre son espace comptable",
   "duration": "0:17",
-  "durationSeconds": 16.9,
+  "durationSeconds": 17,
   "slug": "mobile-split-demo",
   "lang": "fr",
   "langs": [
@@ -28,7 +28,7 @@
     },
     {
       "num": 2,
-      "at": 5.26,
+      "at": 5.29,
       "title": "Le client répond sur son téléphone",
       "key": "Le client répond sur son téléphone",
       "text": "Le client répond sur son téléphone",
@@ -36,7 +36,7 @@
     },
     {
       "num": 3,
-      "at": 10.07,
+      "at": 10.14,
       "title": "Retour chez la comptable",
       "key": "Retour chez la comptable",
       "text": "Retour chez la comptable",

@@ -7,7 +7,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/two-profiles-one-video/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/two-profiles-one-video-poster.webp",
       "duration": "0:23",
-      "durationSeconds": 23
+      "durationSeconds": 23.1
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#paces--one-script-three-cuts": [
@@ -18,7 +18,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/first-invoice-walkthrough/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/first-invoice-walkthrough-poster.webp",
       "duration": "1:07",
-      "durationSeconds": 67.3
+      "durationSeconds": 67.1
     },
     {
       "slug": "first-invoice-docs",
@@ -27,7 +27,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/first-invoice-docs-snippet/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/first-invoice-docs-snippet-poster.webp",
       "duration": "0:29",
-      "durationSeconds": 28.9
+      "durationSeconds": 29
     },
     {
       "slug": "first-invoice-social",
@@ -36,7 +36,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/first-invoice-social-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/first-invoice-social-demo-poster.webp",
       "duration": "0:25",
-      "durationSeconds": 24.5
+      "durationSeconds": 24.6
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#zooming-on-an-element": [
@@ -47,7 +47,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/zoom-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/zoom-demo-poster.webp",
       "duration": "0:45",
-      "durationSeconds": 45.3
+      "durationSeconds": 45.2
     }
   ],
   "https://github.com/Youniwemi/playwright-director/#fast-forwarding-long-waits": [
@@ -80,7 +80,7 @@
       "url": "https://youniwemi.github.io/playwright-director/gallery/mobile-split-demo/",
       "poster": "https://youniwemi.github.io/playwright-director/gallery/videos/mobile-split-demo-poster.webp",
       "duration": "0:17",
-      "durationSeconds": 16.9
+      "durationSeconds": 17
     }
   ]
 }

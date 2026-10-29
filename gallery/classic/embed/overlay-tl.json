@@ -20,7 +20,7 @@
   "steps": [
     {
       "num": 1,
-      "at": 0.02,
+      "at": 0.01,
       "title": "First step",
       "key": "First step",
       "text": "First step",
