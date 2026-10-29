@@ -26,7 +26,10 @@ export default {
 			'fast-forward-demo': { docs: '#fast-forwarding-long-waits' },
 			'two-profiles-one-video': { docs: '#multiple-user-profiles' },
 			'mobile-split-demo': { docs: '#variants--record-the-same-tutorial-for-mobile' },
-			'overlay-tl': { docs: '#styling' }
+			'overlay-tl': { docs: '#styling' },
+			'first-invoice-walkthrough': { docs: '#paces--one-script-three-cuts' },
+			'first-invoice-docs': { docs: '#paces--one-script-three-cuts' },
+			'first-invoice-social': { docs: '#paces--one-script-three-cuts' }
 		},
 		// Sections in display order; `items` lists e2e testNames in reading order
 		categories: {
@@ -34,6 +37,11 @@ export default {
 				label: 'Getting started',
 				blurb: 'One test, one narrated video: sessions, scenes and split screens.',
 				items: ['two-profiles-one-video', 'split-screen-demo']
+			},
+			paces: {
+				label: 'One script, three cuts',
+				blurb: 'The same tutorial recorded as a full walkthrough, a docs snippet and a social demo (TUTORIAL_PACE).',
+				items: ['first-invoice-walkthrough', 'first-invoice-docs', 'first-invoice-social']
 			},
 			camera: {
 				label: 'Camera and pacing',
@@ -54,7 +62,7 @@ export default {
 		// Hero chips: a click shows only the role's sections
 		roles: {
 			first: { label: 'My first video', sections: ['start', 'overlays'] },
-			polish: { label: 'I polish videos', sections: ['camera', 'overlays'] },
+			polish: { label: 'I polish videos', sections: ['paces', 'camera', 'overlays'] },
 			mobile: { label: 'I ship a mobile app', sections: ['mobile'] }
 		},
 		ui: {
