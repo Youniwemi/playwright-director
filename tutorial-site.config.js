@@ -17,6 +17,10 @@ export default {
 		Académie: '/playwright-director/gallery/',
 		Classic: '/playwright-director/gallery/classic/'
 	},
+	// `make site`: both themes served from the root of a local server
+	targets: {
+		local: { themeSwitcher: { Académie: '/', Classic: '/classic/' } }
+	},
 	docsUrl: 'https://github.com/Youniwemi/playwright-director',
 	tutorials: {
 		featured: 'two-profiles-one-video',

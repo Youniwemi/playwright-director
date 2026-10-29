@@ -50,6 +50,31 @@ test.describe('overlay position', () => {
 		});
 	}
 
+	test('--tutorial-overlay-bottom raises the bottom card', { tag: '@tutorial' }, async ({ page }) => {
+		await page.goto('about:blank');
+		await page.setContent('<html><body style="margin:0;padding:48px"><h1>Bottom inset</h1></body></html>');
+		// Inline style on <html> beats the stylesheet whenever it is injected
+		await page.evaluate(() => document.documentElement.style.setProperty('--tutorial-overlay-bottom', '108px'));
+
+		const tutorial = new Tutorial(page, {
+			title: 'Bottom inset',
+			testName: 'overlay-bottom-inset',
+			testTitle: '--tutorial-overlay-bottom raises the bottom card',
+			testFile: 'overlay-position.spec.ts',
+			projectName: 'chromium',
+			lang: 'en',
+			backgroundMusic: '',
+			overlayPosition: 'BL'
+		});
+
+		tutorial.step('Raised card', async () => {
+			const box = await page.locator('#tutorial-overlay').boundingBox();
+			expect(page.viewportSize()!.height - (box!.y + box!.height)).toBeCloseTo(108, 0);
+		});
+
+		await tutorial.complete();
+	});
+
 	test('per-step position override', { tag: '@tutorial' }, async ({ page }) => {
 		await page.goto('about:blank');
 		await page.setContent('<html><body style="margin:0;padding:48px"><h1>Override test</h1></body></html>');

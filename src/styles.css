@@ -19,6 +19,8 @@
 	/* Sizing */
 	--tutorial-overlay-width: 320px;
 	--tutorial-overlay-top: 20px;
+	/* Bottom corners (BL/BR). Raise it when the recorded video is shorter than the viewport. */
+	--tutorial-overlay-bottom: var(--tutorial-overlay-top);
 	--tutorial-overlay-offset: 20px;
 	--tutorial-border-radius: 12px;
 	--tutorial-padding: 20px;
@@ -64,6 +66,7 @@
 	   consuming project is a plain `:root { ... }` override. */
 	--tutorial-overlay-width-mobile: min(250px, calc(100vw - 2 * var(--tutorial-overlay-offset)));
 	--tutorial-overlay-top-mobile: 12px;
+	--tutorial-overlay-bottom-mobile: var(--tutorial-overlay-top-mobile);
 	--tutorial-overlay-offset-mobile: 12px;
 	--tutorial-padding-mobile: 12px;
 	--tutorial-title-size-mobile: 12px;
@@ -86,6 +89,7 @@
 html[data-tutorial-variant='mobile'] {
 	--tutorial-overlay-width: var(--tutorial-overlay-width-mobile);
 	--tutorial-overlay-top: var(--tutorial-overlay-top-mobile);
+	--tutorial-overlay-bottom: var(--tutorial-overlay-bottom-mobile);
 	--tutorial-overlay-offset: var(--tutorial-overlay-offset-mobile);
 	--tutorial-padding: var(--tutorial-padding-mobile);
 	--tutorial-title-size: var(--tutorial-title-size-mobile);
@@ -203,14 +207,14 @@ html[data-tutorial-variant='mobile'] .tutorial-progress {
 
 .tutorial-overlay-bl {
 	top: auto;
-	bottom: var(--tutorial-overlay-top);
+	bottom: var(--tutorial-overlay-bottom);
 }
 
 .tutorial-overlay-br {
 	left: auto;
 	right: var(--tutorial-overlay-offset);
 	top: auto;
-	bottom: var(--tutorial-overlay-top);
+	bottom: var(--tutorial-overlay-bottom);
 }
 
 .tutorial-overlay-bl,

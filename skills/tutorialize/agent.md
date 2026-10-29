@@ -62,6 +62,8 @@ Follow all rules from `api.md`:
   panel filled while zoomed (`storytelling.md` §9, `api.md` §13). Never on
   every step
 - Passwords, API keys and tokens typed with `tutorial.typeBlurred()`
+- Bottom overlay cards (`BL`/`BR`) visible in the recorded video: when the video
+  is shorter than the viewport, set `--tutorial-overlay-bottom` (`api.md` §11)
 - Long waits (generation, import) and repetitive chores wrapped in
   `tutorial.fastForward(speed, …)` inside their step, announced in the narration,
   ending before the payoff (`storytelling.md` §10, `api.md` §14)

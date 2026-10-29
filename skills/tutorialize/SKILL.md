@@ -48,6 +48,8 @@ COMPLETE: Celebrate the outcome, suggest what's next
 - Direct attention sparingly: `zoom()` (optionally `blur`) on the 1–3 moments
   the viewer must not miss (`storytelling.md` §9, `api.md` §13); secrets go
   through `typeBlurred()`
+- Bottom overlay cards (`BL`/`BR`) cut off because the video is shorter than the
+  viewport: raise `--tutorial-overlay-bottom` (`api.md` §11)
 - Fast-forward the dead time: wrap slow generations or repetitive chores in
   `fastForward(speed, …)` inside their step (`storytelling.md` §10, `api.md` §14)
 - Write once, in full, for every pace: `walkthrough` narrates everything,

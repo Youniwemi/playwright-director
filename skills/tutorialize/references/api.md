@@ -462,6 +462,8 @@ tutorial.step('Look here', async () => { ... }, {
 | `BL` | Bottom-left |
 | `BR` | Bottom-right |
 
+**Bottom inset**: `BL`/`BR` sit `--tutorial-overlay-bottom` from the viewport bottom (default: same as `--tutorial-overlay-top`, 20px; mobile: `--tutorial-overlay-bottom-mobile`). If the recorded video is shorter than the viewport (headless Chrome 154+ records a 1280x808 viewport as 1280x720), the card falls below the picture — raise it with `:root { --tutorial-overlay-bottom: 108px; }` in the app stylesheet (viewport height − video height + 20). From a test, set it inline on `<html>` — it beats the library stylesheet whenever that is injected: `await page.evaluate(() => document.documentElement.style.setProperty('--tutorial-overlay-bottom', '108px'))`. Do not use `customStyles` for this: it *replaces* the default stylesheet.
+
 **RTL mirroring**: when `lang: 'ar'`, positions mirror automatically — `TL`↔`TR`, `BL`↔`BR`. No manual override needed.
 
 **When to move the overlay**: place it where it won't cover the action. If the step interacts with a top-left form, move the overlay to `BR`. If the action is bottom-right, keep `TL`.

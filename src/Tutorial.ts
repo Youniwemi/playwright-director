@@ -40,8 +40,9 @@ const TUTORIAL_VOICE_VOLUME = parseFloat(process.env.TUTORIAL_VOICE_VOLUME || '2
 
 const DEFAULT_STYLES = readFileSync(join(__dirname, 'styles.css'), 'utf-8');
 
-let _sharp: typeof import('sharp') | null = null;
-async function getSharp(): Promise<typeof import('sharp') | null> {
+type Sharp = typeof import('sharp').default;
+let _sharp: Sharp | null = null;
+async function getSharp(): Promise<Sharp | null> {
 	if (_sharp !== null) return _sharp;
 	try {
 		_sharp = (await import('sharp')).default;
